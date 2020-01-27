@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Users>
+
+  <User userId="U10" username="admin" password="cb69962946617da006a2f95776d78b49e5ec7941d2bdb2d25cdb05f957f64344" salt="61646d696e">
+    <Firstname>Admin</Firstname>
+    <Lastname>Admin</Lastname>
+    <State>ENABLED</State>
+    <Locale>en-GB</Locale>
+    <Roles>
+      <Role>Admin</Role>
+    </Roles>
+  </User>
+  <User userId="S01" username="agent">
+    <State>SYSTEM</State>
+    <Roles>
+      <Role>agent</Role>
+    </Roles>
+  </User>
+
+</Users>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StrolchModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://strolch.li/xsd/StrolchModel-1.6.xsd"
+              xsi:schemaLocation="https://strolch.li/xsd/StrolchModel-1.6.xsd StrolchModel-1.6.xsd">
+
+    <!--
+        Simple logger output connection
+    -->
+    <Resource Id="loggerOutput" Name="Logger PLC Connection" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.LoggerOutConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+        </ParameterBag>
+    </Resource>
+
+    <!--
+        Simple Boolean connection
+    -->
+    <Resource Id="booleanConnection" Name="Single Boolean PLC Connection" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.InMemoryBooleanConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+        </ParameterBag>
+    </Resource>
+
+    <!--
+        Barcode reader connection, currently place holder with RandomString
+    -->
+    <Resource Id="barcodeReader" Name="Barcode Reader Connection" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.RandomStringConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+        </ParameterBag>
+    </Resource>
+
+    <!--
+        Simple toggler device
+    -->
+    <Resource Id="toggler" Name="Toggler 01" Type="PlcLogicalDevice">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="group" Name="Group" Type="String" Value="Entry"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+        <ParameterBag Id="relations" Name="Relations" Type="Relations">
+            <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Value="addrTogglerOn"/>
+            <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram"
+                       Value="telToggleTogglerOn, telToggleTogglerOff"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="addrTogglerOn" Name="Toggler - On" Type="PlcAddress">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="loggerOutput"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Toggler"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="On"/>
+            <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="Boolean"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telToggleTogglerOn" Name="Toggler - On" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="loggerOutput"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Toggler"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="On"/>
+            <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="Boolean"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telToggleTogglerOff" Name="Toggler - Off" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="loggerOutput"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Toggler"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Off"/>
+            <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="Boolean"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
+        </ParameterBag>
+    </Resource>
+
+    <!--
+        PLC State
+    -->
+    <Resource Id="plc" Name="PLC" Type="PlcLogicalDevice">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="group" Name="Group" Type="String" Value="Startup"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="999999"/>
+        </ParameterBag>
+        <ParameterBag Id="relations" Name="Relations" Type="Relations">
+            <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress"
+                       Value="addrPlcStarted"/>
+            <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram"
+                       Value="telPlcStarted, telPlcStopped"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="addrPlcStarted" Name="PLC - Started" Type="PlcAddress">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="booleanConnection"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Started"/>
+            <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="Boolean"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telPlcStarted" Name="PLC - Started" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="booleanConnection"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Started"/>
+            <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="Boolean"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telPlcStopped" Name="PLC - Stopped" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="booleanConnection"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Stopped"/>
+            <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="Boolean"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
+        </ParameterBag>
+    </Resource>
+
+    <!--
+        BarcodeReader
+    -->
+    <Resource Id="BarcodeReader" Name="BarcodeReader" Type="PlcLogicalDevice">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="group" Name="Group" Type="String" Value="BarcodeReader"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+        <ParameterBag Id="relations" Name="Relations" Type="Relations">
+            <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress"
+                       Value="addrBarcodeReader"/>
+            <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram"
+                       Value="telReadBarcode"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="addrBarcodeReader" Name="BarcodeReader - Barcode" Type="PlcAddress">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="barcodeReader"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BarcodeReader"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Barcode"/>
+            <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="String"/>
+            <Parameter Id="value" Name="Value" Type="String" Value=""/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="110"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telReadBarcode" Name="BarcodeReader - ReadBarcode" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="barcodeReader"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BarcodeReader"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ReadBarcode"/>
+            <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="String"/>
+            <Parameter Id="value" Name="Value" Type="String" Value="DoRead"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="70"/>
+        </ParameterBag>
+    </Resource>
+
+</StrolchModel>
