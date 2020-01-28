@@ -1,4 +1,4 @@
-package li.strolch.plc.gw;
+package li.strolch.plc.gw.client;
 
 import static java.net.NetworkInterface.getByInetAddress;
 import static li.strolch.model.Tags.Json.*;
@@ -8,11 +8,8 @@ import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCau
 import static li.strolch.utils.helper.NetworkHelper.formatMacAddress;
 import static li.strolch.utils.helper.StringHelper.isEmpty;
 
-import javax.websocket.CloseReason;
+import javax.websocket.*;
 import javax.websocket.CloseReason.CloseCodes;
-import javax.websocket.PongMessage;
-import javax.websocket.RemoteEndpoint;
-import javax.websocket.Session;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.URI;
@@ -35,7 +32,7 @@ import li.strolch.utils.helper.ExceptionHelper;
 import li.strolch.utils.helper.NetworkHelper;
 import org.glassfish.tyrus.client.ClientManager;
 
-public class PlcGwHandler extends StrolchComponent {
+public class PlcGwClientHandler extends StrolchComponent {
 
 	private static final long RETRY_DELAY = 30;
 	private static final int INITIAL_DELAY = 10;
@@ -55,7 +52,7 @@ public class PlcGwHandler extends StrolchComponent {
 	private JsonArray ipAddresses;
 	private JsonObject versions;
 
-	public PlcGwHandler(ComponentContainer container, String componentName) {
+	public PlcGwClientHandler(ComponentContainer container, String componentName) {
 		super(container, componentName);
 	}
 
@@ -392,5 +389,40 @@ public class PlcGwHandler extends StrolchComponent {
 			this.ipAddressesUpdateTime = System.currentTimeMillis();
 		}
 		return this.ipAddresses;
+	}
+
+	@ClientEndpoint
+	public static class PlcGwClientEndpoint {
+
+		private PlcGwClientHandler gwHandler;
+
+		public PlcGwClientEndpoint(PlcGwClientHandler gwHandler) {
+			this.gwHandler = gwHandler;
+		}
+
+		@OnMessage
+		public void onMessage(String message, Session session) {
+			this.gwHandler.handleMessage(session, message);
+		}
+
+		@OnMessage
+		public void onPong(PongMessage message, Session session) {
+			this.gwHandler.pong(message, session);
+		}
+
+		@OnOpen
+		public void onOpen(Session session) {
+			this.gwHandler.open(session);
+		}
+
+		@OnClose
+		public void onClose(Session session, CloseReason closeReason) {
+			this.gwHandler.close(session, closeReason);
+		}
+
+		@OnError
+		public void onError(Session session, Throwable throwable) {
+			this.gwHandler.error(session, throwable);
+		}
 	}
 }

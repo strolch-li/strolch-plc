@@ -10,8 +10,8 @@
         <version>0.1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>strolch-plc-gw</artifactId>
-    <name>strolch-plc-gw</name>
+    <artifactId>strolch-plc-gw-server</artifactId>
+    <name>strolch-plc-gw-client</name>
     <packaging>jar</packaging>
     <url>https://github.com/4treesCH/strolch-plc</url>
 
@@ -67,7 +67,7 @@
         <!-- PLC -->
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>strolch-plc-core</artifactId>
+            <artifactId>strolch-plc-model</artifactId>
         </dependency>
 
         <!-- web -->
@@ -109,20 +109,17 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <exclude>**/componentVersion.properties</exclude>
-                </excludes>
+                <filtering>true</filtering>
                 <includes>
                     <include>**/*.properties</include>
                 </includes>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/componentVersion.properties</include>
-                </includes>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.properties</exclude>
+                </excludes>
             </resource>
         </resources>
 

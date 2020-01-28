@@ -5,14 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>li.strolch</groupId>
         <artifactId>strolch-plc</artifactId>
+        <groupId>li.strolch</groupId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>strolch-plc-rest</artifactId>
-    <name>strolch-plc-rest</name>
+    <artifactId>strolch-plc-gw-client</artifactId>
+    <name>strolch-plc-gw-client</name>
     <packaging>jar</packaging>
     <url>https://github.com/4treesCH/strolch-plc</url>
 
