@@ -2,9 +2,9 @@ package li.strolch.plc.core.hw.connections;
 
 import li.strolch.plc.core.hw.Plc;
 
-public class InMemoryBooleanConnection extends SimplePlcConnection {
+public class VirtualBooleanValueConnection extends SimplePlcConnection {
 
-	public InMemoryBooleanConnection(Plc plc, String id) {
+	public VirtualBooleanValueConnection(Plc plc, String id) {
 		super(plc, id);
 	}
 

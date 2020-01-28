@@ -9,7 +9,6 @@ public class StartupPlcService extends PlcService {
 
 	public static final String PLC = "PLC";
 	public static final String STARTED = "Started";
-	public static final String STOPPED = "Stopped";
 
 	public StartupPlcService(ComponentContainer container, PlcHandler plcHandler) {
 		super(container, plcHandler);
@@ -17,13 +16,13 @@ public class StartupPlcService extends PlcService {
 
 	@Override
 	public void start(StrolchTransaction tx) {
-		send(PLC, STARTED);
+		notify(PLC, STARTED, true);
 		super.start(tx);
 	}
 
 	@Override
 	public void stop() {
-		send(PLC, STOPPED);
+		notify(PLC, STARTED, false);
 		super.stop();
 	}
 }

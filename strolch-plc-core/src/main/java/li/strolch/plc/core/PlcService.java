@@ -76,6 +76,10 @@ public abstract class PlcService implements PlcListener {
 		this.plcHandler.send(resource, action, value);
 	}
 
+	protected void notify(String resource, String action, Object value) {
+		this.plcHandler.notify(resource, action, value);
+	}
+
 	protected StrolchTransaction openTx(PrivilegeContext ctx, boolean readOnly) {
 		return this.plcHandler.openTx(ctx.getCertificate(), readOnly);
 	}

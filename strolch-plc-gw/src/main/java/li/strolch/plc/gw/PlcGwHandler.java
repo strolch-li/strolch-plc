@@ -27,6 +27,7 @@ import li.strolch.agent.api.*;
 import li.strolch.model.Resource;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.model.ConnectionState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
@@ -71,12 +72,23 @@ public class PlcGwHandler extends StrolchComponent {
 
 	@Override
 	public void start() throws Exception {
+		notifyPlcConnectionState(ConnectionState.Disconnected);
 		delayConnect(INITIAL_DELAY, TimeUnit.SECONDS);
 		super.start();
 	}
 
+	private void notifyPlcConnectionState(ConnectionState disconnected) {
+		try {
+			getComponent(PlcHandler.class).notify("PLC", "ServerConnected", disconnected.name());
+		} catch (Exception e) {
+			logger.error("Failed to notify PLC of connection state", e);
+		}
+	}
+
 	@Override
 	public void stop() throws Exception {
+
+		notifyPlcConnectionState(ConnectionState.Disconnected);
 
 		if (this.gwSession != null) {
 			try {
@@ -120,7 +132,7 @@ public class PlcGwHandler extends StrolchComponent {
 				logger.error("Failed to connect to server! Will try to connect again in " + RETRY_DELAY + "s", e);
 			}
 
-			closeGwSessionUpdateState("Failed to connect to server", ConnectionState.Failed,
+			closeBrokenGwSessionUpdateState("Failed to connect to server",
 					"Connection refused to connect to server. Will try to connect again in " + RETRY_DELAY + "s: "
 							+ getExceptionMessageWithCauses(e));
 			delayConnect(RETRY_DELAY, TimeUnit.SECONDS);
@@ -131,7 +143,7 @@ public class PlcGwHandler extends StrolchComponent {
 		this.lastSystemStateNotification = System.currentTimeMillis();
 		if (tryPingServer()) {
 			logger.error("Failed to ping server. Will try to connect again in " + RETRY_DELAY + "s");
-			closeGwSessionUpdateState("Ping failed", ConnectionState.Failed,
+			closeBrokenGwSessionUpdateState("Ping failed",
 					"Failed to ping server. Will try to connect again in " + RETRY_DELAY + "s");
 			delayConnect(RETRY_DELAY, TimeUnit.SECONDS);
 			return;
@@ -151,7 +163,7 @@ public class PlcGwHandler extends StrolchComponent {
 		} catch (IOException e) {
 			String msg = "Failed to send Auth to server";
 			logger.error(msg, e);
-			closeGwSessionUpdateState(msg, ConnectionState.Failed, msg);
+			closeBrokenGwSessionUpdateState(msg, msg);
 			delayConnect(RETRY_DELAY, TimeUnit.SECONDS);
 			return;
 		}
@@ -165,20 +177,18 @@ public class PlcGwHandler extends StrolchComponent {
 				.scheduleWithFixedDelay(this::pingServer, 1, RETRY_DELAY, TimeUnit.SECONDS);
 	}
 
-	private void closeGwSessionUpdateState(String closeReason, ConnectionState connectionState,
-			String connectionStateMsg) {
+	private void closeBrokenGwSessionUpdateState(String closeReason, String connectionStateMsg) {
 		try {
-			runAsAgent(ctx -> {
-				closeGwSessionUpdateState(ctx, closeReason, connectionState, connectionStateMsg);
-			});
+			runAsAgent(ctx -> closeBrokenGwSessionUpdateState(ctx, closeReason, connectionStateMsg));
 		} catch (Exception e) {
 			logger.error("Failed to close GW Session!", e);
 		}
+
+		notifyPlcConnectionState(ConnectionState.Failed);
 	}
 
-	private void closeGwSessionUpdateState(PrivilegeContext ctx, String closeReason, ConnectionState connectionState,
-			String connectionStateMsg) {
-		saveServerConnectionState(ctx, connectionState, connectionStateMsg);
+	private void closeBrokenGwSessionUpdateState(PrivilegeContext ctx, String closeReason, String connectionStateMsg) {
+		saveServerConnectionState(ctx, ConnectionState.Failed, connectionStateMsg);
 		closeGwSession(closeReason);
 	}
 
@@ -206,7 +216,7 @@ public class PlcGwHandler extends StrolchComponent {
 	private void pingServer() {
 		if (tryPingServer()) {
 			logger.error("Failed to ping server. Reconnecting...");
-			closeGwSessionUpdateState("Ping failed", ConnectionState.Failed,
+			closeBrokenGwSessionUpdateState("Ping failed",
 					"Failed to ping server. Will try to connect again in " + RETRY_DELAY + "s");
 			delayConnect(RETRY_DELAY, TimeUnit.MILLISECONDS);
 		}
@@ -268,7 +278,7 @@ public class PlcGwHandler extends StrolchComponent {
 
 		if (!response.has(PARAM_STATE) || !response.has(PARAM_STATE_MSG) || !response.has(PARAM_AUTH_TOKEN)) {
 
-			closeGwSessionUpdateState(ctx, "Auth failed!", ConnectionState.Failed,
+			closeBrokenGwSessionUpdateState(ctx, "Auth failed!",
 					"Failed to authenticated with Server: At least one of " + PARAM_STATE + ", " + PARAM_STATE_MSG
 							+ ", " + PARAM_AUTH_TOKEN + " params is missing on Auth Response");
 
@@ -277,20 +287,21 @@ public class PlcGwHandler extends StrolchComponent {
 		}
 
 		if (!response.get(PARAM_STATE).getAsBoolean()) {
-			closeGwSessionUpdateState(ctx, "Failed to authenticated with server!", ConnectionState.Failed,
+			closeBrokenGwSessionUpdateState(ctx, "Failed to authenticated with server!",
 					"Failed to authenticated with Server: " + response.get(PARAM_STATE_MSG).getAsString());
 			throw new IllegalStateException("Auth failed to Server: " + response.get(PARAM_STATE_MSG).getAsString());
 		}
 
 		String serverAuthToken = response.get(PARAM_AUTH_TOKEN).getAsString();
 		if (isEmpty(serverAuthToken)) {
-			closeGwSessionUpdateState(ctx, "Missing auth token on AUTH response!", ConnectionState.Failed,
+			closeBrokenGwSessionUpdateState(ctx, "Missing auth token on AUTH response!",
 					"Missing auth token on AUTH response!");
 			throw new IllegalStateException("Missing auth token on AUTH response!");
 		}
 		logger.info(this.gwSession.getId() + ": Successfully authenticated with Server!");
 
 		saveServerConnectionState(ctx, ConnectionState.Connected, "");
+		notifyPlcConnectionState(ConnectionState.Connected);
 	}
 
 	public void pong(PongMessage message, Session session) {
