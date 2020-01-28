@@ -1,6 +1,6 @@
 package li.strolch.plc.core;
 
-import static li.strolch.plc.core.PlcConstants.*;
+import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
 
 import java.util.HashMap;

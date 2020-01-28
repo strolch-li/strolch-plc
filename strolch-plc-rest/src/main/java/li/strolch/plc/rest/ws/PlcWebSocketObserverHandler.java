@@ -1,6 +1,6 @@
 package li.strolch.plc.rest.ws;
 
-import static li.strolch.plc.core.PlcConstants.TYPE_PLC_ADDRESS;
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
 import static li.strolch.plc.rest.PlcModelVisitor.plcAddressToJson;
 
 import java.util.Set;

@@ -1,6 +1,6 @@
 package li.strolch.plc.core.service;
 
-import static li.strolch.plc.core.PlcConstants.*;
+import static li.strolch.plc.model.PlcConstants.*;
 
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.hw.PlcAddress;

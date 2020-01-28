@@ -8,7 +8,7 @@ import static li.strolch.utils.helper.StringHelper.toHexString;
 import java.io.IOException;
 import java.util.*;
 
-import li.strolch.plc.core.ConnectionState;
+import li.strolch.plc.model.ConnectionState;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.PlcConnection;
 import li.strolch.plc.core.hw.gpio.PlcGpioController;

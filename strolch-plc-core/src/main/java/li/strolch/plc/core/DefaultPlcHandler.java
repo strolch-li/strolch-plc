@@ -1,6 +1,6 @@
 package li.strolch.plc.core;
 
-import static li.strolch.plc.core.PlcConstants.*;
+import static li.strolch.plc.model.PlcConstants.*;
 import static java.lang.System.nanoTime;
 import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
@@ -18,6 +18,8 @@ import li.strolch.model.parameter.Parameter;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.model.visitor.SetParameterValueVisitor;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.model.ConnectionState;
+import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;

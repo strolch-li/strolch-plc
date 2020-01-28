@@ -5,6 +5,7 @@ import java.util.List;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.model.PlcServiceState;
 
 public abstract class PlcServiceInitializer extends StrolchComponent {
 

@@ -1,7 +1,7 @@
 package li.strolch.plc.core;
 
-import static li.strolch.plc.core.PlcConstants.PARAM_VALUE;
-import static li.strolch.plc.core.PlcConstants.TYPE_PLC_ADDRESS;
+import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +12,7 @@ import li.strolch.agent.api.ComponentContainer;
 import li.strolch.model.Resource;
 import li.strolch.model.parameter.Parameter;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.model.PlcServiceState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.privilege.PrivilegedRunnable;
 import li.strolch.runtime.privilege.PrivilegedRunnableWithResult;

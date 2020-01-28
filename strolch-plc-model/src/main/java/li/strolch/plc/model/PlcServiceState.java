@@ -1,4 +1,4 @@
-package li.strolch.plc.core;
+package li.strolch.plc.model;
 
 public enum PlcServiceState {
 	Registered,

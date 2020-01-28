@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import li.strolch.plc.core.ConnectionState;
+import li.strolch.plc.model.ConnectionState;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;

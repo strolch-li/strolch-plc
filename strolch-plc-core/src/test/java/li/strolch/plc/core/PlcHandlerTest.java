@@ -1,7 +1,7 @@
 package li.strolch.plc.core;
 
-import static li.strolch.plc.core.PlcConstants.PARAM_VALUE;
-import static li.strolch.plc.core.PlcConstants.TYPE_PLC_ADDRESS;
+import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -9,6 +9,8 @@ import li.strolch.model.Resource;
 import li.strolch.model.parameter.BooleanParameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.PlcConnection;
+import li.strolch.plc.model.ConnectionState;
+import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.testbase.runtime.RuntimeMock;
 import org.junit.AfterClass;

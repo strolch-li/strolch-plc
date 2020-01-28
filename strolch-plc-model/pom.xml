@@ -3,16 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <groupId>li.strolch</groupId>
         <artifactId>strolch-plc</artifactId>
+        <groupId>li.strolch</groupId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>strolch-plc-core</artifactId>
-    <name>strolch-plc-core</name>
+    <artifactId>strolch-plc-model</artifactId>
+    <name>strolch-plc-model</name>
     <packaging>jar</packaging>
     <url>https://github.com/4treesCH/strolch-plc</url>
 
@@ -47,32 +45,8 @@
             <groupId>li.strolch</groupId>
             <artifactId>li.strolch.model</artifactId>
         </dependency>
-        <dependency>
-            <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.service</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.rest</artifactId>
-        </dependency>
 
-        <!-- PLC -->
-        <dependency>
-            <groupId>li.strolch</groupId>
-            <artifactId>strolch-plc-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- PI4j -->
-        <dependency>
-            <groupId>com.pi4j</groupId>
-            <artifactId>pi4j-core</artifactId>
-        </dependency>
-
+        <!-- Web -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>

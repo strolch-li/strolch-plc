@@ -2,7 +2,7 @@ package li.strolch.plc.core.search;
 
 import static li.strolch.utils.helper.StringHelper.isEmpty;
 
-import li.strolch.plc.core.PlcConstants;
+import li.strolch.plc.model.PlcConstants;
 import li.strolch.search.ResourceSearch;
 
 public class PlcLogicalDeviceSearch extends ResourceSearch {

@@ -3,7 +3,7 @@ package li.strolch.plc.core.hw;
 import java.util.Map;
 import java.util.Set;
 
-import li.strolch.plc.core.ConnectionState;
+import li.strolch.plc.model.ConnectionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

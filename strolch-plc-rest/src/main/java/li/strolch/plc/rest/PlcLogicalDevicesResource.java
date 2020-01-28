@@ -1,7 +1,7 @@
 package li.strolch.plc.rest;
 
 import static java.util.Comparator.comparing;
-import static li.strolch.plc.core.PlcConstants.*;
+import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.plc.rest.PlcModelVisitor.*;
 import static li.strolch.rest.StrolchRestfulConstants.DATA;
 

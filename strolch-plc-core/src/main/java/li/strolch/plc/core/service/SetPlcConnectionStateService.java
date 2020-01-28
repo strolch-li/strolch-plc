@@ -1,8 +1,8 @@
 package li.strolch.plc.core.service;
 
-import static li.strolch.plc.core.PlcConstants.TYPE_PLC_CONNECTION;
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC_CONNECTION;
 
-import li.strolch.plc.core.ConnectionState;
+import li.strolch.plc.model.ConnectionState;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.hw.PlcConnection;
 import li.strolch.model.Resource;

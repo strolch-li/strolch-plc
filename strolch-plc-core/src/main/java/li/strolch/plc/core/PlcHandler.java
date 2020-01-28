@@ -7,6 +7,7 @@ import li.strolch.plc.core.hw.PlcAddress;
 import li.strolch.plc.core.hw.PlcListener;
 import li.strolch.plc.core.hw.PlcValueType;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.Certificate;
 
 public interface PlcHandler {

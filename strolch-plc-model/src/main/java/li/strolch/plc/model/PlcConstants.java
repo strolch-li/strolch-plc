@@ -1,0 +1,51 @@
+package li.strolch.plc.model;
+
+import li.strolch.model.Tags;
+
+public class PlcConstants {
+
+	public static final String TYPE_PLC = "Plc";
+	public static final String TYPE_PLC_CONNECTION = "PlcConnection";
+	public static final String TYPE_PLC_LOGICAL_DEVICE = "PlcLogicalDevice";
+	public static final String TYPE_PLC_ADDRESS = "PlcAddress";
+	public static final String TYPE_PLC_TELEGRAM = "PlcTelegram";
+
+	public static final String BAG_NOTIFICATIONS = "notifications";
+	public static final String BAG_TELEGRAMS = "telegrams";
+
+	public static final String PARAM_ACTION = "action";
+	public static final String PARAM_ADDRESS = "address";
+	public static final String PARAM_ADDRESS_TYPE = "addressType";
+	public static final String PARAM_ADDRESSES = "addresses";
+	public static final String PARAM_AUTH_TOKEN = "authToken";
+	public static final String PARAM_CLASS_NAME = "className";
+	public static final String PARAM_CONNECTION_STATE = "connectionState";
+	public static final String PARAM_CONNECTION_STATE_MSG = "connectionStateMsg";
+	public static final String PARAM_GROUP = "group";
+	public static final String PARAM_HOST_NAME = "hostname";
+	public static final String PARAM_INDEX = "index";
+	public static final String PARAM_INTERRUPT_PIN_NAME = "interruptPinName";
+	public static final String PARAM_INVERTED = "inverted";
+	public static final String PARAM_IP_ADDRESS = "ipAddress";
+	public static final String PARAM_IP_ADDRESSES = "ipAddresses";
+	public static final String PARAM_MAC_ADDRESS = "macAddress";
+	public static final String PARAM_MESSAGE_TYPE = "messageType";
+	public static final String PARAM_PASSWORD = "password";
+	public static final String PARAM_PLC_ID = "plcId";
+	public static final String PARAM_RESOURCE = "resource";
+	public static final String PARAM_STATE = "state";
+	public static final String PARAM_STATE_MSG = "stateMsg";
+	public static final String PARAM_SYSTEM_STATE = "systemState";
+	public static final String PARAM_TELEGRAMS = "telegrams";
+	public static final String PARAM_TYPE = "type";
+	public static final String PARAM_USERNAME = Tags.Json.USERNAME;
+	public static final String PARAM_VALUE = "value";
+	public static final String PARAM_VALUE_TYPE = "valueType";
+	public static final String PARAM_VERSIONS = "versions";
+
+	public static final String INTERPRETATION_NOTIFICATION = "Notification";
+	public static final String INTERPRETATION_TELEGRAM = "Telegram";
+
+	public static final String MSG_TYPE_AUTH = "Authentication";
+	public static final String MSG_TYPE_STATE_NOTIFICATION = "StateNotification";
+}

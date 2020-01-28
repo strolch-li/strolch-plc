@@ -1,6 +1,6 @@
 package li.strolch.plc.rest;
 
-import static li.strolch.plc.core.PlcConstants.*;
+import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.rest.StrolchRestfulConstants.DATA;
 
 import javax.servlet.http.HttpServletRequest;

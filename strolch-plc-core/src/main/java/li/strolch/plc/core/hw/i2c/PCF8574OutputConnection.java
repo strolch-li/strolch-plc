@@ -7,7 +7,7 @@ import static li.strolch.utils.helper.StringHelper.toHexString;
 
 import java.util.*;
 
-import li.strolch.plc.core.ConnectionState;
+import li.strolch.plc.model.ConnectionState;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.PlcConnection;
 import com.pi4j.io.i2c.I2CBus;
