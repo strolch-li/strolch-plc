@@ -136,7 +136,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 			return;
 		}
 
-		// register gwSession by sending a heart beat
+		// register session on server by sending a heart beat, which sends our plcId
 		this.lastSystemStateNotification = System.currentTimeMillis();
 		if (tryPingServer()) {
 			logger.error("Failed to ping server. Will try to connect again in " + RETRY_DELAY + "s");
