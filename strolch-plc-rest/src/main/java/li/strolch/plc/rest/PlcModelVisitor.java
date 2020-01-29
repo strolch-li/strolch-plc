@@ -4,7 +4,7 @@ import static li.strolch.plc.model.PlcConstants.*;
 import static java.util.Comparator.comparing;
 import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
 
-import li.strolch.plc.core.hw.PlcAddress;
+import li.strolch.plc.model.PlcAddress;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import li.strolch.model.Tags;

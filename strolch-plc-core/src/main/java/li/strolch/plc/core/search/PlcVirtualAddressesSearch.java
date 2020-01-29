@@ -1,7 +1,7 @@
 package li.strolch.plc.core.search;
 
 import li.strolch.plc.core.PlcHandler;
-import li.strolch.plc.core.hw.PlcAddress;
+import li.strolch.plc.model.PlcAddress;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.search.SearchResult;

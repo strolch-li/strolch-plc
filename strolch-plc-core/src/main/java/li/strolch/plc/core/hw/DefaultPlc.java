@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcAddressType;
 import li.strolch.utils.collections.MapOfLists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ public class DefaultPlc implements Plc {
 	private Map<String, PlcAddress> notificationMappings;
 	private Map<String, PlcConnection> connections;
 	private Map<String, PlcConnection> connectionsByAddress;
+	private PlcListener globalListener;
 	private MapOfLists<PlcAddress, PlcListener> listeners;
 	private PlcConnectionStateChangeListener connectionStateChangeListener;
 
@@ -24,6 +27,11 @@ public class DefaultPlc implements Plc {
 		this.listeners = new MapOfLists<>();
 		this.connections = new HashMap<>();
 		this.connectionsByAddress = new HashMap<>();
+	}
+
+	@Override
+	public void setGlobalListener(PlcListener listener) {
+		this.globalListener = listener;
 	}
 
 	@Override
@@ -64,6 +72,9 @@ public class DefaultPlc implements Plc {
 				logger.error("Failed to notify listener " + listener + " for key " + key, e);
 			}
 		}
+
+		if (this.globalListener != null)
+			this.globalListener.handleNotification(key, value);
 	}
 
 	@Override

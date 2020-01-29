@@ -1,6 +1,8 @@
-package li.strolch.plc.core.hw;
+package li.strolch.plc.model;
 
 import java.util.Objects;
+
+import li.strolch.model.StrolchValueType;
 
 public class PlcAddress {
 
@@ -11,12 +13,12 @@ public class PlcAddress {
 	public final String action;
 
 	public final String address;
-	public final PlcValueType valueType;
+	public final StrolchValueType valueType;
 	public final Object defaultValue;
 	public final boolean inverted;
 
 	public PlcAddress(PlcAddressType type, boolean virtual, String resource, String action, String address,
-			PlcValueType valueType, Object defaultValue, boolean inverted) {
+			StrolchValueType valueType, Object defaultValue, boolean inverted) {
 		this.type = type;
 		this.virtual = virtual;
 		this.resource = resource.intern();

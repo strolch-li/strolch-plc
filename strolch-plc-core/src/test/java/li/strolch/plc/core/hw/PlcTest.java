@@ -11,7 +11,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import li.strolch.model.StrolchValueType;
 import li.strolch.plc.model.ConnectionState;
+import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcAddressType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -43,11 +46,11 @@ public class PlcTest {
 		conveyorCon.initialize(Collections.emptyMap());
 		plc.addConnection(conveyorCon);
 		positionOn = new PlcAddress(PlcAddressType.Telegram, false, "Conveyor", "On", "Conveyor.OnOff",
-				PlcValueType.Boolean, true, false);
+				StrolchValueType.BOOLEAN, true, false);
 		positionOff = new PlcAddress(PlcAddressType.Telegram, false, "Conveyor", "Off", "Conveyor.OnOff",
-				PlcValueType.Boolean, false, false);
+				StrolchValueType.BOOLEAN, false, false);
 		positionOccupied = new PlcAddress(PlcAddressType.Notification, false, "Conveyor", "Occupied",
-				"Conveyor.Occupied", PlcValueType.Boolean, null, false);
+				"Conveyor.Occupied", StrolchValueType.BOOLEAN, null, false);
 		plc.registerNotificationMapping(positionOccupied);
 	}
 

@@ -20,12 +20,15 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import li.strolch.agent.api.*;
 import li.strolch.model.Resource;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.model.ConnectionState;
+import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcResponseState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
 import li.strolch.utils.helper.ExceptionHelper;
@@ -34,6 +37,9 @@ import org.glassfish.tyrus.client.ClientManager;
 
 public class PlcGwClientHandler extends StrolchComponent {
 
+	private static final String THREAD_POOL = "PlcNotifications";
+
+	private static final long PING_DELAY = 90;
 	private static final long RETRY_DELAY = 30;
 	private static final int INITIAL_DELAY = 10;
 
@@ -44,6 +50,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 
 	private ClientManager gwClient;
 	private volatile Session gwSession;
+	private boolean authenticated;
 
 	private ScheduledFuture<?> serverConnectFuture;
 
@@ -71,6 +78,10 @@ public class PlcGwClientHandler extends StrolchComponent {
 	public void start() throws Exception {
 		notifyPlcConnectionState(ConnectionState.Disconnected);
 		delayConnect(INITIAL_DELAY, TimeUnit.SECONDS);
+
+		getComponent(PlcHandler.class).setGlobalListener(
+				(address, value) -> getExecutorService(THREAD_POOL).submit(() -> notifyServer(address, value)));
+
 		super.start();
 	}
 
@@ -148,7 +159,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 
 		// now authenticate
 		JsonObject authJ = new JsonObject();
-		authJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_AUTH);
+		authJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_AUTHENTICATION);
 		authJ.addProperty(PARAM_PLC_ID, this.plcId);
 		authJ.addProperty(PARAM_USERNAME, this.gwUsername);
 		authJ.addProperty(PARAM_PASSWORD, this.gwPassword);
@@ -171,7 +182,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 		if (this.serverConnectFuture != null)
 			this.serverConnectFuture.cancel(true);
 		this.serverConnectFuture = getScheduledExecutor("Server")
-				.scheduleWithFixedDelay(this::pingServer, 1, RETRY_DELAY, TimeUnit.SECONDS);
+				.scheduleWithFixedDelay(this::pingServer, PING_DELAY, PING_DELAY, TimeUnit.SECONDS);
 	}
 
 	private void closeBrokenGwSessionUpdateState(String closeReason, String connectionStateMsg) {
@@ -208,6 +219,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 
 		this.gwClient = null;
 		this.gwSession = null;
+		this.authenticated = false;
 	}
 
 	private void pingServer() {
@@ -229,7 +241,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 			if (lastUpdate > TimeUnit.HOURS.toMillis(1)) {
 				logger.info("Sending system state to server...");
 				JsonObject stateJ = new JsonObject();
-				stateJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_AUTH);
+				stateJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_AUTHENTICATION);
 				stateJ.addProperty(PARAM_PLC_ID, this.plcId);
 				stateJ.add(PARAM_IP_ADDRESSES, getIpAddresses());
 				stateJ.add(PARAM_VERSIONS, getVersions());
@@ -246,8 +258,37 @@ public class PlcGwClientHandler extends StrolchComponent {
 		}
 	}
 
-	public void handleMessage(Session session, String message) {
-		logger.info(session.getId() + ": Received data " + message);
+	private void notifyServer(PlcAddress plcAddress, Object value) {
+		if (!this.authenticated) {
+			logger.warn("Not yet authenticated with server, ignoring update for " + plcAddress + ": " + value);
+			return;
+		}
+
+		JsonObject notificationJ = new JsonObject();
+		notificationJ.addProperty(PARAM_PLC_ID, this.plcId);
+		notificationJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_PLC_NOTIFICATION);
+		notificationJ.addProperty(PARAM_RESOURCE, plcAddress.resource);
+		notificationJ.addProperty(PARAM_ACTION, plcAddress.action);
+
+		if (value instanceof Boolean)
+			notificationJ.add(PARAM_VALUE, new JsonPrimitive((Boolean) value));
+		else if (value instanceof Number)
+			notificationJ.add(PARAM_VALUE, new JsonPrimitive((Number) value));
+		else if (value instanceof String)
+			notificationJ.add(PARAM_VALUE, new JsonPrimitive((String) value));
+		else
+			notificationJ.add(PARAM_VALUE, new JsonPrimitive(value.toString()));
+
+		try {
+			sendDataToClient(notificationJ);
+			logger.info("Sent notification for " + plcAddress.resource + "-" + plcAddress.action + " to server");
+		} catch (IOException e) {
+			logger.error("Failed to send notification to server", e);
+		}
+	}
+
+	public void onWsMessage(Session session, String message) {
+		logger.info(session.getId() + ": Handling message");
 
 		JsonObject jsonObject = new JsonParser().parse(message).getAsJsonObject();
 		if (!jsonObject.has(PARAM_MESSAGE_TYPE)) {
@@ -260,7 +301,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 		try {
 			runAsAgent(ctx -> {
 
-				if (MSG_TYPE_AUTH.equals(messageType)) {
+				if (MSG_TYPE_AUTHENTICATION.equals(messageType)) {
 					handleAuthResponse(ctx, jsonObject);
 				} else {
 					logger.error("Unhandled message type " + messageType);
@@ -280,10 +321,11 @@ public class PlcGwClientHandler extends StrolchComponent {
 							+ ", " + PARAM_AUTH_TOKEN + " params is missing on Auth Response");
 
 			throw new IllegalStateException(
-					"Failed to authenticated with Server: " + response.get(PARAM_STATE_MSG).getAsString());
+					"Failed to authenticated with Server: At least one of " + PARAM_STATE + ", " + PARAM_STATE_MSG
+							+ ", " + PARAM_AUTH_TOKEN + " params is missing on Auth Response");
 		}
 
-		if (!response.get(PARAM_STATE).getAsBoolean()) {
+		if (PlcResponseState.valueOf(response.get(PARAM_STATE).getAsString()) != PlcResponseState.Sent) {
 			closeBrokenGwSessionUpdateState(ctx, "Failed to authenticated with server!",
 					"Failed to authenticated with Server: " + response.get(PARAM_STATE_MSG).getAsString());
 			throw new IllegalStateException("Auth failed to Server: " + response.get(PARAM_STATE_MSG).getAsString());
@@ -299,21 +341,25 @@ public class PlcGwClientHandler extends StrolchComponent {
 
 		saveServerConnectionState(ctx, ConnectionState.Connected, "");
 		notifyPlcConnectionState(ConnectionState.Connected);
+		this.authenticated = true;
 	}
 
-	public void pong(PongMessage message, Session session) {
+	public void onWsPong(PongMessage message, Session session) {
 		logger.info(session.getId() + ": Received pong " + message.toString());
 	}
 
-	public void open(Session session) {
-		logger.error("Why do we get an open: " + session);
+	public void onWsOpen(Session session) {
+		logger.info(session.getId() + ": New Session");
 	}
 
-	public void close(Session session, CloseReason closeReason) {
-		logger.error(session.getId() + ": Received close " + closeReason);
+	public void onWsClose(Session session, CloseReason closeReason) {
+		logger.info("Session closed with ID " + session.getId() + " due to " + closeReason.getCloseCode() + " "
+				+ closeReason.getReasonPhrase() + ". Reconnecting in " + RETRY_DELAY + "s.");
+		this.authenticated = false;
+		delayConnect(RETRY_DELAY, TimeUnit.SECONDS);
 	}
 
-	public void error(Session session, Throwable throwable) {
+	public void onWsError(Session session, Throwable throwable) {
 		logger.error(session.getId() + ": Received error: " + throwable.getMessage(), throwable);
 	}
 
@@ -402,27 +448,27 @@ public class PlcGwClientHandler extends StrolchComponent {
 
 		@OnMessage
 		public void onMessage(String message, Session session) {
-			this.gwHandler.handleMessage(session, message);
+			this.gwHandler.onWsMessage(session, message);
 		}
 
 		@OnMessage
 		public void onPong(PongMessage message, Session session) {
-			this.gwHandler.pong(message, session);
+			this.gwHandler.onWsPong(message, session);
 		}
 
 		@OnOpen
 		public void onOpen(Session session) {
-			this.gwHandler.open(session);
+			this.gwHandler.onWsOpen(session);
 		}
 
 		@OnClose
 		public void onClose(Session session, CloseReason closeReason) {
-			this.gwHandler.close(session, closeReason);
+			this.gwHandler.onWsClose(session, closeReason);
 		}
 
 		@OnError
 		public void onError(Session session, Throwable throwable) {
-			this.gwHandler.error(session, throwable);
+			this.gwHandler.onWsError(session, throwable);
 		}
 	}
 }

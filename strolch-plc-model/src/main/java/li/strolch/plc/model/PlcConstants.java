@@ -32,6 +32,7 @@ public class PlcConstants {
 	public static final String PARAM_MESSAGE_TYPE = "messageType";
 	public static final String PARAM_PASSWORD = "password";
 	public static final String PARAM_PLC_ID = "plcId";
+	public static final String PARAM_SEQUENCE_ID = "sequenceId";
 	public static final String PARAM_RESOURCE = "resource";
 	public static final String PARAM_STATE = "state";
 	public static final String PARAM_STATE_MSG = "stateMsg";
@@ -42,10 +43,13 @@ public class PlcConstants {
 	public static final String PARAM_VALUE = "value";
 	public static final String PARAM_VALUE_TYPE = "valueType";
 	public static final String PARAM_VERSIONS = "versions";
+	public static final String PARAM_LOCAL_IP = "localIp";
 
 	public static final String INTERPRETATION_NOTIFICATION = "Notification";
 	public static final String INTERPRETATION_TELEGRAM = "Telegram";
 
-	public static final String MSG_TYPE_AUTH = "Authentication";
+	public static final String MSG_TYPE_AUTHENTICATION = "Authentication";
+	public static final String MSG_TYPE_PLC_NOTIFICATION = "PlcNotification";
+	public static final String MSG_TYPE_PLC_TELEGRAM = "PlcTelegram";
 	public static final String MSG_TYPE_STATE_NOTIFICATION = "StateNotification";
 }

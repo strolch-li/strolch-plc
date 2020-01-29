@@ -3,8 +3,8 @@ package li.strolch.plc.core.service;
 import static li.strolch.plc.model.PlcConstants.*;
 
 import li.strolch.plc.core.PlcHandler;
-import li.strolch.plc.core.hw.PlcAddress;
-import li.strolch.plc.core.hw.PlcAddressType;
+import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcAddressType;
 import com.google.gson.JsonObject;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.service.JsonServiceArgument;
@@ -36,7 +36,7 @@ public class SendPlcAddressActionService extends AbstractService<JsonServiceArgu
 			PlcHandler plcHandler = getComponent(PlcHandler.class);
 			PlcAddress plcAddress = plcHandler.getPlcAddress(resource, action);
 
-			Object value = plcAddress.valueType.parseStringValue(valueS);
+			Object value = plcAddress.valueType.parseValue(valueS);
 
 			if (addressType == PlcAddressType.Telegram) {
 				plcHandler.send(resource, action, value);

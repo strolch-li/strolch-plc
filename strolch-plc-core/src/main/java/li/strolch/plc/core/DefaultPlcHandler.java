@@ -1,8 +1,8 @@
 package li.strolch.plc.core;
 
-import static li.strolch.plc.model.PlcConstants.*;
 import static java.lang.System.nanoTime;
 import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
+import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 import static li.strolch.utils.helper.StringHelper.formatNanoDuration;
 
@@ -10,15 +10,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import li.strolch.plc.core.hw.*;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
 import li.strolch.model.Resource;
+import li.strolch.model.StrolchValueType;
 import li.strolch.model.parameter.Parameter;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.model.visitor.SetParameterValueVisitor;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.core.hw.*;
 import li.strolch.plc.model.ConnectionState;
+import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcAddressType;
 import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.privilege.model.PrivilegeContext;
@@ -35,6 +38,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	private MapOfMaps<String, String, PlcAddress> plcAddresses;
 	private MapOfMaps<String, String, PlcAddress> plcTelegrams;
 	private Map<PlcAddress, String> addressesToResourceId;
+	private PlcListener globalListener;
 
 	public DefaultPlcHandler(ComponentContainer container, String componentName) {
 		super(container, componentName);
@@ -210,7 +214,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 				Resource addressRes = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
 
 				// see if we need to invert a boolean flag
-				if (address.valueType == PlcValueType.Boolean && address.inverted) {
+				if (address.valueType == StrolchValueType.BOOLEAN && address.inverted) {
 					value = !((boolean) value);
 				}
 
@@ -268,13 +272,16 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	@Override
-	public void registerVirtualListener(String resource, String action, PlcListener listener, PlcValueType valueType,
-			Object defaultValue) {
+	public void registerVirtualListener(String resource, String action, PlcListener listener,
+			StrolchValueType valueType, Object defaultValue) {
+
 		if (this.plcAddresses.containsElement(resource, action))
 			throw new IllegalStateException(
 					"There already is a virtual listener registered for key " + resource + "-" + action);
+
 		PlcAddress plcAddress = new PlcAddress(PlcAddressType.Notification, true, resource, action,
 				listener.getClass().getSimpleName(), valueType, defaultValue, false);
+
 		this.plcAddresses.addElement(resource, action, plcAddress);
 		this.virtualListeners.put(plcAddress, listener);
 		logger.info("Registered virtual listener for " + resource + "-" + action);
@@ -296,6 +303,12 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 		this.plcAddresses.removeElement(resource, action);
 		logger.info("Unregistered listener " + resource + " " + action);
+	}
+
+	@Override
+	public void setGlobalListener(PlcListener listener) {
+		this.globalListener = listener;
+		this.plc.setGlobalListener(listener);
 	}
 
 	@Override
@@ -365,6 +378,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 		if (plcAddress.virtual) {
 			this.virtualListeners.get(plcAddress).handleNotification(plcAddress, value);
+			this.globalListener.handleNotification(plcAddress, value);
 			return;
 		}
 

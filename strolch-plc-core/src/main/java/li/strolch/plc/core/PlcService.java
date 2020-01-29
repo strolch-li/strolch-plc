@@ -6,7 +6,7 @@ import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import li.strolch.plc.core.hw.PlcAddress;
+import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.core.hw.PlcListener;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.model.Resource;

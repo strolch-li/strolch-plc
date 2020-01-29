@@ -7,9 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import li.strolch.model.parameter.Parameter;
 import li.strolch.plc.core.hw.*;
 import li.strolch.model.Resource;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcAddressType;
 import li.strolch.search.ResourceSearch;
 import li.strolch.utils.collections.MapOfMaps;
 import li.strolch.utils.helper.ClassHelper;
@@ -73,14 +76,13 @@ class PlcConfigurator {
 		String address = addressRes.getParameter(PARAM_ADDRESS, true).getValue();
 		String resource = addressRes.getParameter(PARAM_RESOURCE, true).getValue();
 		String action = addressRes.getParameter(PARAM_ACTION, true).getValue();
-		PlcValueType valueType = PlcValueType.valueOf(addressRes.getParameter(PARAM_VALUE_TYPE, true).getValue());
-		Object value = addressRes.getParameter(PARAM_VALUE, true).getValue();
+		Parameter<?> valueP = addressRes.getParameter(PARAM_VALUE, true);
 		boolean inverted =
 				addressRes.hasParameter(PARAM_INVERTED) && ((boolean) addressRes.getParameter(PARAM_INVERTED, true)
 						.getValue());
 
-		PlcAddress plcAddress = new PlcAddress(PlcAddressType.Notification, false, resource, action, address, valueType,
-				value, inverted);
+		PlcAddress plcAddress = new PlcAddress(PlcAddressType.Notification, false, resource, action, address,
+				valueP.getValueType(), valueP.getValue(), inverted);
 		logger.info("Adding PlcAddress " + plcAddress + "...");
 		plc.registerNotificationMapping(plcAddress);
 
@@ -100,22 +102,21 @@ class PlcConfigurator {
 		String address = telegramRes.getParameter(PARAM_ADDRESS, true).getValue();
 		String resource = telegramRes.getParameter(PARAM_RESOURCE, true).getValue();
 		String action = telegramRes.getParameter(PARAM_ACTION, true).getValue();
-		PlcValueType valueType = PlcValueType.valueOf(telegramRes.getParameter(PARAM_VALUE_TYPE, true).getValue());
-		Object value = telegramRes.getParameter(PARAM_VALUE, true).getValue();
+		Parameter<?> valueP = telegramRes.getParameter(PARAM_VALUE, true);
 
 		PlcAddress existingAddress = plcAddressesByHwAddress.get(address);
 		if (existingAddress == null)
 			throw new IllegalStateException(
 					telegramRes.getLocator() + " is referencing non-existing address " + address);
 
-		if (valueType != existingAddress.valueType) {
+		if (valueP.getValueType() != existingAddress.valueType) {
 			throw new IllegalStateException(
-					telegramRes.getLocator() + " has valueType " + valueType + " but address " + existingAddress.address
-							+ " has type " + existingAddress.valueType);
+					telegramRes.getLocator() + " has valueType " + valueP.getValueType() + " but address "
+							+ existingAddress.address + " has type " + existingAddress.valueType);
 		}
 
 		PlcAddress telegramAddress = new PlcAddress(PlcAddressType.Telegram, false, resource, action, address,
-				valueType, value, false);
+				valueP.getValueType(), valueP.getValue(), false);
 		logger.info("Adding PlcTelegram " + telegramAddress + "...");
 
 		PlcAddress replaced = plcTelegrams.addElement(resource, action, telegramAddress);

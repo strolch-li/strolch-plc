@@ -16,26 +16,26 @@ public class PlcServerWebSocketEndpoint {
 
 	@OnMessage
 	public void onMessage(String message, Session session) {
-		this.serverHandler.onMessage(message, session);
+		this.serverHandler.onWsMessage(message, session);
 	}
 
 	@OnMessage
 	public void onPong(PongMessage message, Session session) {
-		this.serverHandler.onPong(message, session);
+		this.serverHandler.onWsPong(message, session);
 	}
 
 	@OnOpen
 	public void onOpen(Session session) {
-		this.serverHandler.onOpen(session);
+		this.serverHandler.onWsOpen(session);
 	}
 
 	@OnClose
 	public void onClose(Session session, CloseReason closeReason) {
-		this.serverHandler.onClose(session, closeReason);
+		this.serverHandler.onWsClose(session, closeReason);
 	}
 
 	@OnError
 	public void onError(Session session, Throwable throwable) {
-		this.serverHandler.onError(session, throwable);
+		this.serverHandler.onWsError(session, throwable);
 	}
 }

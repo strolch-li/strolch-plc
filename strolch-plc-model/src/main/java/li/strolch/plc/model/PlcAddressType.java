@@ -1,4 +1,4 @@
-package li.strolch.plc.core.hw;
+package li.strolch.plc.model;
 
 public enum PlcAddressType {
 	Telegram,

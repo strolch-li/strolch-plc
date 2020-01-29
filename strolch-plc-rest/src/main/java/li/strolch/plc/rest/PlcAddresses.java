@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import li.strolch.plc.core.hw.PlcAddress;
+import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.core.search.PlcVirtualAddressesSearch;
 import li.strolch.plc.core.service.SendPlcAddressActionService;
 import li.strolch.privilege.model.Certificate;

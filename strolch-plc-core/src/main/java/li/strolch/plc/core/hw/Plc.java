@@ -1,10 +1,14 @@
 package li.strolch.plc.core.hw;
 
+import li.strolch.plc.model.PlcAddress;
+
 public interface Plc {
 
 	void start();
 
 	void stop();
+
+	void setGlobalListener(PlcListener listener);
 
 	void registerListener(PlcAddress address, PlcListener listener);
 
