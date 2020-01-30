@@ -53,6 +53,10 @@ public class PlcGwServerHandler extends StrolchComponent {
 		super.initialize(configuration);
 	}
 
+	public boolean isPlcConnected(String plcId) {
+		return this.plcSessionsByPlcId.containsKey(plcId);
+	}
+
 	public void register(PlcAddressKey addressKey, String plcId, PlcNotificationListener listener) {
 		MapOfLists<PlcAddressKey, PlcNotificationListener> plcListeners = this.plcAddressListenersByPlcId.get(plcId);
 		if (plcListeners == null) {
