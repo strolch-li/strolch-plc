@@ -14,6 +14,7 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 
 	private List<Integer> outputBcmAddresses;
 	private Map<String, GpioPinDigitalOutput> pinsByAddress;
+	private boolean inverted;
 
 	public RaspiBcmGpioOutputConnection(Plc plc, String id) {
 		super(plc, id);
@@ -24,6 +25,7 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 		@SuppressWarnings("unchecked")
 		List<Integer> bcmOutputPins = (List<Integer>) parameters.get("bcmOutputPins");
 		this.outputBcmAddresses = bcmOutputPins;
+		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
 		logger.info(
 				"Configured Raspi BCM GPIO Output for Pins " + this.outputBcmAddresses.stream().map(Object::toString)
 						.collect(joining(", ")));
@@ -76,7 +78,11 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 
 	@Override
 	public void send(String address, Object value) {
+
 		boolean high = (boolean) value;
+		if (this.inverted)
+			high = !high;
+
 		GpioPinDigitalOutput outputPin = this.pinsByAddress.get(address);
 		if (outputPin == null)
 			throw new IllegalArgumentException("Output pin with address " + address + " does not exist!");

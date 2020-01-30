@@ -39,8 +39,10 @@ public class SendPlcAddressActionService extends AbstractService<JsonServiceArgu
 			Object value = plcAddress.valueType.parseValue(valueS);
 
 			if (addressType == PlcAddressType.Telegram) {
+				logger.info("PLC Send " + resource + "-" + action + " with " + valueS);
 				plcHandler.send(resource, action, value);
 			} else if (addressType == PlcAddressType.Notification) {
+				logger.info("PLC Notification " + resource + "-" + action + " with " + valueS);
 				plcHandler.notify(resource, action, value);
 			} else {
 				throw new UnsupportedOperationException("Unhandled address type " + addressType);

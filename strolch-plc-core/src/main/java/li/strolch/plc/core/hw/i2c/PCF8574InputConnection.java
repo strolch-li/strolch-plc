@@ -26,15 +26,18 @@ public class PCF8574InputConnection extends PlcConnection {
 	private static final Logger logger = LoggerFactory.getLogger(PCF8574InputConnection.class);
 
 	private int i2cBusNr;
-	private byte address;
+	private boolean inverted;
+
+	private byte[] addresses;
+	private I2CDevice[] inputDevices;
+	private boolean[][] states;
+
+	private Map<String, int[]> positionsByAddress;
+
+	private PinPullResistance interruptResistance;
 	private int interruptBcmPinAddress;
 	private PinState interruptChangeState;
-
-	private Map<String, Integer> positionsByAddress;
-	private I2CDevice inputDev;
 	private GpioPinDigitalInput interruptGpioPin;
-
-	private boolean[] states;
 
 	public PCF8574InputConnection(Plc plc, String id) {
 		super(plc, id);
@@ -45,24 +48,36 @@ public class PCF8574InputConnection extends PlcConnection {
 
 		if (!parameters.containsKey("i2cBus"))
 			throw new IllegalArgumentException("Missing param i2cBus");
-		if (!parameters.containsKey("address"))
-			throw new IllegalArgumentException("Missing param address");
+		if (!parameters.containsKey("addresses"))
+			throw new IllegalArgumentException("Missing param addresses");
+		if (!parameters.containsKey("interruptPinPullResistance"))
+			throw new IllegalArgumentException("Missing param interruptPinPullResistance");
 		if (!parameters.containsKey("interruptBcmPinAddress"))
 			throw new IllegalArgumentException("Missing param interruptBcmPinAddress");
 
 		this.i2cBusNr = (int) parameters.get("i2cBus");
-		String addressS = (String) parameters.get("address");
-		this.address = Integer.decode(addressS).byteValue();
+		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
+
+		@SuppressWarnings("unchecked")
+		List<Integer> addressList = (List<Integer>) parameters.get("addresses");
+		this.addresses = new byte[addressList.size()];
+		for (int i = 0; i < addressList.size(); i++) {
+			this.addresses[i] = addressList.get(i).byteValue();
+		}
+
+		Map<String, int[]> positionsByAddress = new HashMap<>();
+		for (int i = 0; i < this.addresses.length; i++) {
+			for (int j = 0; j < 8; j++)
+				positionsByAddress.put(this.id + "." + i + "." + j, new int[] { i, j });
+		}
+		this.positionsByAddress = Collections.unmodifiableMap(positionsByAddress);
+
+		this.interruptResistance = PinPullResistance.valueOf((String) parameters.get("interruptPinPullResistance"));
 		this.interruptBcmPinAddress = (Integer) parameters.get("interruptBcmPinAddress");
 		this.interruptChangeState = PinState.valueOf((String) parameters.get("interruptChangeState"));
 
-		Map<String, Integer> positionsByAddress = new HashMap<>();
-		for (int i = 0; i < 8; i++)
-			positionsByAddress.put(this.id + "." + i, i);
-		this.positionsByAddress = Collections.unmodifiableMap(positionsByAddress);
-
-		logger.info("Configured PCF8574 Input on I2C address " + addressS + " on BCM Pin interrupt trigger "
-				+ this.interruptBcmPinAddress);
+		logger.info("Configured PCF8574 Input on I2C address " + Arrays.toString(this.addresses)
+				+ " on BCM Pin interrupt trigger " + this.interruptBcmPinAddress);
 	}
 
 	@Override
@@ -77,17 +92,21 @@ public class PCF8574InputConnection extends PlcConnection {
 		// initialize
 		try {
 			I2CBus i2cBus = I2CFactory.getInstance(this.i2cBusNr);
-			this.inputDev = i2cBus.getDevice(this.address);
-			logger.info("Connected to I2C Device at address 0x" + toHexString(this.address) + " on I2C Bus "
-					+ this.i2cBusNr);
+
+			this.inputDevices = new I2CDevice[this.addresses.length];
+			for (int i = 0; i < this.addresses.length; i++) {
+				this.inputDevices[i] = i2cBus.getDevice(this.addresses[i]);
+				logger.info("Connected to I2C Device at address " + toHexString(this.addresses[i]) + " on I2C Bus "
+						+ this.i2cBusNr);
+			}
+
 		} catch (Exception e) {
-			logger.error("Failed to connect to I2C Bus " + this.i2cBusNr + " and address " + toHexString(this.address),
-					e);
+			logger.error("Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses " + Arrays
+					.toString(this.addresses), e);
 
 			this.connectionState = ConnectionState.Failed;
-			this.connectionStateMsg =
-					"Failed to connect to I2C Bus " + this.i2cBusNr + " and address " + toHexString(this.address) + ": "
-							+ getExceptionMessageWithCauses(e);
+			this.connectionStateMsg = "Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses " + Arrays
+					.toString(this.addresses) + ": " + getExceptionMessageWithCauses(e);
 			this.plc.notifyConnectionStateChanged(this);
 			return;
 		}
@@ -95,13 +114,13 @@ public class PCF8574InputConnection extends PlcConnection {
 		try {
 			readInitialState();
 		} catch (Exception e) {
-			logger.error("Failed to read initial values from I2C Bus " + this.i2cBusNr + " and address " + toHexString(
-					this.address), e);
+			logger.error("Failed to read initial values from I2C Bus " + this.i2cBusNr + " and addresses " + Arrays
+					.toString(this.addresses), e);
 
 			this.connectionState = ConnectionState.Failed;
 			this.connectionStateMsg =
-					"Failed to read initial values from I2C Bus " + this.i2cBusNr + " and address " + toHexString(
-							this.address) + ": " + getExceptionMessageWithCauses(e);
+					"Failed to read initial values from I2C Bus " + this.i2cBusNr + " and addresses " + Arrays
+							.toString(this.addresses) + ": " + getExceptionMessageWithCauses(e);
 			this.plc.notifyConnectionStateChanged(this);
 			return;
 		}
@@ -117,7 +136,7 @@ public class PCF8574InputConnection extends PlcConnection {
 
 			if (gpioController.getProvisionedPins().stream().map(GpioPin::getPin).anyMatch(interruptPin::equals))
 				throw new IllegalStateException("Pin " + interruptPin + " is already provisioned!");
-			this.interruptGpioPin = gpioController.provisionDigitalInputPin(interruptPin);
+			this.interruptGpioPin = gpioController.provisionDigitalInputPin(interruptPin, this.interruptResistance);
 			this.interruptGpioPin.removeAllListeners();
 			this.interruptGpioPin.addListener((GpioPinListenerDigital) this::handleInterrupt);
 
@@ -147,7 +166,7 @@ public class PCF8574InputConnection extends PlcConnection {
 			PlcGpioController.getInstance().unprovisionPin(this.interruptGpioPin);
 		}
 
-		this.inputDev = null;
+		this.inputDevices = null;
 
 		this.connectionState = ConnectionState.Disconnected;
 		this.connectionStateMsg = "-";
@@ -167,26 +186,43 @@ public class PCF8574InputConnection extends PlcConnection {
 	}
 
 	private void handleNewState() throws IOException {
-		byte data = (byte) this.inputDev.read();
-		boolean newState;
 
-		for (int i = 0; i < this.states.length; i++) {
-			newState = isBitSet(data, i);
-			if (this.states[i] != newState) {
-				this.states[i] = newState;
-				this.plc.notify(this.id + "." + i, newState);
+		for (int i = 0; i < this.addresses.length; i++) {
+
+			byte data = (byte) this.inputDevices[i].read();
+			boolean newState;
+
+			for (int j = 0; j < 8; j++) {
+				newState = isBitSet(data, j);
+				if (this.inverted)
+					newState = !newState;
+
+				if (this.states[i][j] != newState) {
+					this.states[i][j] = newState;
+					this.plc.notify(this.id + "." + i + "." + j, newState);
+				}
 			}
 		}
 	}
 
 	private void readInitialState() throws IOException {
-		byte data = (byte) this.inputDev.read();
-		logger.info("Initial Value: " + asBinary(data));
 
-		this.states = new boolean[8];
-		for (int i = 0; i < this.states.length; i++) {
-			this.states[i] = isBitSet(data, i);
-			this.plc.notify(this.id + "." + i, this.states[i]);
+		this.states = new boolean[this.addresses.length][];
+		for (int i = 0; i < this.addresses.length; i++) {
+
+			byte data = (byte) this.inputDevices[i].read();
+			logger.info("Initial Value for address " + toHexString(this.addresses[i]) + " is " + asBinary(data));
+
+			this.states[i] = new boolean[8];
+			for (int j = 0; j < 8; j++) {
+				boolean bitSet = isBitSet(data, j);
+
+				if (this.inverted)
+					bitSet = !bitSet;
+
+				this.states[i][j] = bitSet;
+				this.plc.notify(this.id + "." + i + "." + j, this.states[i][j]);
+			}
 		}
 	}
 

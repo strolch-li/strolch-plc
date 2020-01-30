@@ -147,6 +147,9 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			this.plcState = PlcState.Configured;
 			this.plcStateMsg = PlcState.Configured.name();
 
+			if (this.globalListener != null)
+				this.plc.setGlobalListener(this.globalListener);
+
 			logger.info("Reconfigured PLC with " + this.plcAddresses.size() + " addresses");
 			return true;
 
@@ -308,7 +311,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	@Override
 	public void setGlobalListener(PlcListener listener) {
 		this.globalListener = listener;
-		this.plc.setGlobalListener(listener);
+		if (this.plc != null)
+			this.plc.setGlobalListener(listener);
 	}
 
 	@Override

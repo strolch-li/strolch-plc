@@ -6,6 +6,7 @@ import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.model.PlcServiceState;
+import li.strolch.plc.model.PlcState;
 
 public abstract class PlcServiceInitializer extends StrolchComponent {
 
@@ -43,6 +44,11 @@ public abstract class PlcServiceInitializer extends StrolchComponent {
 
 	protected void startPlcServices() {
 		PlcHandler plcHandler = getComponent(PlcHandler.class);
+		if (plcHandler.getPlcState() != PlcState.Started) {
+			logger.error("Can not start PlcServices as PlcState is " + plcHandler.getPlcState());
+			return;
+		}
+
 		this.plcServices = getPlcServices(plcHandler);
 		for (PlcService plcService : this.plcServices) {
 			try {

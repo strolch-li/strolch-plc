@@ -29,6 +29,7 @@ import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.model.ConnectionState;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcResponseState;
+import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
 import li.strolch.utils.helper.ExceptionHelper;
@@ -76,11 +77,15 @@ public class PlcGwClientHandler extends StrolchComponent {
 
 	@Override
 	public void start() throws Exception {
-		notifyPlcConnectionState(ConnectionState.Disconnected);
-		delayConnect(INITIAL_DELAY, TimeUnit.SECONDS);
 
-		getComponent(PlcHandler.class).setGlobalListener(
+		PlcHandler plcHandler = getComponent(PlcHandler.class);
+
+		if (plcHandler.getPlcState() == PlcState.Started)
+			notifyPlcConnectionState(ConnectionState.Disconnected);
+		plcHandler.setGlobalListener(
 				(address, value) -> getExecutorService(THREAD_POOL).submit(() -> notifyServer(address, value)));
+
+		delayConnect(INITIAL_DELAY, TimeUnit.SECONDS);
 
 		super.start();
 	}

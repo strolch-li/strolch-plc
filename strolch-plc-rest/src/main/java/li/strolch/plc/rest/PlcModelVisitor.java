@@ -45,11 +45,15 @@ public class PlcModelVisitor {
 	}
 
 	public static StrolchRootElementToJsonVisitor plcAddressToJson() {
-		return toJsonFlat();
+		return toJsonFlat().resourceHook((address, addressJ) -> {
+			addressJ.addProperty(PARAM_VALUE_TYPE, address.getParameter(PARAM_VALUE).getValueType().getType());
+		});
 	}
 
 	public static StrolchRootElementToJsonVisitor plcTelegramToJson() {
-		return toJsonFlat();
+		return toJsonFlat().resourceHook((address, addressJ) -> {
+			addressJ.addProperty(PARAM_VALUE_TYPE, address.getParameter(PARAM_VALUE).getValueType().getType());
+		});
 	}
 
 	public static JsonObject plcAddressToJson(PlcAddress plcAddress) {
@@ -62,6 +66,7 @@ public class PlcModelVisitor {
 		addressJ.addProperty(Tags.Json.ID, plcAddress.address);
 		addressJ.add(Tags.Json.VALUE, plcAddress.valueType.valueToJson(plcAddress.defaultValue));
 		addressJ.addProperty(Tags.Json.TYPE, plcAddress.valueType.name());
+		addressJ.addProperty(PARAM_VALUE_TYPE, plcAddress.valueType.name());
 
 		return addressJ;
 	}

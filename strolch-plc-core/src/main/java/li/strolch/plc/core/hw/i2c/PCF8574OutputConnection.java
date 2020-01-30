@@ -7,12 +7,12 @@ import static li.strolch.utils.helper.StringHelper.toHexString;
 
 import java.util.*;
 
-import li.strolch.plc.model.ConnectionState;
-import li.strolch.plc.core.hw.Plc;
-import li.strolch.plc.core.hw.PlcConnection;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
+import li.strolch.plc.core.hw.Plc;
+import li.strolch.plc.core.hw.PlcConnection;
+import li.strolch.plc.model.ConnectionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +21,13 @@ public class PCF8574OutputConnection extends PlcConnection {
 	private static final Logger logger = LoggerFactory.getLogger(PCF8574OutputConnection.class);
 
 	private int i2cBusNr;
-	private byte state;
-	private byte address;
-	private I2CDevice outputDev;
+	private boolean inverted;
 
-	private Map<String, Integer> positionsByAddress;
+	private byte[] addresses;
+	private I2CDevice[] outputDevices;
+	private byte[] states;
+
+	private Map<String, int[]> positionsByAddress;
 
 	public PCF8574OutputConnection(Plc plc, String id) {
 		super(plc, id);
@@ -36,19 +38,27 @@ public class PCF8574OutputConnection extends PlcConnection {
 
 		if (!parameters.containsKey("i2cBus"))
 			throw new IllegalArgumentException("Missing param i2cBus");
-		if (!parameters.containsKey("address"))
-			throw new IllegalArgumentException("Missing param address");
+		if (!parameters.containsKey("addresses"))
+			throw new IllegalArgumentException("Missing param addresses");
 
 		this.i2cBusNr = (int) parameters.get("i2cBus");
-		String addressS = (String) parameters.get("address");
-		this.address = Integer.decode(addressS).byteValue();
+		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
 
-		Map<String, Integer> positionsByAddress = new HashMap<>();
-		for (int i = 0; i < 8; i++)
-			positionsByAddress.put(this.id + "." + i, i);
+		@SuppressWarnings("unchecked")
+		List<Integer> addressList = (List<Integer>) parameters.get("addresses");
+		this.addresses = new byte[addressList.size()];
+		for (int i = 0; i < addressList.size(); i++) {
+			this.addresses[i] = addressList.get(i).byteValue();
+		}
+
+		Map<String, int[]> positionsByAddress = new HashMap<>();
+		for (int i = 0; i < this.addresses.length; i++) {
+			for (int j = 0; j < 8; j++)
+				positionsByAddress.put(this.id + "." + i + "." + j, new int[] { i, j });
+		}
 		this.positionsByAddress = Collections.unmodifiableMap(positionsByAddress);
 
-		logger.info("Configured PCF8574 Output on I2C address " + addressS);
+		logger.info("Configured PCF8574 Output on I2C addresses " + Arrays.toString(this.addresses));
 	}
 
 	@Override
@@ -63,14 +73,22 @@ public class PCF8574OutputConnection extends PlcConnection {
 		// initialize
 		try {
 			I2CBus i2cBus = I2CFactory.getInstance(i2cBusNr);
-			this.outputDev = i2cBus.getDevice(address);
 
-			// default is all outputs off, i.e. 1
-			this.state = (byte) 0xff;
-			this.outputDev.write(this.state);
+			this.outputDevices = new I2CDevice[this.addresses.length];
+			this.states = new byte[this.addresses.length];
+			byte[] bytes = this.addresses;
+			for (int i = 0; i < bytes.length; i++) {
+				byte address = bytes[i];
 
-			logger.info("Connected to I2C Device at address 0x" + toHexString(this.address) + " on I2C Bus "
-					+ this.i2cBusNr);
+				this.outputDevices[i] = i2cBus.getDevice(address);
+
+				// default is all outputs off, i.e. 1
+				this.states[i] = (byte) 0xff;
+				this.outputDevices[i].write(this.states[i]);
+
+				logger.info("Connected to I2C Device at address 0x" + toHexString(address) + " on I2C Bus "
+						+ this.i2cBusNr);
+			}
 
 			logger.info(this.id + ": Is now connected.");
 			this.connectionState = ConnectionState.Connected;
@@ -78,20 +96,20 @@ public class PCF8574OutputConnection extends PlcConnection {
 			this.plc.notifyConnectionStateChanged(this);
 
 		} catch (Exception e) {
-			logger.error("Failed to connect to I2C Bus " + this.i2cBusNr + " and address " + toHexString(this.address),
-					e);
+			logger.error("Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses " + Arrays
+					.toString(this.addresses), e);
 
 			this.connectionState = ConnectionState.Failed;
-			this.connectionStateMsg =
-					"Failed to connect to I2C Bus " + this.i2cBusNr + " and address " + toHexString(this.address) + ": "
-							+ getExceptionMessageWithCauses(e);
+			this.connectionStateMsg = "Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses " + Arrays
+					.toString(this.addresses) + ": " + getExceptionMessageWithCauses(e);
 			this.plc.notifyConnectionStateChanged(this);
 		}
 	}
 
 	@Override
 	public void disconnect() {
-		this.outputDev = null;
+		this.outputDevices = null;
+		this.states = null;
 
 		this.connectionState = ConnectionState.Disconnected;
 		this.connectionStateMsg = "-";
@@ -107,21 +125,28 @@ public class PCF8574OutputConnection extends PlcConnection {
 	public void send(String address, Object value) {
 		assertConnected();
 
-		Integer pos = this.positionsByAddress.get(address);
+		int[] pos = this.positionsByAddress.get(address);
 		if (pos == null)
 			throw new IllegalStateException("Address is illegal " + address);
 
+		int device = pos[0];
+		int pin = pos[1];
+
 		boolean high = (boolean) value;
+
+		// see if we need to invert
+		if (this.inverted)
+			high = !high;
 
 		try {
 			byte newState;
 			if (high)
-				newState = clearBit(this.state, pos);
+				newState = clearBit(this.states[device], pin);
 			else
-				newState = setBit(this.state, pos);
+				newState = setBit(this.states[device], pin);
 
-			this.outputDev.write(newState);
-			this.state = newState;
+			this.outputDevices[device].write(newState);
+			this.states[device] = newState;
 		} catch (Exception e) {
 			this.connectionState = ConnectionState.Failed;
 			this.connectionStateMsg =

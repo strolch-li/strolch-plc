@@ -15,7 +15,7 @@
     </Resource>
 
     <!--
-        Simple Boolean connection
+        Virtual connections
     -->
     <Resource Id="virtualString" Name="Virtual String PLC Connection" Type="PlcConnection">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
