@@ -14,6 +14,7 @@ public class PlcConstants {
 	public static final String BAG_TELEGRAMS = "telegrams";
 
 	public static final String PARAM_ACTION = "action";
+	public static final String PARAM_DESCRIPTION = "description";
 	public static final String PARAM_ADDRESS = "address";
 	public static final String PARAM_ADDRESS_TYPE = "addressType";
 	public static final String PARAM_ADDRESSES = "addresses";
