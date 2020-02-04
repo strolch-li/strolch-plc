@@ -32,8 +32,7 @@ class PlcConfigurator {
 		Plc plc = ClassHelper.instantiateClass(plcClassName);
 
 		// instantiate all PlcConnections
-		new ResourceSearch().types(TYPE_PLC_CONNECTION).search(tx)
-				.forEach(connection -> configureConnection(plc, connection));
+		new ResourceSearch().types(TYPE_PLC_CONNECTION).search(tx).forEach(c -> configureConnection(plc, c));
 
 		Map<String, PlcAddress> plcAddressesByHwAddress = new HashMap<>();
 
@@ -41,20 +40,31 @@ class PlcConfigurator {
 		List<Resource> logicalDevices = new ResourceSearch().types(TYPE_PLC_LOGICAL_DEVICE).search(tx).toList();
 
 		// first all addresses
-		logicalDevices.forEach(logicalDevice -> {
-			logger.info("Configuring PlcAddresses for PlcLogicalDevice " + logicalDevice.getId() + "...");
-			tx.getResourcesByRelation(logicalDevice, PARAM_ADDRESSES, true).forEach(
-					addressRes -> buildPlcAddress(plc, plcAddresses, addressesToResourceId, plcAddressesByHwAddress,
-							addressRes));
-		});
+		for (Resource resource : logicalDevices) {
+			logger.info("Configuring PlcAddresses for PlcLogicalDevice " + resource.getId() + "...");
+			List<Resource> addresses = tx.getResourcesByRelation(resource, PARAM_ADDRESSES, true);
+			if (addresses.isEmpty()) {
+				logger.warn("\tNo PlcAddresses for " + resource.getId());
+			} else {
+				for (Resource addressRes : addresses) {
+					buildPlcAddress(plc, plcAddresses, addressesToResourceId, plcAddressesByHwAddress, addressRes);
+				}
+			}
+		}
 
 		// now telegrams
-		logicalDevices.forEach(logicalDevice -> {
+		for (Resource logicalDevice : logicalDevices) {
 			logger.info("Configuring PlcTelegrams for PlcLogicalDevice " + logicalDevice.getId() + "...");
-			tx.getResourcesByRelation(logicalDevice, PARAM_TELEGRAMS, true).forEach(
-					telegramRes -> buildTelegramPlcAddress(plcAddresses, plcTelegrams, addressesToResourceId,
-							plcAddressesByHwAddress, telegramRes));
-		});
+			List<Resource> telegrams = tx.getResourcesByRelation(logicalDevice, PARAM_TELEGRAMS, true);
+			if (telegrams.isEmpty()) {
+				logger.warn("\tNo PlcTelegrams for " + logicalDevice.getId());
+			} else {
+				for (Resource telegramRes : telegrams) {
+					buildTelegramPlcAddress(plcAddresses, plcTelegrams, addressesToResourceId, plcAddressesByHwAddress,
+							telegramRes);
+				}
+			}
+		}
 
 		return plc;
 	}
@@ -83,7 +93,6 @@ class PlcConfigurator {
 
 		PlcAddress plcAddress = new PlcAddress(PlcAddressType.Notification, false, resource, action, address,
 				valueP.getValueType(), valueP.getValue(), inverted);
-		logger.info("Adding PlcAddress " + plcAddress + "...");
 		plc.registerNotificationMapping(plcAddress);
 
 		PlcAddress replaced = plcAddresses.addElement(resource, action, plcAddress);

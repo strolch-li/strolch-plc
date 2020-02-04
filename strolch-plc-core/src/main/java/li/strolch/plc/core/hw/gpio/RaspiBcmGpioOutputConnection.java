@@ -13,7 +13,8 @@ import com.pi4j.io.gpio.*;
 public class RaspiBcmGpioOutputConnection extends PlcConnection {
 
 	private List<Integer> outputBcmAddresses;
-	private Map<String, GpioPinDigitalOutput> pinsByAddress;
+	private Map<String, Pin> pinsByAddress;
+	private Map<String, GpioPinDigitalOutput> gpioPinsByAddress;
 	private boolean inverted;
 
 	public RaspiBcmGpioOutputConnection(Plc plc, String id) {
@@ -25,6 +26,17 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 		@SuppressWarnings("unchecked")
 		List<Integer> bcmOutputPins = (List<Integer>) parameters.get("bcmOutputPins");
 		this.outputBcmAddresses = bcmOutputPins;
+
+		this.pinsByAddress = new HashMap<>();
+		for (Integer address : this.outputBcmAddresses) {
+			Pin pin = RaspiBcmPin.getPinByAddress(address);
+			if (pin == null)
+				throw new IllegalArgumentException("RaspiBcmPin " + address + " does not exist!");
+			String key = this.id + "." + address;
+			this.pinsByAddress.put(key, pin);
+			logger.info("Registered address " + key + " for RaspiBcmPin " + pin);
+		}
+
 		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
 		logger.info(
 				"Configured Raspi BCM GPIO Output for Pins " + this.outputBcmAddresses.stream().map(Object::toString)
@@ -36,14 +48,12 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 		try {
 			GpioController gpioController = PlcGpioController.getInstance();
 
-			this.pinsByAddress = new HashMap<>();
-			for (Integer address : this.outputBcmAddresses) {
-				Pin pin = RaspiBcmPin.getPinByAddress(address);
-				if (pin == null)
-					throw new IllegalArgumentException("RaspiBcmPin " + address + " does not exist!");
+			this.gpioPinsByAddress = new HashMap<>();
+			for (String address : this.pinsByAddress.keySet()) {
+				Pin pin = this.pinsByAddress.get(address);
 				GpioPinDigitalOutput outputPin = gpioController.provisionDigitalOutputPin(pin);
 				String key = this.id + "." + address;
-				this.pinsByAddress.put(key, outputPin);
+				this.gpioPinsByAddress.put(key, outputPin);
 				logger.info("Registered address " + key + " for RaspiBcmPin " + outputPin);
 			}
 
@@ -63,10 +73,10 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 	public void disconnect() {
 		try {
 			GpioController gpioController = PlcGpioController.getInstance();
-			for (GpioPinDigitalOutput outputPin : this.pinsByAddress.values()) {
+			for (GpioPinDigitalOutput outputPin : this.gpioPinsByAddress.values()) {
 				gpioController.unprovisionPin(outputPin);
 			}
-			this.pinsByAddress.clear();
+			this.gpioPinsByAddress.clear();
 		} catch (Error e) {
 			logger.error("Failed to disconnect " + this.id, e);
 		}
@@ -83,7 +93,7 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 		if (this.inverted)
 			high = !high;
 
-		GpioPinDigitalOutput outputPin = this.pinsByAddress.get(address);
+		GpioPinDigitalOutput outputPin = this.gpioPinsByAddress.get(address);
 		if (outputPin == null)
 			throw new IllegalArgumentException("Output pin with address " + address + " does not exist!");
 

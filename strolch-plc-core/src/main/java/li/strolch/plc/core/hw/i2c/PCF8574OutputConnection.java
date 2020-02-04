@@ -4,6 +4,7 @@ import static li.strolch.utils.helper.ByteHelper.clearBit;
 import static li.strolch.utils.helper.ByteHelper.setBit;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 import static li.strolch.utils.helper.StringHelper.toHexString;
+import static li.strolch.utils.helper.StringHelper.toPrettyHexString;
 
 import java.util.*;
 
@@ -58,7 +59,7 @@ public class PCF8574OutputConnection extends PlcConnection {
 		}
 		this.positionsByAddress = Collections.unmodifiableMap(positionsByAddress);
 
-		logger.info("Configured PCF8574 Output on I2C addresses " + Arrays.toString(this.addresses));
+		logger.info("Configured PCF8574 Output on I2C addresses 0x " + toPrettyHexString(this.addresses));
 	}
 
 	@Override
@@ -96,12 +97,13 @@ public class PCF8574OutputConnection extends PlcConnection {
 			this.plc.notifyConnectionStateChanged(this);
 
 		} catch (Exception e) {
-			logger.error("Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses " + Arrays
-					.toString(this.addresses), e);
+			logger.error("Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses 0x " + toPrettyHexString(
+					this.addresses), e);
 
 			this.connectionState = ConnectionState.Failed;
-			this.connectionStateMsg = "Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses " + Arrays
-					.toString(this.addresses) + ": " + getExceptionMessageWithCauses(e);
+			this.connectionStateMsg =
+					"Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses 0x " + toPrettyHexString(
+							this.addresses) + ": " + getExceptionMessageWithCauses(e);
 			this.plc.notifyConnectionStateChanged(this);
 		}
 	}
