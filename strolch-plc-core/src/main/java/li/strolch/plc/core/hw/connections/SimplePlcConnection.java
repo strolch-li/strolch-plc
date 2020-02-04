@@ -16,7 +16,7 @@ public abstract class SimplePlcConnection extends PlcConnection {
 
 	@Override
 	public void initialize(Map<String, Object> parameters) {
-		logger.info("Configured " + getClass().getSimpleName() + this.id);
+		logger.info("Configured " + getClass().getSimpleName() + " " + this.id);
 	}
 
 	@Override
