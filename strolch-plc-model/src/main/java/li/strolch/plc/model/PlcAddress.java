@@ -7,7 +7,6 @@ import li.strolch.model.StrolchValueType;
 public class PlcAddress {
 
 	public final PlcAddressType type;
-	public final boolean virtual;
 
 	public final String resource;
 	public final String action;
@@ -17,10 +16,9 @@ public class PlcAddress {
 	public final Object defaultValue;
 	public final boolean inverted;
 
-	public PlcAddress(PlcAddressType type, boolean virtual, String resource, String action, String address,
+	public PlcAddress(PlcAddressType type, String resource, String action, String address,
 			StrolchValueType valueType, Object defaultValue, boolean inverted) {
 		this.type = type;
-		this.virtual = virtual;
 		this.resource = resource.intern();
 		this.action = action.intern();
 		this.address = address.intern();

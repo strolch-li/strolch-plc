@@ -11,6 +11,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -45,13 +47,13 @@ public class PlcLogicalDevicesResource {
 			MapOfLists<String, Resource> devicesByGroup = new PlcLogicalDeviceSearch() //
 					.stringQuery(query) //
 					.search(tx) //
-					.orderBy(comparing((Resource o) -> o.getParameter(PARAM_GROUP).getValue())
-							.thenComparing(o -> o.getParameter(PARAM_INDEX).getValue())) //
+					.orderBy(comparing((Resource o) -> o.getParameter(PARAM_INDEX).getValue())) //
 					.toMapOfLists(r -> r.hasParameter(PARAM_GROUP) ?
 							r.getParameter(PARAM_GROUP).getValueAsString() :
 							"default");
 
-			for (String group : devicesByGroup.keySet()) {
+			Set<String> groups = new TreeSet<>(devicesByGroup.keySet());
+			for (String group : groups) {
 				List<Resource> devices = devicesByGroup.getList(group);
 				JsonObject groupJ = new JsonObject();
 				groupJ.addProperty(Tags.Json.NAME, group);

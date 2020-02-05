@@ -52,9 +52,8 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 			for (String address : this.pinsByAddress.keySet()) {
 				Pin pin = this.pinsByAddress.get(address);
 				GpioPinDigitalOutput outputPin = gpioController.provisionDigitalOutputPin(pin);
-				String key = this.id + "." + address;
-				this.gpioPinsByAddress.put(key, outputPin);
-				logger.info("Registered address " + key + " for RaspiBcmPin " + outputPin);
+				this.gpioPinsByAddress.put(address, outputPin);
+				logger.info("Provisioned output pin  " + outputPin + " for address " + address);
 			}
 
 			logger.info(this.id + ": Is now connected.");

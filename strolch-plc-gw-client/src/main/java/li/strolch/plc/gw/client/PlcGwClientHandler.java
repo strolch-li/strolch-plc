@@ -361,6 +361,13 @@ public class PlcGwClientHandler extends StrolchComponent {
 		logger.info("Session closed with ID " + session.getId() + " due to " + closeReason.getCloseCode() + " "
 				+ closeReason.getReasonPhrase() + ". Reconnecting in " + RETRY_DELAY + "s.");
 		this.authenticated = false;
+
+		if (this.gwSession != null) {
+			closeBrokenGwSessionUpdateState(closeReason.getReasonPhrase(),
+					"Session closed with ID " + session.getId() + " due to " + closeReason.getCloseCode() + " "
+							+ closeReason.getReasonPhrase() + ". Reconnecting in " + RETRY_DELAY + "s.");
+		}
+
 		delayConnect(RETRY_DELAY, TimeUnit.SECONDS);
 	}
 

@@ -1,22 +1,18 @@
 package li.strolch.plc.rest;
 
-import static java.util.Comparator.comparing;
-import static li.strolch.rest.StrolchRestfulConstants.DATA;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import li.strolch.plc.model.PlcAddress;
-import li.strolch.plc.core.search.PlcVirtualAddressesSearch;
 import li.strolch.plc.core.service.SendPlcAddressActionService;
 import li.strolch.privilege.model.Certificate;
-import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.rest.RestfulStrolchComponent;
 import li.strolch.rest.StrolchRestfulConstants;
 import li.strolch.rest.helper.ResponseUtil;
@@ -26,23 +22,6 @@ import li.strolch.service.api.ServiceResult;
 
 @Path("plc/addresses")
 public class PlcAddresses {
-
-	@GET
-	@Path("virtual")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getVirtualAddresses(@Context HttpServletRequest request, @QueryParam("query") String query) {
-
-		Certificate cert = (Certificate) request.getAttribute(StrolchRestfulConstants.STROLCH_CERTIFICATE);
-		PrivilegeContext ctx = RestfulStrolchComponent.getInstance().getPrivilegeHandler().validate(cert);
-
-		JsonArray result = new PlcVirtualAddressesSearch()
-				.search(RestfulStrolchComponent.getInstance().getAgent().getContainer(), ctx)
-				.orderBy(comparing((PlcAddress p) -> p.resource).thenComparing(p -> p.action))
-				.map(PlcModelVisitor::plcAddressToJson).asStream()
-				.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
-
-		return ResponseUtil.toResponse(DATA, result);
-	}
 
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)

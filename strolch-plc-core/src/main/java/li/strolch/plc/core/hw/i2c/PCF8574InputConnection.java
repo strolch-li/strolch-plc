@@ -9,16 +9,16 @@ import static li.strolch.utils.helper.StringHelper.toPrettyHexString;
 import java.io.IOException;
 import java.util.*;
 
-import li.strolch.plc.model.ConnectionState;
-import li.strolch.plc.core.hw.Plc;
-import li.strolch.plc.core.hw.PlcConnection;
-import li.strolch.plc.core.hw.gpio.PlcGpioController;
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
+import li.strolch.plc.core.hw.Plc;
+import li.strolch.plc.core.hw.PlcConnection;
+import li.strolch.plc.core.hw.gpio.PlcGpioController;
+import li.strolch.plc.model.ConnectionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +26,7 @@ public class PCF8574InputConnection extends PlcConnection {
 
 	private static final Logger logger = LoggerFactory.getLogger(PCF8574InputConnection.class);
 
+	private boolean verbose;
 	private int i2cBusNr;
 	private boolean inverted;
 
@@ -55,6 +56,7 @@ public class PCF8574InputConnection extends PlcConnection {
 			throw new IllegalArgumentException("Missing param interruptPinPullResistance");
 		if (!parameters.containsKey("interruptBcmPinAddress"))
 			throw new IllegalArgumentException("Missing param interruptBcmPinAddress");
+		this.verbose = parameters.containsKey("verbose") && (Boolean) parameters.get("verbose");
 
 		this.i2cBusNr = (int) parameters.get("i2cBus");
 		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
@@ -79,6 +81,8 @@ public class PCF8574InputConnection extends PlcConnection {
 
 		logger.info("Configured PCF8574 Input on I2C addresses 0x " + toPrettyHexString(this.addresses)
 				+ " on BCM Pin interrupt trigger " + this.interruptBcmPinAddress);
+		if (this.verbose)
+			logger.info("Verbose enabled for connection " + this.id);
 	}
 
 	@Override
@@ -97,7 +101,7 @@ public class PCF8574InputConnection extends PlcConnection {
 			this.inputDevices = new I2CDevice[this.addresses.length];
 			for (int i = 0; i < this.addresses.length; i++) {
 				this.inputDevices[i] = i2cBus.getDevice(this.addresses[i]);
-				logger.info("Connected to I2C Device at address " + toHexString(this.addresses[i]) + " on I2C Bus "
+				logger.info("Connected to I2C Device at address 0x" + toHexString(this.addresses[i]) + " on I2C Bus "
 						+ this.i2cBusNr);
 			}
 
@@ -113,18 +117,14 @@ public class PCF8574InputConnection extends PlcConnection {
 			return;
 		}
 
-		try {
-			readInitialState();
-		} catch (Exception e) {
+		if (!readInitialState()) {
 			logger.error("Failed to read initial values from I2C Bus " + this.i2cBusNr + " and addresses 0x "
-					+ toPrettyHexString(this.addresses), e);
-
-			this.connectionState = ConnectionState.Failed;
+					+ toPrettyHexString(this.addresses));
+			this.connectionState = ConnectionState.Connected;
 			this.connectionStateMsg =
 					"Failed to read initial values from I2C Bus " + this.i2cBusNr + " and addresses 0x "
-							+ toPrettyHexString(this.addresses) + ": " + getExceptionMessageWithCauses(e);
+							+ toPrettyHexString(this.addresses);
 			this.plc.notifyConnectionStateChanged(this);
-			return;
 		}
 
 		// register interrupt listener
@@ -162,7 +162,6 @@ public class PCF8574InputConnection extends PlcConnection {
 
 	@Override
 	public void disconnect() {
-
 		if (this.interruptGpioPin != null) {
 			this.interruptGpioPin.removeAllListeners();
 			PlcGpioController.getInstance().unprovisionPin(this.interruptGpioPin);
@@ -176,6 +175,9 @@ public class PCF8574InputConnection extends PlcConnection {
 	}
 
 	private void handleInterrupt(GpioPinDigitalStateChangeEvent event) {
+		if (this.verbose)
+			logger.info(event.getPin() + " " + event.getState() + " " + event.getEdge());
+
 		try {
 			if (event.getState() == this.interruptChangeState)
 				handleNewState();
@@ -189,13 +191,16 @@ public class PCF8574InputConnection extends PlcConnection {
 
 	private void handleNewState() throws IOException {
 
-		for (int i = 0; i < this.addresses.length; i++) {
+		for (int i = 0; i < this.inputDevices.length; i++) {
+			I2CDevice i2CDevice = this.inputDevices[i];
+			byte data = (byte) i2CDevice.read();
 
-			byte data = (byte) this.inputDevices[i].read();
-			boolean newState;
+			if (this.verbose)
+				logger.info(
+						"Address 0x" + toHexString((byte) i2CDevice.getAddress()) + " has new state " + asBinary(data));
 
 			for (int j = 0; j < 8; j++) {
-				newState = isBitSet(data, j);
+				boolean newState = isBitSet(data, j);
 				if (this.inverted)
 					newState = !newState;
 
@@ -207,25 +212,36 @@ public class PCF8574InputConnection extends PlcConnection {
 		}
 	}
 
-	private void readInitialState() throws IOException {
+	private boolean readInitialState() {
 
-		this.states = new boolean[this.addresses.length][];
-		for (int i = 0; i < this.addresses.length; i++) {
+		boolean ok = true;
 
-			byte data = (byte) this.inputDevices[i].read();
-			logger.info("Initial Value for address " + toHexString(this.addresses[i]) + " is " + asBinary(data));
+		this.states = new boolean[this.inputDevices.length][];
 
-			this.states[i] = new boolean[8];
-			for (int j = 0; j < 8; j++) {
-				boolean bitSet = isBitSet(data, j);
+		for (int i = 0; i < this.inputDevices.length; i++) {
+			I2CDevice i2CDevice = this.inputDevices[i];
+			try {
+				byte data = (byte) i2CDevice.read();
+				logger.info("Initial Value for address 0x" + toHexString(this.addresses[i]) + " is " + asBinary(data));
 
-				if (this.inverted)
-					bitSet = !bitSet;
+				this.states[i] = new boolean[8];
+				for (int j = 0; j < 8; j++) {
+					boolean bitSet = isBitSet(data, j);
 
-				this.states[i][j] = bitSet;
-				this.plc.notify(this.id + "." + i + "." + j, this.states[i][j]);
+					if (this.inverted)
+						bitSet = !bitSet;
+
+					this.states[i][j] = bitSet;
+					this.plc.notify(this.id + "." + i + "." + j, this.states[i][j]);
+				}
+			} catch (Exception e) {
+				ok = false;
+				logger.error("Failed to read initial state for address 0x" + toHexString((byte) i2CDevice.getAddress()),
+						e);
 			}
 		}
+
+		return ok;
 	}
 
 	@Override

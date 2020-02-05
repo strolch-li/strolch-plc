@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import li.strolch.plc.model.ConnectionState;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressType;
 import li.strolch.utils.collections.MapOfLists;
@@ -53,48 +54,55 @@ public class DefaultPlc implements Plc {
 	public void notify(String address, Object value) {
 		logger.info("Update for " + address + " with value " + value);
 
-		PlcAddress key = this.notificationMappings.get(address);
-		if (key == null) {
+		PlcAddress plcAddress = this.notificationMappings.get(address);
+		if (plcAddress == null) {
 			logger.warn("No mapping to PlcAddress for hwAddress " + address);
 			return;
 		}
 
-		List<PlcListener> listeners = this.listeners.getList(key);
+		List<PlcListener> listeners = this.listeners.getList(plcAddress);
 		if (listeners == null || listeners.isEmpty()) {
-			logger.warn("No listeners for key " + key);
-			return;
-		}
-
-		for (PlcListener listener : listeners) {
-			try {
-				listener.handleNotification(key, value);
-			} catch (Exception e) {
-				logger.error("Failed to notify listener " + listener + " for key " + key, e);
+			logger.warn("No listeners for key " + plcAddress);
+		} else {
+			for (PlcListener listener : listeners) {
+				try {
+					listener.handleNotification(plcAddress, value);
+				} catch (Exception e) {
+					logger.error("Failed to notify listener " + listener + " for address " + plcAddress, e);
+				}
 			}
 		}
 
 		if (this.globalListener != null)
-			this.globalListener.handleNotification(key, value);
+			this.globalListener.handleNotification(plcAddress, value);
 	}
 
 	@Override
-	public void send(PlcAddress address) {
-		PlcConnection connection = this.connectionsByAddress.get(address.address);
-		if (connection == null)
-			throw new IllegalStateException(
-					"No PlcConnection exists for key " + address + " with address " + address.address);
-
-		connection.send(address.address, address.defaultValue);
+	public void send(PlcAddress plcAddress) {
+		logger.info("Sending " + plcAddress.resource + "-" + plcAddress.action + ": " + plcAddress.defaultValue
+				+ " (default)");
+		validateConnection(plcAddress).send(plcAddress.address, plcAddress.defaultValue);
+		notify(plcAddress.address, plcAddress.defaultValue);
 	}
 
 	@Override
-	public void send(PlcAddress address, Object value) {
-		PlcConnection connection = this.connectionsByAddress.get(address.address);
-		if (connection == null)
-			throw new IllegalStateException(
-					"No PlcConnection exists for key " + address + " with address " + address.address);
+	public void send(PlcAddress plcAddress, Object value) {
+		logger.info("Sending " + plcAddress.resource + "-" + plcAddress.action + ": " + value);
+		validateConnection(plcAddress).send(plcAddress.address, value);
+		notify(plcAddress.address, value);
+	}
 
-		connection.send(address.address, value);
+	private PlcConnection validateConnection(PlcAddress plcAddress) {
+		PlcConnection connection = getConnection(plcAddress);
+		if (connection.getState() == ConnectionState.Connected)
+			return connection;
+
+		connection.connect();
+
+		if (connection.getState() == ConnectionState.Connected)
+			return connection;
+
+		throw new IllegalStateException("PlcConnection " + connection.getId() + " is disconnected for " + plcAddress);
 	}
 
 	@Override

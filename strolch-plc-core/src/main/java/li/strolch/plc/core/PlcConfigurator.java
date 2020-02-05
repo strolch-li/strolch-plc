@@ -91,7 +91,7 @@ class PlcConfigurator {
 				addressRes.hasParameter(PARAM_INVERTED) && ((boolean) addressRes.getParameter(PARAM_INVERTED, true)
 						.getValue());
 
-		PlcAddress plcAddress = new PlcAddress(PlcAddressType.Notification, false, resource, action, address,
+		PlcAddress plcAddress = new PlcAddress(PlcAddressType.Notification, resource, action, address,
 				valueP.getValueType(), valueP.getValue(), inverted);
 		plc.registerNotificationMapping(plcAddress);
 
@@ -124,7 +124,7 @@ class PlcConfigurator {
 							+ existingAddress.address + " has type " + existingAddress.valueType);
 		}
 
-		PlcAddress telegramAddress = new PlcAddress(PlcAddressType.Telegram, false, resource, action, address,
+		PlcAddress telegramAddress = new PlcAddress(PlcAddressType.Telegram, resource, action, address,
 				valueP.getValueType(), valueP.getValue(), false);
 		logger.info("Adding PlcTelegram " + telegramAddress + "...");
 

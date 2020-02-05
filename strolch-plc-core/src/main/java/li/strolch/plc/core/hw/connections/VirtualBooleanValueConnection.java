@@ -12,6 +12,6 @@ public class VirtualBooleanValueConnection extends SimplePlcConnection {
 	public void send(String address, Object value) {
 		boolean bool = (boolean) value;
 		logger.info("Setting address " + this.id + " to " + bool);
-		this.plc.notify(this.id, bool);
+		// this.plc.notify(this.id, bool);
 	}
 }

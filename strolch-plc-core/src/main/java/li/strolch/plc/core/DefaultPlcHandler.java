@@ -6,7 +6,6 @@ import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 import static li.strolch.utils.helper.StringHelper.formatNanoDuration;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +18,6 @@ import li.strolch.model.parameter.StringParameter;
 import li.strolch.model.visitor.SetParameterValueVisitor;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.*;
-import li.strolch.plc.model.ConnectionState;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressType;
 import li.strolch.plc.model.PlcState;
@@ -34,7 +32,6 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	private Plc plc;
 	private PlcState plcState;
 	private String plcStateMsg;
-	private Map<PlcAddress, PlcListener> virtualListeners;
 	private MapOfMaps<String, String, PlcAddress> plcAddresses;
 	private MapOfMaps<String, String, PlcAddress> plcTelegrams;
 	private Map<PlcAddress, String> addressesToResourceId;
@@ -86,7 +83,6 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 		this.plcState = PlcState.Initial;
 		this.plcStateMsg = PlcState.Initial.name();
-		this.virtualListeners = new HashMap<>();
 		this.plcAddresses = new MapOfMaps<>();
 		this.plcTelegrams = new MapOfMaps<>();
 		this.addressesToResourceId = new HashMap<>();
@@ -270,45 +266,6 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	@Override
-	public Collection<PlcAddress> getVirtualAddresses() {
-		return this.virtualListeners.keySet();
-	}
-
-	@Override
-	public void registerVirtualListener(String resource, String action, PlcListener listener,
-			StrolchValueType valueType, Object defaultValue) {
-
-		if (this.plcAddresses.containsElement(resource, action))
-			throw new IllegalStateException(
-					"There already is a virtual listener registered for key " + resource + "-" + action);
-
-		PlcAddress plcAddress = new PlcAddress(PlcAddressType.Notification, true, resource, action,
-				listener.getClass().getSimpleName(), valueType, defaultValue, false);
-
-		this.plcAddresses.addElement(resource, action, plcAddress);
-		this.virtualListeners.put(plcAddress, listener);
-		logger.info("Registered virtual listener for " + resource + "-" + action);
-	}
-
-	@Override
-	public void unregisterVirtualListener(String resource, String action) {
-		PlcAddress plcAddress = this.plcAddresses.getElement(resource, action);
-		if (plcAddress == null) {
-			logger.error("No PlcListener registered for " + resource + " " + action);
-			return;
-		}
-
-		PlcListener listener = this.virtualListeners.remove(plcAddress);
-		if (listener == null) {
-			logger.error("No PlcListener registered for " + resource + " " + action);
-			return;
-		}
-
-		this.plcAddresses.removeElement(resource, action);
-		logger.info("Unregistered listener " + resource + " " + action);
-	}
-
-	@Override
 	public void setGlobalListener(PlcListener listener) {
 		this.globalListener = listener;
 		if (this.plc != null)
@@ -339,17 +296,10 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		if (plcAddress == null)
 			throw new IllegalStateException("No PlcTelegram exists for " + resource + "-" + action);
 
-		if (plcAddress.virtual) {
-			this.virtualListeners.get(plcAddress).handleNotification(plcAddress, plcAddress.defaultValue);
-			return;
-		}
-
 		if (plcAddress.defaultValue == null)
 			throw new IllegalStateException("Can not send PlcAddress as no default value set for " + plcAddress);
 
-		logger.info("Sending " + resource + "-" + action + ": " + plcAddress.defaultValue + " (default)");
-		PlcConnection connection = validateConnection(plcAddress);
-		connection.send(plcAddress.address, plcAddress.defaultValue);
+		this.plc.send(plcAddress);
 		asyncStateUpdate(plcAddress, plcAddress.defaultValue);
 	}
 
@@ -359,14 +309,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		if (plcAddress == null)
 			throw new IllegalStateException("No PlcTelegram exists for " + resource + "-" + action);
 
-		if (plcAddress.virtual) {
-			this.virtualListeners.get(plcAddress).handleNotification(plcAddress, value);
-			return;
-		}
-
-		logger.info("Sending " + resource + "-" + action + ": " + value);
-		PlcConnection connection = validateConnection(plcAddress);
-		connection.send(plcAddress.address, value);
+		this.plc.send(plcAddress, value);
 		asyncStateUpdate(plcAddress, value);
 	}
 
@@ -380,26 +323,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			throw new IllegalStateException(
 					"Can not notify PlcAddress " + plcAddress + " as it is not a notification!");
 
-		if (plcAddress.virtual) {
-			this.virtualListeners.get(plcAddress).handleNotification(plcAddress, value);
-			this.globalListener.handleNotification(plcAddress, value);
-			return;
-		}
-
 		this.plc.notify(plcAddress.address, value);
-	}
-
-	private PlcConnection validateConnection(PlcAddress plcAddress) {
-		PlcConnection connection = this.plc.getConnection(plcAddress);
-		if (connection.getState() == ConnectionState.Connected)
-			return connection;
-
-		connection.connect();
-
-		if (connection.getState() == ConnectionState.Connected)
-			return connection;
-
-		throw new IllegalStateException("PlcConnection " + connection.getId() + " is disconnected for " + plcAddress);
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package li.strolch.plc.core.hw.i2c;
 
-import static li.strolch.utils.helper.ByteHelper.clearBit;
-import static li.strolch.utils.helper.ByteHelper.setBit;
+import static li.strolch.utils.helper.ByteHelper.*;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 import static li.strolch.utils.helper.StringHelper.toHexString;
 import static li.strolch.utils.helper.StringHelper.toPrettyHexString;
@@ -78,6 +77,7 @@ public class PCF8574OutputConnection extends PlcConnection {
 			this.outputDevices = new I2CDevice[this.addresses.length];
 			this.states = new byte[this.addresses.length];
 			byte[] bytes = this.addresses;
+			boolean ok = true;
 			for (int i = 0; i < bytes.length; i++) {
 				byte address = bytes[i];
 
@@ -85,16 +85,35 @@ public class PCF8574OutputConnection extends PlcConnection {
 
 				// default is all outputs off, i.e. 1
 				this.states[i] = (byte) 0xff;
-				this.outputDevices[i].write(this.states[i]);
+				try {
+					this.outputDevices[i].write(this.states[i]);
+					logger.info(
+							"Set initial value to " + asBinary((byte) 0xff) + " for address 0x" + toHexString(address));
+				} catch (Exception e) {
+					ok = false;
+					logger.error(
+							"Failed to set initial value to " + asBinary((byte) 0xff) + " on I2C Bus " + this.i2cBusNr
+									+ " and address 0x" + toHexString(address), e);
+				}
 
 				logger.info("Connected to I2C Device at address 0x" + toHexString(address) + " on I2C Bus "
 						+ this.i2cBusNr);
 			}
 
-			logger.info(this.id + ": Is now connected.");
-			this.connectionState = ConnectionState.Connected;
-			this.connectionStateMsg = "-";
-			this.plc.notifyConnectionStateChanged(this);
+			if (ok) {
+				logger.info(this.id + ": Is now connected.");
+				this.connectionState = ConnectionState.Connected;
+				this.connectionStateMsg = "-";
+				this.plc.notifyConnectionStateChanged(this);
+			} else {
+				logger.error("Failed to set initial values to " + asBinary((byte) 0xff) + " on I2C Bus " + this.i2cBusNr
+						+ " and addresses 0x " + toPrettyHexString(this.addresses));
+				this.connectionState = ConnectionState.Connected;
+				this.connectionStateMsg =
+						"Failed to read initial values from I2C Bus " + this.i2cBusNr + " and addresses 0x "
+								+ toPrettyHexString(this.addresses);
+				this.plc.notifyConnectionStateChanged(this);
+			}
 
 		} catch (Exception e) {
 			logger.error("Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses 0x " + toPrettyHexString(

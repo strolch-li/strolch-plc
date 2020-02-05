@@ -12,6 +12,6 @@ public class VirtualStringValueConnection extends SimplePlcConnection {
 	public void send(String address, Object value) {
 		String string = (String) value;
 		logger.info("Setting address " + this.id + " to " + string);
-		this.plc.notify(this.id, string);
+		// this.plc.notify(this.id, string);
 	}
 }
