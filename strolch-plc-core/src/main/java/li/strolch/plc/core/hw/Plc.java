@@ -31,4 +31,6 @@ public interface Plc {
 	void notifyConnectionStateChanged(PlcConnection connection);
 
 	void setConnectionStateChangeListener(PlcConnectionStateChangeListener listener);
+
+	void setVerbose(boolean verbose);
 }

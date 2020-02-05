@@ -204,7 +204,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 	}
 
 	public void onWsMessage(String message, Session session) {
-		logger.info(session.getId() + ": Handling message");
+		//logger.info(session.getId() + ": Handling message");
 
 		JsonObject jsonObject = new JsonParser().parse(message).getAsJsonObject();
 		if (!jsonObject.has(PARAM_MESSAGE_TYPE))

@@ -2,6 +2,8 @@ package li.strolch.plc.core;
 
 import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -14,7 +16,6 @@ import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.testbase.runtime.RuntimeMock;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class PlcHandlerTest {
 	private static Certificate cert;
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 		runtimeMock = new RuntimeMock().mockRuntime(TARGET_PATH, SRC_RUNTIME);
 		runtimeMock.startContainer();
 		cert = runtimeMock.loginAdmin();
@@ -47,33 +48,71 @@ public class PlcHandlerTest {
 	}
 
 	@Test
-	public void shouldStartPlcHandler() throws InterruptedException {
+	public void shouldStartPlcHandler() {
 
 		PlcHandler plcHandler = runtimeMock.getComponent(PlcHandler.class);
-		Assert.assertEquals(PlcState.Started, plcHandler.getPlcState());
+		assertEquals(PlcState.Started, plcHandler.getPlcState());
 
 		PlcConnection loggerOutput = plcHandler.getPlc().getConnection("loggerOutput");
-		Assert.assertEquals(ConnectionState.Connected, loggerOutput.getState());
+		assertEquals(ConnectionState.Connected, loggerOutput.getState());
 
 		PlcConnection barcodeReader = plcHandler.getPlc().getConnection("barcodeReader");
-		Assert.assertEquals(ConnectionState.Connected, barcodeReader.getState());
+		assertEquals(ConnectionState.Connected, barcodeReader.getState());
 
 		String plcAddressId = plcHandler.getPlcAddressId("PLC", "Started");
-		Assert.assertEquals("addrPlcStarted", plcAddressId);
+		assertEquals("addrPlcStarted", plcAddressId);
 		try (StrolchTransaction tx = runtimeMock.openUserTx(cert, true)) {
 			Resource plcStartedAddr = tx.getResourceBy(TYPE_PLC_ADDRESS, plcAddressId, true);
 			BooleanParameter valueP = plcStartedAddr.getParameter(PARAM_VALUE, true);
-			Assert.assertEquals(true, valueP.getValue());
+			assertEquals(true, valueP.getValue());
 		}
 	}
 
 	@Test
-	public void shouldNotifyPlcService() throws InterruptedException {
+	public void shouldNotifyPlcService() {
 
 		PlcHandler plcHandler = runtimeMock.getComponent(PlcHandler.class);
 		AtomicReference<String> value = new AtomicReference<>("");
 		plcHandler.registerListener("BarcodeReader", "Barcode", (address, v) -> value.set((String) v));
 		plcHandler.send("BarcodeReader", "ReadBarcode", "DoRead");
-		Assert.assertNotEquals("", value.get());
+		assertNotEquals("", value.get());
+	}
+
+	@Test
+	public void shouldSendVirtualBoolean() {
+
+		PlcHandler plcHandler = runtimeMock.getComponent(PlcHandler.class);
+		String addressId = plcHandler.getPlcAddressId("PLC", "Running");
+		AtomicReference<Boolean> value;
+		try (StrolchTransaction tx = runtimeMock.openUserTx(cert, true)) {
+			Resource address = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
+			value = new AtomicReference<>(address.getParameter(PARAM_VALUE, true).getValue());
+		}
+		assertEquals(false, value.get());
+
+		plcHandler.registerListener("PLC", "Running", (address, v) -> value.set((Boolean) v));
+		plcHandler.send("PLC", "Running");
+		assertEquals(true, value.get());
+		plcHandler.send("PLC", "NotRunning");
+		assertEquals(false, value.get());
+	}
+
+	@Test
+	public void shouldSendVirtualString() {
+
+		PlcHandler plcHandler = runtimeMock.getComponent(PlcHandler.class);
+		String addressId = plcHandler.getPlcAddressId("Server", "Connected");
+		AtomicReference<String> value;
+		try (StrolchTransaction tx = runtimeMock.openUserTx(cert, true)) {
+			Resource address = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
+			value = new AtomicReference<>(address.getParameter(PARAM_VALUE, true).getValue());
+		}
+		assertEquals("Disconnected", value.get());
+
+		plcHandler.registerListener("Server", "Connected", (address, v) -> value.set((String) v));
+		plcHandler.send("Server", "Connected", "Connected");
+		assertEquals("Connected", value.get());
+		plcHandler.send("Server", "Connected", "Disconnected");
+		assertEquals("Disconnected", value.get());
 	}
 }

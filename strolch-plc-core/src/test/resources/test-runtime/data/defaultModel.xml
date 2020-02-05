@@ -15,26 +15,6 @@
     </Resource>
 
     <!--
-        Virtual connections
-    -->
-    <Resource Id="virtualString" Name="Virtual String PLC Connection" Type="PlcConnection">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.VirtualStringValueConnection"/>
-            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
-                       Value=""/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="virtualBoolean" Name="Virtual Boolean PLC Connection" Type="PlcConnection">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.VirtualBooleanValueConnection"/>
-            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
-                       Value=""/>
-        </ParameterBag>
-    </Resource>
-
-    <!--
         Barcode reader connection, currently place holder with RandomString
     -->
     <Resource Id="barcodeReader" Name="Barcode Reader Connection" Type="PlcConnection">
@@ -98,17 +78,89 @@
         </ParameterBag>
         <ParameterBag Id="relations" Name="Relations" Type="Relations">
             <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress"
-                       Value="addrPlcStarted"/>
+                       Value="addrPlcStarted, addrPlcRunning, addrServerConnected"/>
             <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram"
-                       Value=""/>
+                       Value="telPlcStarted, telPlcStopped, telPlcRunning, telPlcNotRunning, telServerConnected, telServerDisconnected"/>
         </ParameterBag>
     </Resource>
     <Resource Id="addrPlcStarted" Name="PLC - Started" Type="PlcAddress">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean"/>
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean.plcStarted"/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Started"/>
             <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telPlcStarted" Name="PLC - Started" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean.plcStarted"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Started"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telPlcStopped" Name="PLC - Stopped" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean.plcStarted"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Stopped"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="addrPlcRunning" Name="PLC - Running" Type="PlcAddress">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean.plcRunning"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Running"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telPlcRunning" Name="PLC - Running" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean.plcRunning"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Running"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telPlcNotRunning" Name="PLC - NotRunning" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean.plcRunning"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="NotRunning"/>
+            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="addrServerConnected" Name="Server - Connected" Type="PlcAddress">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean.serverConnected"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Server"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Connected"/>
+            <Parameter Id="value" Name="Value" Type="String" Value="Disconnected"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telServerConnected" Name="Server - Connected" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean.serverConnected"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Server"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Connected"/>
+            <Parameter Id="value" Name="Value" Type="String" Value="Connected"/>
+            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="telServerDisconnected" Name="Server - Disconnected" Type="PlcTelegram">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualBoolean.serverConnected"/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Server"/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Disconnected"/>
+            <Parameter Id="value" Name="Value" Type="String" Value="Disconnected"/>
             <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
         </ParameterBag>
     </Resource>

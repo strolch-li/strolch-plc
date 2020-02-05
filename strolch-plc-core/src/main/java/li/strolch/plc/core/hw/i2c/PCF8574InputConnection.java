@@ -139,6 +139,8 @@ public class PCF8574InputConnection extends PlcConnection {
 			if (gpioController.getProvisionedPins().stream().map(GpioPin::getPin).anyMatch(interruptPin::equals))
 				throw new IllegalStateException("Pin " + interruptPin + " is already provisioned!");
 			this.interruptGpioPin = gpioController.provisionDigitalInputPin(interruptPin, this.interruptResistance);
+			logger.info("Provisioned GPIO Input pin " + this.interruptGpioPin + " with PinPullResistance "
+					+ this.interruptResistance);
 			this.interruptGpioPin.removeAllListeners();
 			this.interruptGpioPin.addListener((GpioPinListenerDigital) this::handleInterrupt);
 
@@ -165,6 +167,7 @@ public class PCF8574InputConnection extends PlcConnection {
 		if (this.interruptGpioPin != null) {
 			this.interruptGpioPin.removeAllListeners();
 			PlcGpioController.getInstance().unprovisionPin(this.interruptGpioPin);
+			logger.info("Provisioned GPIO Input pin " + this.interruptGpioPin);
 		}
 
 		this.inputDevices = null;
@@ -193,6 +196,11 @@ public class PCF8574InputConnection extends PlcConnection {
 
 		for (int i = 0; i < this.inputDevices.length; i++) {
 			I2CDevice i2CDevice = this.inputDevices[i];
+			if (i2CDevice == null) {
+				logger.warn("Ignoring invalid I2C Device 0x" + toHexString(this.addresses[i]));
+				continue;
+			}
+
 			byte data = (byte) i2CDevice.read();
 
 			if (this.verbose)
@@ -236,6 +244,7 @@ public class PCF8574InputConnection extends PlcConnection {
 				}
 			} catch (Exception e) {
 				ok = false;
+				this.inputDevices[i] = null;
 				logger.error("Failed to read initial state for address 0x" + toHexString((byte) i2CDevice.getAddress()),
 						e);
 			}

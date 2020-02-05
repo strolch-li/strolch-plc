@@ -36,6 +36,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	private MapOfMaps<String, String, PlcAddress> plcTelegrams;
 	private Map<PlcAddress, String> addressesToResourceId;
 	private PlcListener globalListener;
+	private boolean verbose;
 
 	public DefaultPlcHandler(ComponentContainer container, String componentName) {
 		super(container, componentName);
@@ -86,6 +87,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		this.plcAddresses = new MapOfMaps<>();
 		this.plcTelegrams = new MapOfMaps<>();
 		this.addressesToResourceId = new HashMap<>();
+		this.verbose = configuration.getBoolean("verbose", false);
 
 		super.initialize(configuration);
 	}
@@ -136,6 +138,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			MapOfMaps<String, String, PlcAddress> plcTelegrams = new MapOfMaps<>();
 			Map<PlcAddress, String> addressesToResourceId = new HashMap<>();
 			this.plc = configure(validateCtx(), plcAddresses, plcTelegrams, addressesToResourceId);
+			this.plc.setVerbose(this.verbose);
 			this.plcAddresses = plcAddresses;
 			this.plcTelegrams = plcTelegrams;
 			this.addressesToResourceId = addressesToResourceId;
@@ -199,7 +202,9 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	private void updatePlcAddress(PlcAddress address, Object value) {
-		long s = nanoTime();
+		long s = 0L;
+		if (this.verbose)
+			s = nanoTime();
 
 		String addressId = this.addressesToResourceId.get(address);
 		if (addressId == null) {
@@ -213,13 +218,13 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 				Resource addressRes = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
 
 				// see if we need to invert a boolean flag
-				if (address.valueType == StrolchValueType.BOOLEAN && address.inverted) {
+				if (address.valueType == StrolchValueType.BOOLEAN && address.inverted)
 					value = !((boolean) value);
-				}
 
 				Parameter<?> valueP = addressRes.getParameter(PARAM_VALUE, true);
-				logger.info("PlcAddress {}-{} has changed from {} to {}", address.resource, address.action,
-						valueP.getValue(), value);
+				if (this.verbose)
+					logger.info("PlcAddress {}-{} has changed from {} to {}", address.resource, address.action,
+							valueP.getValue(), value);
 
 				valueP.accept(new SetParameterValueVisitor(value));
 				tx.update(addressRes);
@@ -229,11 +234,14 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			logger.error("Failed to update PlcAddress " + addressId + " with new value " + value, e);
 		}
 
-		logger.info("async update " + address.address + " took " + (formatNanoDuration(nanoTime() - s)));
+		if (this.verbose)
+			logger.info("async update " + address.address + " took " + (formatNanoDuration(nanoTime() - s)));
 	}
 
 	private void updateConnectionState(PlcConnection plcConnection) {
-		long s = nanoTime();
+		long s = 0L;
+		if (this.verbose)
+			s = nanoTime();
 
 		try {
 			try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), "updateConnectionState", false)) {
@@ -247,7 +255,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			logger.error("Failed to update state for connection " + plcConnection.getId(), e);
 		}
 
-		logger.info("updateConnectionState took " + (formatNanoDuration(nanoTime() - s)));
+		if (this.verbose)
+			logger.info("updateConnectionState took " + (formatNanoDuration(nanoTime() - s)));
 	}
 
 	private PrivilegeContext validateCtx() {

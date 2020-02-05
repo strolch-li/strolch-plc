@@ -44,6 +44,8 @@ public class PlcGwClientHandler extends StrolchComponent {
 	private static final long RETRY_DELAY = 30;
 	private static final int INITIAL_DELAY = 10;
 
+	private boolean verbose;
+
 	private String plcId;
 	private String gwUsername;
 	private String gwPassword;
@@ -67,6 +69,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 	@Override
 	public void initialize(ComponentConfiguration configuration) throws Exception {
 
+		this.verbose = configuration.getBoolean("verbose", false);
 		this.plcId = configuration.getString("plcId", null);
 		this.gwUsername = configuration.getString("gwUsername", null);
 		this.gwPassword = configuration.getString("gwPassword", null);
@@ -286,14 +289,15 @@ public class PlcGwClientHandler extends StrolchComponent {
 
 		try {
 			sendDataToClient(notificationJ);
-			logger.info("Sent notification for " + plcAddress.resource + "-" + plcAddress.action + " to server");
+			if (this.verbose)
+				logger.info("Sent notification for " + plcAddress.resource + "-" + plcAddress.action + " to server");
 		} catch (IOException e) {
 			logger.error("Failed to send notification to server", e);
 		}
 	}
 
 	public void onWsMessage(Session session, String message) {
-		logger.info(session.getId() + ": Handling message");
+		//logger.info(session.getId() + ": Handling message");
 
 		JsonObject jsonObject = new JsonParser().parse(message).getAsJsonObject();
 		if (!jsonObject.has(PARAM_MESSAGE_TYPE)) {

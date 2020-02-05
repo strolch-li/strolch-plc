@@ -22,12 +22,18 @@ public class DefaultPlc implements Plc {
 	private PlcListener globalListener;
 	private MapOfLists<PlcAddress, PlcListener> listeners;
 	private PlcConnectionStateChangeListener connectionStateChangeListener;
+	private boolean verbose;
 
 	public DefaultPlc() {
 		this.notificationMappings = new HashMap<>();
 		this.listeners = new MapOfLists<>();
 		this.connections = new HashMap<>();
 		this.connectionsByAddress = new HashMap<>();
+	}
+
+	@Override
+	public void setVerbose(boolean verbose) {
+		this.verbose = verbose;
 	}
 
 	@Override
@@ -52,13 +58,14 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void notify(String address, Object value) {
-		logger.info("Update for " + address + " with value " + value);
-
 		PlcAddress plcAddress = this.notificationMappings.get(address);
 		if (plcAddress == null) {
 			logger.warn("No mapping to PlcAddress for hwAddress " + address);
 			return;
 		}
+
+		logger.info("Update for {}-{} @ {} with value {}", plcAddress.resource, plcAddress.action, plcAddress.address,
+				value);
 
 		List<PlcListener> listeners = this.listeners.getList(plcAddress);
 		if (listeners == null || listeners.isEmpty()) {
@@ -79,16 +86,19 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void send(PlcAddress plcAddress) {
-		logger.info("Sending " + plcAddress.resource + "-" + plcAddress.action + ": " + plcAddress.defaultValue
-				+ " (default)");
-		validateConnection(plcAddress).send(plcAddress.address, plcAddress.defaultValue);
+		if (this.verbose)
+			logger.info("Sending {}-{}: {} (default)", plcAddress.resource, plcAddress.action, plcAddress.defaultValue);
+		if (!isVirtual(plcAddress))
+			validateConnection(plcAddress).send(plcAddress.address, plcAddress.defaultValue);
 		notify(plcAddress.address, plcAddress.defaultValue);
 	}
 
 	@Override
 	public void send(PlcAddress plcAddress, Object value) {
-		logger.info("Sending " + plcAddress.resource + "-" + plcAddress.action + ": " + value);
-		validateConnection(plcAddress).send(plcAddress.address, value);
+		if (this.verbose)
+			logger.info("Sending {}-{}: {}", plcAddress.resource, plcAddress.action, value);
+		if (!isVirtual(plcAddress))
+			validateConnection(plcAddress).send(plcAddress.address, value);
 		notify(plcAddress.address, value);
 	}
 
@@ -154,18 +164,40 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void registerNotificationMapping(PlcAddress address) {
-		if (!this.connectionsByAddress.containsKey(address.address))
+
+		boolean virtual = isVirtual(address);
+		if (virtual)
+			validateVirtualAddress(address);
+		else if (!this.connectionsByAddress.containsKey(address.address))
 			throw new IllegalStateException(
 					"There is no connection registered for address " + address.address + " for key " + address);
-		logger.info("Registered address mapping for " + address);
 
 		if (address.type != PlcAddressType.Notification)
 			throw new IllegalArgumentException("Key must be of type " + PlcAddressType.Notification + ": " + address);
 
 		PlcAddress replaced = this.notificationMappings.put(address.address, address);
-		if (replaced != null) {
+		if (replaced != null)
 			throw new IllegalArgumentException(
 					"Replaced mapping for address " + address.address + " for key " + replaced + " with " + address);
+
+		logger.info("Registered address mapping for " + address);
+	}
+
+	private void validateVirtualAddress(PlcAddress address) {
+
+		if (address.address.equals("virtualBoolean") || address.address.equals("virtualBoolean.")) {
+			throw new IllegalStateException(
+					"Virtual address " + address.address + " is missing sub component for " + address);
 		}
+
+		if (address.address.equals("virtualString") || address.address.equals("virtualString.")) {
+			throw new IllegalStateException(
+					"Virtual address " + address.address + " is missing sub component for " + address);
+		}
+	}
+
+	private boolean isVirtual(PlcAddress address) {
+		return address.address.startsWith("virtualBoolean") //
+				|| address.address.startsWith("virtualString");
 	}
 }
