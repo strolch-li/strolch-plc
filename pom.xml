@@ -67,6 +67,7 @@
 
     <modules>
         <module>strolch-plc-model</module>
+        <module>strolch-plc-util</module>
         <module>strolch-plc-core</module>
         <module>strolch-plc-rest</module>
         <module>strolch-plc-gw-client</module>
