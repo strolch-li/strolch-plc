@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<StrolchModel xmlns="https://strolch.li/xsd/StrolchModel-1.6.xsd">
+
+    <Resource Id="PlcLogicalDevice" Name="PlcLogicalDevice Template" Type="Template">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="description" Name="Description" Index="5" Type="String" Value=""/>
+            <Parameter Id="group" Name="Group" Index="20" Type="String" Value="default"/>
+            <Parameter Id="index" Name="Index" Index="30" Type="Integer" Value="0"/>
+        </ParameterBag>
+        <ParameterBag Id="relations" Name="Relations" Type="Relations">
+            <Parameter Id="addresses" Name="Addresses" Index="10" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Value=""/>
+            <Parameter Id="telegrams" Name="Telegrams" Index="20" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Value=""/>
+        </ParameterBag>
+    </Resource>
+
+    <Resource Id="PlcAddress" Name="PlcAddress Template" Type="Template">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="description" Name="Description" Index="5" Type="String" Value=""/>
+            <Parameter Id="address" Name="HW Address" Index="10" Type="String" Interpretation="PlcConnection" Value=""/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Index="20" Type="String" Value=""/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Index="30" Type="String" Value=""/>
+            <Parameter Id="index" Name="Index" Index="40" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+
+    <Resource Id="PlcTelegram" Name="PlcTelegram Template" Type="Template">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="description" Name="Description" Index="5" Type="String" Value=""/>
+            <Parameter Id="address" Name="HW Address" Index="10" Type="String" Interpretation="PlcConnection" Value=""/>
+            <Parameter Id="resource" Name="Resource ID for PlcAddress" Index="20" Type="String" Value=""/>
+            <Parameter Id="action" Name="Action ID for PlcAddress" Index="30" Type="String" Value=""/>
+            <Parameter Id="index" Name="Index" Index="40" Type="Integer" Value="10"/>
+        </ParameterBag>
+    </Resource>
+
+</StrolchModel>

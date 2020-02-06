@@ -2,136 +2,19 @@
 <StrolchModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://strolch.li/xsd/StrolchModel-1.6.xsd"
               xsi:schemaLocation="https://strolch.li/xsd/StrolchModel-1.6.xsd StrolchModel-1.6.xsd">
 
-    <!--
-        Simple logger output connection
-    -->
-    <Resource Id="loggerOutput" Name="Logger PLC Connection" Type="PlcConnection">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.LoggerOutConnection"/>
-            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
-                       Value=""/>
-        </ParameterBag>
-    </Resource>
+    <IncludeFile file="Templates.xml"/>
+
+    <IncludeFile file="strolch-plc-example.xml"/>
+    <IncludeFile file="strolch-plc-example-connections.xml"/>
 
     <!--
-        Virtual connections
+        PLC to store connection state to server
     -->
-    <Resource Id="virtualString" Name="Virtual String PLC Connection" Type="PlcConnection">
+    <Resource Id="mfs-soh-plc01" Name="PLC" Type="Plc">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.VirtualStringValueConnection"/>
-            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+            <Parameter Id="connectionState" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="connectionStateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
                        Value=""/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="virtualBoolean" Name="Virtual Boolean PLC Connection" Type="PlcConnection">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.VirtualBooleanValueConnection"/>
-            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
-                       Value=""/>
-        </ParameterBag>
-    </Resource>
-
-    <!--
-        Barcode reader connection, currently place holder with RandomString
-    -->
-    <Resource Id="barcodeReader" Name="Barcode Reader Connection" Type="PlcConnection">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.RandomStringConnection"/>
-            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
-                       Value=""/>
-        </ParameterBag>
-    </Resource>
-
-    <!--
-        Raspberry GPIO BCM Address connection
-    -->
-    <Resource Id="raspiBcmGpioOutput" Name="Raspi BCM GPIO Output" Type="PlcConnection">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.gpio.RaspiBcmGpioOutputConnection"/>
-            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
-                       Value=""/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-            <Parameter Id="bcmOutputPins" Name="BCM Output Pins" Type="IntegerList" Value="27"/>
-        </ParameterBag>
-    </Resource>
-
-    <!--
-        I2C input connections
-    -->
-    <Resource Id="i2cInput.dev01" Name="PCF8574 Input 0x38" Type="PlcConnection">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.i2c.PCF8574InputConnection"/>
-            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
-                       Value=""/>
-            <Parameter Id="i2cBus" Name="I2C Bus" Type="Integer" Value="1"/>
-            <Parameter Id="addresses" Name="Addresses" Type="IntegerList" Value="0x38"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="true"/>
-            <Parameter Id="interruptPinPullResistance" Name="Raspi Interrupt PinPullResistance" Type="String" Value="PULL_UP"/>
-            <Parameter Id="interruptChangeState" Name="Raspi Interrupt Change State" Type="String" Value="HIGH"/>
-            <Parameter Id="interruptBcmPinAddress" Name="Raspi BCM Interrupt Pin" Type="Integer" Value="17"/>
-        </ParameterBag>
-    </Resource>
-
-    <!--
-        I2C output connections
-    -->
-    <Resource Id="i2cOutput.dev01" Name="PCF8574 Output 0x21" Type="PlcConnection">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.i2c.PCF8574OutputConnection"/>
-            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
-                       Value=""/>
-            <Parameter Id="i2cBus" Name="I2C Bus" Type="Integer" Value="1"/>
-            <Parameter Id="addresses" Name="Addresses" Type="IntegerList" Value="0x21"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-        </ParameterBag>
-    </Resource>
-
-    <!--
-        Simple toggler device
-    -->
-    <Resource Id="toggler" Name="Toggler 01" Type="PlcLogicalDevice">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="group" Name="Group" Type="String" Value="Entry"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
-        </ParameterBag>
-        <ParameterBag Id="relations" Name="Relations" Type="Relations">
-            <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Value="addrTogglerOn"/>
-            <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram"
-                       Value="telToggleTogglerOn, telToggleTogglerOff"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="addrTogglerOn" Name="Toggler - On" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="loggerOutput"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Toggler"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="On"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="telToggleTogglerOn" Name="Toggler - On" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="loggerOutput"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Toggler"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="On"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="telToggleTogglerOff" Name="Toggler - Off" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="loggerOutput"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Toggler"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Off"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
         </ParameterBag>
     </Resource>
 
@@ -140,7 +23,7 @@
     -->
     <Resource Id="plc" Name="PLC" Type="PlcLogicalDevice">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="group" Name="Group" Type="String" Value="Startup"/>
+            <Parameter Id="group" Name="Group" Type="String" Value="99 Startup"/>
             <Parameter Id="index" Name="Index" Type="Integer" Value="999999"/>
         </ParameterBag>
         <ParameterBag Id="relations" Name="Relations" Type="Relations">
@@ -150,20 +33,19 @@
                        Value="telPlcStarted, telPlcStopped"/>
         </ParameterBag>
     </Resource>
-    <Resource Id="addrPlcConnected" Name="PLC - Started" Type="PlcAddress">
+    <Resource Id="addrPlcConnected" Name="PLC - Connected" Type="PlcAddress">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualString"/>
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualString.plcServerConnected"/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ServerConnected"/>
             <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="String"/>
             <Parameter Id="value" Name="Value" Type="String" Value="false"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
             <Parameter Id="index" Name="Index" Type="Integer" Value="5"/>
         </ParameterBag>
     </Resource>
     <Resource Id="addrPlcStarted" Name="PLC - Started" Type="PlcAddress">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="booleanConnection"/>
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="raspiBcmGpioOutput.27"/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Started"/>
             <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
@@ -173,7 +55,7 @@
     </Resource>
     <Resource Id="telPlcStarted" Name="PLC - Started" Type="PlcTelegram">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="booleanConnection"/>
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="raspiBcmGpioOutput.27"/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Started"/>
             <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
@@ -182,260 +64,11 @@
     </Resource>
     <Resource Id="telPlcStopped" Name="PLC - Stopped" Type="PlcTelegram">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="booleanConnection"/>
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="raspiBcmGpioOutput.27"/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Stopped"/>
             <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
             <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
-        </ParameterBag>
-    </Resource>
-
-    <!--
-        Simple conveyor
-    -->
-    <Resource Id="conveyor01" Name="Conveyor 01" Type="PlcLogicalDevice">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="group" Name="Group" Type="String" Value="Entry"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
-        </ParameterBag>
-        <ParameterBag Id="relations" Name="Relations" Type="Relations">
-            <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress"
-                       Value="addrConveyor01Occupied, addrConveyor01OnState"/>
-            <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram"
-                       Value="telConveyor01On, telConveyor01Off"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="addrConveyor01Occupied" Name="Conveyor01 - Occupied" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cInput.dev01.0.7"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Conveyor01"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Occupied"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="addrConveyor01OnState" Name="Conveyor01 - On" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.7"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Conveyor01"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="On"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="telConveyor01On" Name="Conveyor01 - On" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.7"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Conveyor01"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="On"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="telConveyor01Off" Name="Conveyor01 - Off" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.7"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="Conveyor01"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Off"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
-        </ParameterBag>
-    </Resource>
-
-    <!--
-        BoxFillPosition logical device
-    -->
-    <Resource Id="BoxFillPosition" Name="Box Fill Position" Type="PlcLogicalDevice">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="group" Name="Group" Type="String" Value="Filling"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
-        </ParameterBag>
-        <ParameterBag Id="relations" Name="Relations" Type="Relations">
-            <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress"
-                       Value="addrEntryOccupied, addrBoxFillPositionOccupied, addrExitOccupied, addrEntryStopperOpened, addrEntryStopperClosed, addrEntryStopperOpen, addrExitStopperOpened, addrExitStopperClosed, addrExitStopperOpen, addrConveyorRunning, addrBarcodeReader"/>
-            <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram"
-                       Value="telConveyorRun, telConveyorStop, telEntryStopperOpen, telEntryStopperClose, telExitStopperOpen, telExitStopperClose, telReadBarcode"/>
-        </ParameterBag>
-    </Resource>
-
-    <!-- FillPosition addresses -->
-    <Resource Id="addrEntryOccupied" Name="BoxFillPosition - EntryOccupied" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cInput.dev01.0.0"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="EntryOccupied"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="addrBoxFillPositionOccupied" Name="BoxFillPosition - Occupied" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cInput.dev01.0.1"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Occupied"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="addrExitOccupied" Name="BoxFillPosition - ExitOccupied" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cInput.dev01.0.2"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ExitOccupied"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="30"/>
-        </ParameterBag>
-    </Resource>
-
-    <Resource Id="addrEntryStopperOpened" Name="BoxFillPosition - EntryStopperOpened" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cInput.dev01.0.3"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="EntryStopperOpened"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="40"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="addrEntryStopperClosed" Name="BoxFillPosition - EntryStopperClosed" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cInput.dev01.0.4"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="EntryStopperClosed"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="50"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="addrEntryStopperOpen" Name="BoxFillPosition - EntryStopperOpen" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.0"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="EntryStopperOpen"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="60"/>
-        </ParameterBag>
-    </Resource>
-
-    <Resource Id="addrExitStopperOpened" Name="BoxFillPosition - ExitStopperOpened" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cInput.dev01.0.5"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ExitStopperOpened"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="70"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="addrExitStopperClosed" Name="BoxFillPosition - ExitStopperClosed" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cInput.dev01.0.6"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ExitStopperClosed"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="80"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="addrExitStopperOpen" Name="BoxFillPosition - ExitStopperOpen" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.1"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ExitStopperOpen"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="90"/>
-        </ParameterBag>
-    </Resource>
-
-    <Resource Id="addrConveyorRunning" Name="BoxFillPosition - ConveyorRunning" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.2"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ConveyorRunning"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="100"/>
-        </ParameterBag>
-    </Resource>
-
-    <Resource Id="addrBarcodeReader" Name="BoxFillPosition - Barcode" Type="PlcAddress">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="barcodeReader"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Barcode"/>
-            <Parameter Id="value" Name="Value" Type="String" Value=""/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="110"/>
-        </ParameterBag>
-    </Resource>
-
-    <!-- FillPosition telegrams -->
-    <Resource Id="telConveyorRun" Name="BoxFillPosition - ConveyorRun" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.2"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ConveyorRun"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="telConveyorStop" Name="BoxFillPosition - ConveyorStop" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.2"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ConveyorStop"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
-        </ParameterBag>
-    </Resource>
-
-    <Resource Id="telEntryStopperOpen" Name="BoxFillPosition - EntryStopperOpen" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.0"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="EntryStopperOpen"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="30"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="telEntryStopperClose" Name="BoxFillPosition - EntryStopperClose" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.0"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="EntryStopperClose"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="40"/>
-        </ParameterBag>
-    </Resource>
-
-    <Resource Id="telExitStopperOpen" Name="BoxFillPosition - ExitStopperOpen" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.1"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ExitStopperOpen"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="50"/>
-        </ParameterBag>
-    </Resource>
-    <Resource Id="telExitStopperClose" Name="BoxFillPosition - ExitStopperClose" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="i2cOutput.dev01.0.1"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ExitStopperClose"/>
-            <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="60"/>
-        </ParameterBag>
-    </Resource>
-
-    <Resource Id="telReadBarcode" Name="BoxFillPosition - ReadBarcode" Type="PlcTelegram">
-        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="barcodeReader"/>
-            <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="BoxFillPosition"/>
-            <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ReadBarcode"/>
-            <Parameter Id="value" Name="Value" Type="String" Value="DoRead"/>
-            <Parameter Id="index" Name="Index" Type="Integer" Value="70"/>
         </ParameterBag>
     </Resource>
 
