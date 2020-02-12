@@ -4,5 +4,7 @@ public interface PlcNotificationListener {
 
 	void handleNotification(PlcAddressKey addressKey, Object value);
 
-	void handleConnectionLost();
+	default void handleConnectionLost() {
+		// no-op
+	}
 }
