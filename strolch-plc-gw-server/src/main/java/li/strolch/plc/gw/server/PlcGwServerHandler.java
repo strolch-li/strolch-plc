@@ -24,6 +24,7 @@ import li.strolch.privilege.model.Certificate;
 import li.strolch.rest.StrolchSessionHandler;
 import li.strolch.runtime.configuration.ComponentConfiguration;
 import li.strolch.utils.collections.MapOfLists;
+import li.strolch.utils.dbc.DBC;
 import li.strolch.websocket.WebSocketRemoteIp;
 
 public class PlcGwServerHandler extends StrolchComponent {
@@ -54,10 +55,13 @@ public class PlcGwServerHandler extends StrolchComponent {
 	}
 
 	public boolean isPlcConnected(String plcId) {
+		DBC.PRE.assertNotEmpty("plcId must not be empty", plcId);
 		return this.plcSessionsByPlcId.containsKey(plcId);
 	}
 
 	public void register(PlcAddressKey addressKey, String plcId, PlcNotificationListener listener) {
+		DBC.PRE.assertNotNull("addressKey must not be null", addressKey);
+		DBC.PRE.assertNotEmpty("plcId must not be empty", plcId);
 		MapOfLists<PlcAddressKey, PlcNotificationListener> plcListeners = this.plcAddressListenersByPlcId.get(plcId);
 		if (plcListeners == null) {
 			plcListeners = new MapOfLists<>();
@@ -67,9 +71,13 @@ public class PlcGwServerHandler extends StrolchComponent {
 		synchronized (plcListeners) {
 			plcListeners.addElement(addressKey, listener);
 		}
+
+		logger.info("Registered listener on plc " + plcId + " key " + addressKey + ": " + listener);
 	}
 
 	public void unregister(PlcAddressKey addressKey, String plcId, PlcNotificationListener listener) {
+		DBC.PRE.assertNotNull("addressKey must not be null", addressKey);
+		DBC.PRE.assertNotEmpty("plcId must not be empty", plcId);
 		MapOfLists<PlcAddressKey, PlcNotificationListener> plcListeners = this.plcAddressListenersByPlcId.get(plcId);
 		if (plcListeners == null)
 			return;
@@ -77,6 +85,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 		synchronized (plcListeners) {
 			plcListeners.removeElement(addressKey, listener);
 		}
+
+		logger.info("Unregistered listener from plc " + plcId + " key " + addressKey + ": " + listener);
 	}
 
 	public void sendMessage(PlcAddressKey addressKey, String plcId, boolean value,

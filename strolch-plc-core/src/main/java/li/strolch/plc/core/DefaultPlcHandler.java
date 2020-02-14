@@ -25,6 +25,7 @@ import li.strolch.privilege.model.Certificate;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
 import li.strolch.utils.collections.MapOfMaps;
+import li.strolch.utils.dbc.DBC;
 
 public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, PlcConnectionStateChangeListener {
 
@@ -59,6 +60,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 	@Override
 	public PlcAddress getPlcAddress(String resource, String action) {
+		DBC.PRE.assertNotNull("resource must not be null", resource);
+		DBC.PRE.assertNotEmpty("action must not be empty", action);
 		PlcAddress plcAddress = this.plcAddresses.getElement(resource, action);
 		if (plcAddress == null)
 			throw new IllegalStateException("PlcAddress for " + resource + "-" + action + " does not exist!");
@@ -67,6 +70,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 	@Override
 	public String getPlcAddressId(String resource, String action) {
+		DBC.PRE.assertNotNull("resource must not be null", resource);
+		DBC.PRE.assertNotEmpty("action must not be empty", action);
 		PlcAddress plcAddress = getPlcAddress(resource, action);
 		String addressId = this.addressesToResourceId.get(plcAddress);
 		if (addressId == null)
