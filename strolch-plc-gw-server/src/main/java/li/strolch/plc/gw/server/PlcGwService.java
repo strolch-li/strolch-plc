@@ -1,12 +1,21 @@
 package li.strolch.plc.gw.server;
 
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC;
+import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
+
+import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.execution.ExecutionHandler;
+import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.handler.operationslog.LogSeverity;
+import li.strolch.handler.operationslog.OperationsLog;
+import li.strolch.model.Resource;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.model.PlcAddressKey;
+import li.strolch.plc.model.PlcAddressResponse;
 import li.strolch.plc.model.PlcNotificationListener;
 import li.strolch.plc.model.PlcServiceState;
 import li.strolch.privilege.model.PrivilegeContext;
@@ -84,16 +93,45 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		this.plcHandler.sendMessage(addressKey, plcId, this);
 	}
 
+	@Override
+	public void notify(PlcAddressResponse response) {
+		throw new UnsupportedOperationException("Not implemented!");
+	}
+
+	@Override
+	public void handleNotification(PlcAddressKey addressKey, Object value) {
+		throw new UnsupportedOperationException("Not implemented!");
+	}
+
 	protected StrolchTransaction openTx(PrivilegeContext ctx, boolean readOnly) {
 		return this.container.getRealm(ctx.getCertificate()).openTx(ctx.getCertificate(), getClass(), readOnly);
 	}
 
-	protected void runAsAgent(PrivilegedRunnable runnable) throws Exception {
-		this.container.getPrivilegeHandler().runAsAgent(runnable);
+	protected void runAsAgent(PrivilegedRunnable runnable) {
+		try {
+			this.container.getPrivilegeHandler().runAsAgent(runnable);
+		} catch (Exception e) {
+			logger.error("Runnable " + runnable + " failed!", e);
+			if (hasOperationsLogs()) {
+				getOperationsLogs().addMessage(
+						new LogMessage(this.container.getRealmNames().iterator().next(), SYSTEM_USER_AGENT,
+								Resource.locatorFor(TYPE_PLC, this.plcId), LogSeverity.Exception,
+								ResourceBundle.getBundle("strolch-plc-gw-server"), "systemAction.failed")
+								.withException(e).value("action", runnable).value("reason", e));
+			}
+		}
 	}
 
 	protected ExecutionHandler getExecutionHandler() {
 		return this.container.getComponent(ExecutionHandler.class);
+	}
+
+	protected boolean hasOperationsLogs() {
+		return this.container.hasComponent(OperationsLog.class);
+	}
+
+	protected OperationsLog getOperationsLogs() {
+		return this.container.getComponent(OperationsLog.class);
 	}
 
 	protected <T> T runAsAgentWithResult(PrivilegedRunnableWithResult<T> runnable) throws Exception {
