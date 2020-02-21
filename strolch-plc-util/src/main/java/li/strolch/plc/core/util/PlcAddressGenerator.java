@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,6 +57,15 @@ public class PlcAddressGenerator {
 		new PlcAddressGenerator().generate(templatesF, importFile, exportFile);
 	}
 
+	private void add(Map<String, Resource> exportList, Resource element) {
+		Resource replaced = exportList.put(element.getId(), element);
+		if (replaced != null) {
+			throw new IllegalStateException("A " + element.getType() + " " + element.getId() + ". Addresses: " + element
+					.getParameter(PARAM_ADDRESS, true).getValue() + " and replaced with " + replaced
+					.getParameter(PARAM_ADDRESS, true).getValue());
+		}
+	}
+
 	public void generate(File templatesFile, File importFile, File exportFile) throws IOException {
 
 		Map<String, StrolchRootElement> elementsById = parseToMap(templatesFile);
@@ -68,7 +77,7 @@ public class PlcAddressGenerator {
 		addressT.setType(addressT.getId());
 		telegramT.setType(telegramT.getId());
 
-		List<Resource> exportList = new ArrayList<>();
+		Map<String, Resource> exportList = new HashMap<>();
 
 		CSVFormat csvFormat = CSVFormat.DEFAULT.withFirstRecordAsHeader();
 		try (InputStream in = new FileInputStream(importFile);
@@ -122,7 +131,7 @@ public class PlcAddressGenerator {
 					logicalDevice.getParameter(PARAM_GROUP, true).setValue(groupNrS + " " + description);
 					logicalDevice.getParameter(PARAM_INDEX, true).setValue(groupIndex);
 
-					exportList.add(logicalDevice);
+					add(exportList, logicalDevice);
 					groupIndex += 10;
 					logger.info("Added PlcLogicalDevice " + logicalDevice.getId());
 
@@ -163,7 +172,7 @@ public class PlcAddressGenerator {
 					valueP.setIndex(100);
 					addressR.addParameter(valueP);
 
-					exportList.add(addressR);
+					add(exportList, addressR);
 					logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
 					logger.info(
 							"Added Boolean PlcAddress " + addressR.getId() + " " + addressR.getName() + " for address "
@@ -212,7 +221,7 @@ public class PlcAddressGenerator {
 					valueP.setIndex(100);
 					telegramR.addParameter(valueP);
 
-					exportList.add(telegramR);
+					add(exportList, telegramR);
 					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
 					logger.info("Added Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 							+ " for address " + address);
@@ -234,13 +243,13 @@ public class PlcAddressGenerator {
 					valueP.setIndex(100);
 					telegramR.addParameter(valueP);
 
-					exportList.add(telegramR);
+					add(exportList, telegramR);
 					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
 					logger.info("Added Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 							+ " for address " + address);
 
 					// validate address exists for this address
-					if (exportList.stream().filter(e -> e.getType().equals(TYPE_PLC_ADDRESS))
+					if (exportList.values().stream().filter(e -> e.getType().equals(TYPE_PLC_ADDRESS))
 							.noneMatch(e -> e.getParameter(PARAM_ADDRESS).getValue().equals(address))) {
 
 						Resource addressR = addressT.getClone();
@@ -259,7 +268,7 @@ public class PlcAddressGenerator {
 						valueP.setIndex(100);
 						addressR.addParameter(valueP);
 
-						exportList.add(addressR);
+						add(exportList, addressR);
 						logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
 						logger.info("Added missing Boolean PlcAddress " + addressR.getId() + " " + addressR.getName()
 								+ " for address " + address);
@@ -302,7 +311,7 @@ public class PlcAddressGenerator {
 					valueP.setIndex(100);
 					addressR.addParameter(valueP);
 
-					exportList.add(addressR);
+					add(exportList, addressR);
 					logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
 					logger.info("Added Virtual PlcAddress " + addressR.getId() + " " + addressR.getName()
 							+ " for connection " + connection);
@@ -330,7 +339,7 @@ public class PlcAddressGenerator {
 						valueP.setIndex(100);
 						telegramR.addParameter(valueP);
 
-						exportList.add(telegramR);
+						add(exportList, telegramR);
 						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
 						logger.info("Added Virtual Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for connection " + connection);
@@ -354,7 +363,7 @@ public class PlcAddressGenerator {
 						valueP.setIndex(100);
 						telegramR.addParameter(valueP);
 
-						exportList.add(telegramR);
+						add(exportList, telegramR);
 						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
 						logger.info("Added Virtual Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for connection " + connection);
@@ -378,7 +387,7 @@ public class PlcAddressGenerator {
 						valueP.setIndex(100);
 						telegramR.addParameter(valueP);
 
-						exportList.add(telegramR);
+						add(exportList, telegramR);
 						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
 						logger.info("Added Virtual String PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for connection " + connection);
@@ -416,7 +425,7 @@ public class PlcAddressGenerator {
 					valueP.setIndex(100);
 					addressR.addParameter(valueP);
 
-					exportList.add(addressR);
+					add(exportList, addressR);
 					logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
 					logger.info("Added PlcAddress " + addressR.getId() + " " + addressR.getName() + " for connection "
 							+ connection);
@@ -436,7 +445,7 @@ public class PlcAddressGenerator {
 
 					telegramR.addParameter(valueP.getClone());
 
-					exportList.add(telegramR);
+					add(exportList, telegramR);
 					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
 					logger.info("Added Barcode PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 							+ " for connection " + connection);
@@ -449,7 +458,7 @@ public class PlcAddressGenerator {
 
 		// validate
 		boolean valid = true;
-		MapOfLists<String, Resource> elementsByAddress = exportList.stream()
+		MapOfLists<String, Resource> elementsByAddress = exportList.values().stream()
 				.filter(e -> !e.getType().equals(TYPE_PLC_LOGICAL_DEVICE)).collect(MapOfLists::new,
 						(m, e) -> m.addElement(e.getParameter(PARAM_ADDRESS, true).getValueAsString(), e),
 						MapOfLists::addAll);
@@ -504,7 +513,7 @@ public class PlcAddressGenerator {
 		else
 			logger.error("At least one address is invalid!");
 
-		StrolchXmlHelper.writeToFile(exportFile, exportList);
+		StrolchXmlHelper.writeToFile(exportFile, exportList.values());
 		logger.info("Wrote " + exportList.size() + " elements to " + exportFile);
 	}
 }
