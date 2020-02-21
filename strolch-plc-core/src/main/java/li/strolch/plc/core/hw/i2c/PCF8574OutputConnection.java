@@ -11,12 +11,12 @@ import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 import li.strolch.plc.core.hw.Plc;
-import li.strolch.plc.core.hw.PlcConnection;
+import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 import li.strolch.plc.model.ConnectionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PCF8574OutputConnection extends PlcConnection {
+public class PCF8574OutputConnection extends SimplePlcConnection {
 
 	private static final Logger logger = LoggerFactory.getLogger(PCF8574OutputConnection.class);
 
@@ -62,10 +62,10 @@ public class PCF8574OutputConnection extends PlcConnection {
 	}
 
 	@Override
-	public void connect() {
+	public boolean connect() {
 		if (this.connectionState == ConnectionState.Connected) {
 			logger.warn(this.id + ": Already connected");
-			return;
+			return true;
 		}
 
 		logger.info(this.id + ": Connecting...");
@@ -100,30 +100,20 @@ public class PCF8574OutputConnection extends PlcConnection {
 						+ this.i2cBusNr);
 			}
 
-			if (ok) {
-				logger.info(this.id + ": Is now connected.");
-				this.connectionState = ConnectionState.Connected;
-				this.connectionStateMsg = "-";
-				this.plc.notifyConnectionStateChanged(this);
-			} else {
-				logger.error("Failed to set initial values to " + asBinary((byte) 0xff) + " on I2C Bus " + this.i2cBusNr
-						+ " and addresses 0x " + toPrettyHexString(this.addresses));
-				this.connectionState = ConnectionState.Connected;
-				this.connectionStateMsg =
-						"Failed to read initial values from I2C Bus " + this.i2cBusNr + " and addresses 0x "
-								+ toPrettyHexString(this.addresses);
-				this.plc.notifyConnectionStateChanged(this);
-			}
+			if (ok)
+				return super.connect();
 
-		} catch (Exception e) {
-			logger.error("Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses 0x " + toPrettyHexString(
-					this.addresses), e);
+			handleBrokenConnection(
+					"Failed to set initial values to " + asBinary((byte) 0xff) + " on I2C Bus " + this.i2cBusNr
+							+ " and addresses 0x " + toPrettyHexString(this.addresses), null);
+			return false;
 
-			this.connectionState = ConnectionState.Failed;
-			this.connectionStateMsg =
+		} catch (Throwable e) {
+			handleBrokenConnection(
 					"Failed to connect to I2C Bus " + this.i2cBusNr + " and addresses 0x " + toPrettyHexString(
-							this.addresses) + ": " + getExceptionMessageWithCauses(e);
-			this.plc.notifyConnectionStateChanged(this);
+							this.addresses) + ": " + getExceptionMessageWithCauses(e), e);
+
+			return false;
 		}
 	}
 
@@ -169,11 +159,8 @@ public class PCF8574OutputConnection extends PlcConnection {
 			this.outputDevices[device].write(newState);
 			this.states[device] = newState;
 		} catch (Exception e) {
-			this.connectionState = ConnectionState.Failed;
-			this.connectionStateMsg =
-					"Failed to write to I2C address: " + address + ": " + getExceptionMessageWithCauses(e);
-			this.plc.notifyConnectionStateChanged(this);
-
+			handleBrokenConnection(
+					"Failed to write to I2C address: " + address + ": " + getExceptionMessageWithCauses(e), e);
 			throw new IllegalStateException("Failed to write to I2C address " + address, e);
 		}
 	}

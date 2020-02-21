@@ -90,8 +90,9 @@ public class PlcTest {
 		}
 
 		@Override
-		public void connect() {
+		public boolean connect() {
 			this.connectionState = ConnectionState.Connected;
+			return true;
 		}
 
 		@Override

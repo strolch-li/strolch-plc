@@ -8,6 +8,7 @@ import java.util.Set;
 import li.strolch.plc.model.ConnectionState;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressType;
+import li.strolch.utils.ExecutorPool;
 import li.strolch.utils.collections.MapOfLists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ public class DefaultPlc implements Plc {
 	private MapOfLists<PlcAddress, PlcListener> listeners;
 	private PlcConnectionStateChangeListener connectionStateChangeListener;
 	private boolean verbose;
+	private ExecutorPool executorPool;
 
 	public DefaultPlc() {
 		this.notificationMappings = new HashMap<>();
@@ -128,12 +130,15 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void start() {
+		this.executorPool = new ExecutorPool();
 		this.connections.values().forEach(PlcConnection::connect);
 	}
 
 	@Override
 	public void stop() {
 		this.connections.values().forEach(PlcConnection::disconnect);
+		if (this.executorPool != null)
+			this.executorPool.destroy();
 	}
 
 	@Override
@@ -199,5 +204,10 @@ public class DefaultPlc implements Plc {
 	private boolean isVirtual(PlcAddress address) {
 		return address.address.startsWith("virtualBoolean") //
 				|| address.address.startsWith("virtualString");
+	}
+
+	@Override
+	public ExecutorPool getExecutorPool() {
+		return this.executorPool;
 	}
 }

@@ -34,9 +34,9 @@ public abstract class PlcConnection {
 		return this.connectionStateMsg;
 	}
 
-	public abstract void initialize(Map<String, Object> parameters);
+	public abstract void initialize(Map<String, Object> parameters) throws Exception;
 
-	public abstract void connect();
+	public abstract boolean connect();
 
 	public abstract void disconnect();
 
@@ -47,5 +47,23 @@ public abstract class PlcConnection {
 	protected void assertConnected() {
 		if (this.connectionState != ConnectionState.Connected)
 			throw new IllegalStateException("PlcConnection " + this.id + " is not yet connected!");
+	}
+
+	protected boolean isConnected() {
+		return this.connectionState == ConnectionState.Connected;
+	}
+
+	protected void handleBrokenConnection(String errorMsg, Throwable e) {
+		if (e == null)
+			logger.error(errorMsg);
+		else
+			logger.error(errorMsg, e);
+		this.connectionState = ConnectionState.Failed;
+		this.connectionStateMsg = errorMsg;
+		this.plc.notifyConnectionStateChanged(this);
+	}
+
+	protected void notify(String address, Object value) {
+		this.plc.notify(address, value);
 	}
 }

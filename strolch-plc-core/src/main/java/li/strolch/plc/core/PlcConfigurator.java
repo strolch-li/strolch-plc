@@ -25,14 +25,17 @@ class PlcConfigurator {
 
 	static Plc configurePlc(StrolchTransaction tx, String plcClassName,
 			MapOfMaps<String, String, PlcAddress> plcAddresses, MapOfMaps<String, String, PlcAddress> plcTelegrams,
-			Map<PlcAddress, String> addressesToResourceId) {
+			Map<PlcAddress, String> addressesToResourceId) throws Exception {
 
 		// instantiate Plc
 		logger.info("Configuring PLC " + plcClassName + "...");
 		Plc plc = ClassHelper.instantiateClass(plcClassName);
 
 		// instantiate all PlcConnections
-		new ResourceSearch().types(TYPE_PLC_CONNECTION).search(tx).forEach(c -> configureConnection(plc, c));
+		List<Resource> connections = new ResourceSearch().types(TYPE_PLC_CONNECTION).search(tx).toList();
+		for (Resource c : connections) {
+			configureConnection(plc, c);
+		}
 
 		Map<String, PlcAddress> plcAddressesByHwAddress = new HashMap<>();
 
@@ -69,7 +72,7 @@ class PlcConfigurator {
 		return plc;
 	}
 
-	private static void configureConnection(Plc plc, Resource connection) {
+	private static void configureConnection(Plc plc, Resource connection) throws Exception {
 		String className = connection.getParameter(BAG_PARAMETERS, PARAM_CLASS_NAME, true).getValue();
 		logger.info("Configuring PLC Connection " + className + "...");
 		PlcConnection plcConnection = ClassHelper

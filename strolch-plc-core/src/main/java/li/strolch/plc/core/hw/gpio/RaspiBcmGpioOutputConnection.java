@@ -5,12 +5,11 @@ import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCau
 
 import java.util.*;
 
-import li.strolch.plc.model.ConnectionState;
-import li.strolch.plc.core.hw.Plc;
-import li.strolch.plc.core.hw.PlcConnection;
 import com.pi4j.io.gpio.*;
+import li.strolch.plc.core.hw.Plc;
+import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 
-public class RaspiBcmGpioOutputConnection extends PlcConnection {
+public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 
 	private List<Integer> outputBcmAddresses;
 	private Map<String, Pin> pinsByAddress;
@@ -44,7 +43,7 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 	}
 
 	@Override
-	public void connect() {
+	public boolean connect() {
 		try {
 			GpioController gpioController = PlcGpioController.getInstance();
 
@@ -56,15 +55,11 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 				logger.info("Provisioned output pin  " + outputPin + " for address " + address);
 			}
 
-			logger.info(this.id + ": Is now connected.");
-			this.connectionState = ConnectionState.Connected;
-			this.connectionStateMsg = "-";
-			this.plc.notifyConnectionStateChanged(this);
+			return super.connect();
 
-		} catch (Error e) {
-			this.connectionState = ConnectionState.Failed;
-			this.connectionStateMsg = "Failed to connect to GpioController: " + getExceptionMessageWithCauses(e);
-			this.plc.notifyConnectionStateChanged(this);
+		} catch (Throwable e) {
+			handleBrokenConnection("Failed to connect to GpioController: " + getExceptionMessageWithCauses(e), e);
+			return false;
 		}
 	}
 
@@ -80,9 +75,7 @@ public class RaspiBcmGpioOutputConnection extends PlcConnection {
 			logger.error("Failed to disconnect " + this.id, e);
 		}
 
-		this.connectionState = ConnectionState.Disconnected;
-		this.connectionStateMsg = "-";
-		this.plc.notifyConnectionStateChanged(this);
+		super.disconnect();
 	}
 
 	@Override

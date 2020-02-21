@@ -15,16 +15,17 @@ public abstract class SimplePlcConnection extends PlcConnection {
 	}
 
 	@Override
-	public void initialize(Map<String, Object> parameters) {
+	public void initialize(Map<String, Object> parameters) throws Exception {
 		logger.info("Configured " + getClass().getSimpleName() + " " + this.id);
 	}
 
 	@Override
-	public void connect() {
+	public boolean connect() {
 		logger.info(this.id + ": Is now connected.");
 		this.connectionState = ConnectionState.Connected;
 		this.connectionStateMsg = "-";
 		this.plc.notifyConnectionStateChanged(this);
+		return true;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package li.strolch.plc.core.hw;
 
 import li.strolch.plc.model.PlcAddress;
+import li.strolch.utils.ExecutorPool;
 
 public interface Plc {
 
@@ -33,4 +34,6 @@ public interface Plc {
 	void setConnectionStateChangeListener(PlcConnectionStateChangeListener listener);
 
 	void setVerbose(boolean verbose);
+
+	ExecutorPool getExecutorPool();
 }

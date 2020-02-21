@@ -179,7 +179,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	private Plc configure(PrivilegeContext ctx, MapOfMaps<String, String, PlcAddress> plcAddresses,
-			MapOfMaps<String, String, PlcAddress> plcTelegrams, Map<PlcAddress, String> addressesToResourceId) {
+			MapOfMaps<String, String, PlcAddress> plcTelegrams, Map<PlcAddress, String> addressesToResourceId)
+			throws Exception {
 
 		Plc plc;
 		try (StrolchTransaction tx = openTx(ctx.getCertificate(), true)) {
