@@ -49,6 +49,10 @@ public abstract class PlcConnection {
 			throw new IllegalStateException("PlcConnection " + this.id + " is not yet connected!");
 	}
 
+	public boolean isConnectAtStartup() {
+		return true;
+	}
+
 	protected boolean isConnected() {
 		return this.connectionState == ConnectionState.Connected;
 	}

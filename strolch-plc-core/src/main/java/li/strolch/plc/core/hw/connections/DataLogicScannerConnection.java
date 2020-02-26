@@ -39,6 +39,11 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	}
 
 	@Override
+	public boolean isConnectAtStartup() {
+		return false;
+	}
+
+	@Override
 	public void initialize(Map<String, Object> parameters) throws Exception {
 
 		String address = (String) parameters.get("address");
