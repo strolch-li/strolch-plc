@@ -11,9 +11,13 @@ public class PlcAddressKey {
 		this.action = action;
 	}
 
+	public String toKey() {
+		return this.resource + '-' + this.action;
+	}
+
 	@Override
 	public String toString() {
-		return "PlcAddressKey[" + this.resource + '-' + this.action + ']';
+		return toKey();
 	}
 
 	@Override
@@ -37,7 +41,7 @@ public class PlcAddressKey {
 		return result;
 	}
 
-	public static PlcAddressKey valueOf(String address, String action) {
-		return new PlcAddressKey(address, action);
+	public static PlcAddressKey valueOf(String resource, String action) {
+		return new PlcAddressKey(resource, action);
 	}
 }

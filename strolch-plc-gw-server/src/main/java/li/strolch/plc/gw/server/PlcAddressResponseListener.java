@@ -4,5 +4,5 @@ import li.strolch.plc.model.PlcAddressResponse;
 
 public interface PlcAddressResponseListener {
 
-	void notify(PlcAddressResponse response);
+	void handleResponse(PlcAddressResponse response) throws Exception;
 }

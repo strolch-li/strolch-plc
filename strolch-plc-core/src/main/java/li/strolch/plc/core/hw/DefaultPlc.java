@@ -44,17 +44,18 @@ public class DefaultPlc implements Plc {
 	}
 
 	@Override
-	public void registerListener(PlcAddress address, PlcListener listener) {
+	public void register(PlcAddress address, PlcListener listener) {
 		this.listeners.addElement(address, listener);
-		logger.info("Registered listener " + listener + " with key " + address);
+		logger.info(address.toKeyAddress() + ": " + listener.getClass().getSimpleName());
 	}
 
 	@Override
-	public void unregisterListener(PlcAddress address, PlcListener listener) {
+	public void unregister(PlcAddress address, PlcListener listener) {
 		if (this.listeners.removeElement(address, listener)) {
-			logger.info("Unregistered listener " + listener + " with key " + address);
+			logger.info(address + ": " + listener.getClass().getName());
 		} else {
-			logger.warn("Listener " + listener + " not registered with key " + address);
+			logger.warn("Listener not registered with key " + address.toKeyAddress() + ": " + listener.getClass()
+					.getSimpleName());
 		}
 	}
 
@@ -66,8 +67,7 @@ public class DefaultPlc implements Plc {
 			return;
 		}
 
-		logger.info("Update for {}-{} @ {} with value {}", plcAddress.resource, plcAddress.action, plcAddress.address,
-				value);
+		logger.info("Update for {} with value {}", plcAddress.toKey(), value);
 
 		List<PlcListener> listeners = this.listeners.getList(plcAddress);
 		if (listeners == null || listeners.isEmpty()) {
@@ -89,7 +89,7 @@ public class DefaultPlc implements Plc {
 	@Override
 	public void send(PlcAddress plcAddress) {
 		if (this.verbose)
-			logger.info("Sending {}-{}: {} (default)", plcAddress.resource, plcAddress.action, plcAddress.defaultValue);
+			logger.info("Sending {}: {} (default)", plcAddress.toKey(), plcAddress.defaultValue);
 		if (!isVirtual(plcAddress))
 			validateConnection(plcAddress).send(plcAddress.address, plcAddress.defaultValue);
 		notify(plcAddress.address, plcAddress.defaultValue);
@@ -98,7 +98,7 @@ public class DefaultPlc implements Plc {
 	@Override
 	public void send(PlcAddress plcAddress, Object value) {
 		if (this.verbose)
-			logger.info("Sending {}-{}: {}", plcAddress.resource, plcAddress.action, value);
+			logger.info("Sending {}: {}", plcAddress.toKey(), value);
 		if (!isVirtual(plcAddress))
 			validateConnection(plcAddress).send(plcAddress.address, value);
 		notify(plcAddress.address, value);
@@ -121,9 +121,11 @@ public class DefaultPlc implements Plc {
 	public void addConnection(PlcConnection connection) {
 		this.connections.put(connection.getId(), connection);
 		Set<String> addresses = connection.getAddresses();
-		logger.info("Adding connection " + connection + " with " + addresses.size() + " addresses...");
+		logger.info(
+				"Adding connection " + connection.getId() + " " + connection.getClass().getName() + " with " + addresses
+						.size() + " addresses...");
 		for (String address : addresses) {
-			logger.info("  Adding address " + address + "...");
+			logger.info("  Adding " + address + "...");
 			this.connectionsByAddress.put(address, connection);
 		}
 	}
@@ -131,7 +133,7 @@ public class DefaultPlc implements Plc {
 	@Override
 	public void start() {
 		this.executorPool = new ExecutorPool();
-		this.connections.values().forEach(PlcConnection::connect);
+		this.connections.values().stream().filter(PlcConnection::isConnectAtStartup).forEach(PlcConnection::connect);
 	}
 
 	@Override
@@ -155,7 +157,7 @@ public class DefaultPlc implements Plc {
 	public PlcConnection getConnection(PlcAddress address) {
 		PlcConnection plcConnection = this.connectionsByAddress.get(address.address);
 		if (plcConnection == null)
-			throw new IllegalStateException("No PlcConnection exists for address " + address.address);
+			throw new IllegalStateException("No PlcConnection exists for " + address.toKeyAddress());
 		return plcConnection;
 	}
 
@@ -174,8 +176,7 @@ public class DefaultPlc implements Plc {
 		if (virtual)
 			validateVirtualAddress(address);
 		else if (!this.connectionsByAddress.containsKey(address.address))
-			throw new IllegalStateException(
-					"There is no connection registered for address " + address.address + " for key " + address);
+			throw new IllegalStateException("No PlcConnection exists for " + address.toKeyAddress());
 
 		if (address.type != PlcAddressType.Notification)
 			throw new IllegalArgumentException("Key must be of type " + PlcAddressType.Notification + ": " + address);
@@ -185,7 +186,7 @@ public class DefaultPlc implements Plc {
 			throw new IllegalArgumentException(
 					"Replaced mapping for address " + address.address + " for key " + replaced + " with " + address);
 
-		logger.info("Registered address mapping for " + address);
+		logger.info("Registered " + address);
 	}
 
 	private void validateVirtualAddress(PlcAddress address) {

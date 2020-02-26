@@ -11,9 +11,9 @@ public interface Plc {
 
 	void setGlobalListener(PlcListener listener);
 
-	void registerListener(PlcAddress address, PlcListener listener);
+	void register(PlcAddress address, PlcListener listener);
 
-	void unregisterListener(PlcAddress address, PlcListener listener);
+	void unregister(PlcAddress address, PlcListener listener);
 
 	void notify(String address, Object value);
 

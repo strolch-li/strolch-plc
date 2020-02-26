@@ -126,7 +126,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 			PlcAddressResponseListener listener) {
 
 		PlcAddressResponse plcResponse = new PlcAddressResponse(plcSession.plcId, plcAddressKey);
-		plcResponse.setListener(() -> listener.notify(plcResponse));
+		plcResponse.setListener(() -> handleResponse(listener, plcResponse));
 
 		try {
 
@@ -154,10 +154,18 @@ public class PlcGwServerHandler extends StrolchComponent {
 					+ getExceptionMessageWithCauses(e));
 
 			try {
-				listener.notify(plcResponse);
+				listener.handleResponse(plcResponse);
 			} catch (Exception ex) {
 				logger.error("Failed to notify listener " + listener, ex);
 			}
+		}
+	}
+
+	private void handleResponse(PlcAddressResponseListener listener, PlcAddressResponse response) {
+		try {
+			listener.handleResponse(response);
+		} catch (Exception e) {
+			logger.error("Failed to notify listener " + listener + " for response of " + response, e);
 		}
 	}
 
@@ -265,7 +273,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		else
 			value = valueJ.getAsString();
 
-		logger.info("Received notification for " + addressKey + ": " + value);
+		logger.info("Received notification for " + addressKey.toKey() + ": " + value);
 
 		MapOfLists<PlcAddressKey, PlcNotificationListener> plcListeners = this.plcAddressListenersByPlcId
 				.get(plcSession.plcId);
@@ -278,7 +286,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		synchronized (plcListeners) {
 			listeners = plcListeners.getList(addressKey);
 			if (listeners == null) {
-				logger.warn("No listeners for " + addressKey);
+				logger.warn("No listeners for " + addressKey.toKey());
 				return;
 			}
 		}
@@ -288,7 +296,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 			try {
 				listener.handleNotification(addressKey, value);
 			} catch (Exception e) {
-				logger.error("Failed to notify listener " + listener + " for " + addressKey, e);
+				logger.error("Failed to notify listener " + listener + " for " + addressKey.toKey(), e);
 			}
 		}
 	}
@@ -484,9 +492,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 			List<PlcNotificationListener> listenersCopy = new ArrayList<>(listeners);
 			for (PlcNotificationListener listener : listenersCopy) {
-				logger.warn(
-						"Notifying PlcNotificationListener " + addressKey.resource + "-" + addressKey.action + " with "
-								+ listener + " of connection lost!");
+				logger.warn("Notifying PlcNotificationListener " + addressKey + " with " + listener
+						+ " of connection lost!");
 				listener.handleConnectionLost();
 				plcAddressListeners.removeElement(addressKey, listener);
 			}

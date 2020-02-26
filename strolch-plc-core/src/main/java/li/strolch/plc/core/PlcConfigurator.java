@@ -129,7 +129,7 @@ class PlcConfigurator {
 
 		PlcAddress telegramAddress = new PlcAddress(PlcAddressType.Telegram, resource, action, address,
 				valueP.getValueType(), valueP.getValue(), false);
-		logger.info("Adding PlcTelegram " + telegramAddress + "...");
+		logger.info("Adding " + telegramAddress + "...");
 
 		PlcAddress replaced = plcTelegrams.addElement(resource, action, telegramAddress);
 		if (replaced != null)

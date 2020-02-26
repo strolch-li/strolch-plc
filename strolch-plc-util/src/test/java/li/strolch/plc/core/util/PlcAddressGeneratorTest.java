@@ -10,8 +10,8 @@ public class PlcAddressGeneratorTest {
 	public void shouldGenerate() throws IOException {
 
 		String templatesFile = "../example/Templates.xml";
-		String importFile = "../example/strolch-plc-example.csv";
-		String exportFile = "../example/strolch-plc-example.xml";
+		String importFile = "/home/eitch/src/git/mfs-soh/mfs-soh-plc/runtime/data/mfs-soh-plc.csv";
+		String exportFile = "/home/eitch/src/git/mfs-soh/mfs-soh-plc/runtime/data/mfs-soh-plc-generated.xml";
 
 		PlcAddressGenerator.main(new String[] { templatesFile, importFile, exportFile });
 	}

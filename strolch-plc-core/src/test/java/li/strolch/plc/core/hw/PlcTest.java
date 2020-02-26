@@ -66,7 +66,7 @@ public class PlcTest {
 	@Test
 	public void shouldTestConveyorOccupied() {
 		AtomicBoolean state = new AtomicBoolean(false);
-		plc.registerListener(positionOccupied, (key, value) -> state.set((Boolean) value));
+		plc.register(positionOccupied, (key, value) -> state.set((Boolean) value));
 		conveyorCon.notify("Conveyor.Occupied", true);
 		assertTrue(state.get());
 		conveyorCon.notify("Conveyor.Occupied", false);

@@ -290,7 +290,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 		try {
 			sendDataToClient(notificationJ);
 			if (this.verbose)
-				logger.info("Sent notification for " + plcAddress.resource + "-" + plcAddress.action + " to server");
+				logger.info("Sent notification for " + plcAddress.toKey() + " to server");
 		} catch (IOException e) {
 			logger.error("Failed to send notification to server", e);
 		}

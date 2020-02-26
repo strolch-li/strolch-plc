@@ -190,7 +190,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			plc = PlcConfigurator.configurePlc(tx, plcClassName, plcAddresses, plcTelegrams, addressesToResourceId);
 			plc.setConnectionStateChangeListener(this);
 			plcAddresses.values().stream().filter(a -> a.type == PlcAddressType.Notification)
-					.forEach(plcAddress -> plc.registerListener(plcAddress, this::asyncStateUpdate));
+					.forEach(plcAddress -> plc.register(plcAddress, this::asyncStateUpdate));
 
 			if (tx.needsCommit())
 				tx.commitOnClose();
@@ -292,7 +292,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		PlcAddress plcAddress = this.plcAddresses.getElement(resource, action);
 		if (plcAddress == null)
 			throw new IllegalStateException("No PlcAddress exists for " + resource + "-" + action);
-		this.plc.registerListener(plcAddress, listener);
+		this.plc.register(plcAddress, listener);
 	}
 
 	@Override
@@ -301,7 +301,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		if (plcAddress == null) {
 			logger.warn("No PlcAddress exists for " + resource + "-" + action);
 		} else {
-			this.plc.unregisterListener(plcAddress, listener);
+			this.plc.unregister(plcAddress, listener);
 		}
 	}
 

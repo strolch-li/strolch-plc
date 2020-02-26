@@ -94,7 +94,7 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 	}
 
 	@Override
-	public void notify(PlcAddressResponse response) {
+	public void handleResponse(PlcAddressResponse response) throws Exception {
 		throw new UnsupportedOperationException("Not implemented!");
 	}
 

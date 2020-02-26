@@ -16,8 +16,8 @@ public class PlcAddress {
 	public final Object defaultValue;
 	public final boolean inverted;
 
-	public PlcAddress(PlcAddressType type, String resource, String action, String address,
-			StrolchValueType valueType, Object defaultValue, boolean inverted) {
+	public PlcAddress(PlcAddressType type, String resource, String action, String address, StrolchValueType valueType,
+			Object defaultValue, boolean inverted) {
 		this.type = type;
 		this.resource = resource.intern();
 		this.action = action.intern();
@@ -50,7 +50,15 @@ public class PlcAddress {
 
 	@Override
 	public String toString() {
-		return "PlcAddress [" + "type='" + type + '\'' + ", resource='" + resource + '\'' + ", action='" + action + '\''
-				+ ", hwAddress='" + address + '\'' + ", valueType=" + valueType + ']';
+		return this.type + " " + this.resource + "-" + this.action + " " + this.valueType.getType() + " @ "
+				+ this.address;
+	}
+
+	public String toKey() {
+		return this.resource + "-" + this.action;
+	}
+
+	public String toKeyAddress() {
+		return this.resource + "-" + this.action + " @ " + this.address;
 	}
 }
