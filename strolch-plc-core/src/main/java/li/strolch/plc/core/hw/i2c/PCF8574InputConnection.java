@@ -18,7 +18,6 @@ import com.pi4j.io.i2c.I2CFactory;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 import li.strolch.plc.core.hw.gpio.PlcGpioController;
-import li.strolch.plc.model.ConnectionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +86,7 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 
 	@Override
 	public boolean connect() {
-		if (this.connectionState == ConnectionState.Connected) {
+		if (isConnected()) {
 			logger.warn(this.id + ": Already connected");
 			return true;
 		}

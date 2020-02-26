@@ -63,7 +63,7 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 
 	@Override
 	public boolean connect() {
-		if (this.connectionState == ConnectionState.Connected) {
+		if (isConnected()) {
 			logger.warn(this.id + ": Already connected");
 			return true;
 		}

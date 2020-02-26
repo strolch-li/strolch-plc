@@ -49,7 +49,7 @@ public abstract class PlcConnection {
 			throw new IllegalStateException("PlcConnection " + this.id + " is not yet connected!");
 	}
 
-	public boolean isConnectAtStartup() {
+	public boolean isAutoConnect() {
 		return true;
 	}
 

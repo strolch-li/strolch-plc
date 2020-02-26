@@ -2,6 +2,7 @@ package li.strolch.plc.core.hw.connections;
 
 import static java.util.Collections.singletonList;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
+import static li.strolch.utils.helper.StringHelper.isEmpty;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +17,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import li.strolch.plc.core.hw.Plc;
-import li.strolch.plc.model.ConnectionState;
 import li.strolch.utils.helper.AsciiHelper;
 
 public class DataLogicScannerConnection extends SimplePlcConnection {
@@ -39,7 +39,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	}
 
 	@Override
-	public boolean isConnectAtStartup() {
+	public boolean isAutoConnect() {
 		return false;
 	}
 
@@ -57,7 +57,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 	@Override
 	public boolean connect() {
-		if (getState() == ConnectionState.Connected)
+		if (isConnected())
 			return true;
 
 		try {
@@ -190,6 +190,9 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	public void send(String address, Object value) {
 
 		String command = (String) value;
+		if (isEmpty(command))
+			throw new IllegalArgumentException(
+					"PlcAddress " + address + " command empty. Must be one of " + CMD_START + " or " + CMD_STOP);
 
 		try {
 			switch (command) {
@@ -203,7 +206,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 				break;
 
 			case CMD_STOP:
-				if (getState() == ConnectionState.Connected) {
+				if (isConnected()) {
 					sendStopTrigger();
 					disconnect();
 				}

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import li.strolch.plc.model.ConnectionState;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressType;
 import li.strolch.utils.ExecutorPool;
@@ -106,15 +105,17 @@ public class DefaultPlc implements Plc {
 
 	private PlcConnection validateConnection(PlcAddress plcAddress) {
 		PlcConnection connection = getConnection(plcAddress);
-		if (connection.getState() == ConnectionState.Connected)
+		if (!connection.isAutoConnect() || connection.isConnected())
 			return connection;
 
 		connection.connect();
 
-		if (connection.getState() == ConnectionState.Connected)
+		if (connection.isConnected())
 			return connection;
 
-		throw new IllegalStateException("PlcConnection " + connection.getId() + " is disconnected for " + plcAddress);
+		throw new IllegalStateException(
+				"PlcConnection " + connection.getId() + " could not connect to " + plcAddress + " due to " + connection
+						.getStateMsg());
 	}
 
 	@Override
@@ -133,7 +134,7 @@ public class DefaultPlc implements Plc {
 	@Override
 	public void start() {
 		this.executorPool = new ExecutorPool();
-		this.connections.values().stream().filter(PlcConnection::isConnectAtStartup).forEach(PlcConnection::connect);
+		this.connections.values().stream().filter(PlcConnection::isAutoConnect).forEach(PlcConnection::connect);
 	}
 
 	@Override
