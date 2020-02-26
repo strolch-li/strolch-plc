@@ -150,8 +150,10 @@ public class PlcAddressGenerator {
 					int card = Integer.parseInt(device);
 					int io = Integer.parseInt(pin);
 
+					// the device ID must be subtracted, as this defines the actual card
+					int dev = Integer.parseInt(connection.substring(connection.length() - 2));
+					card -= dev;
 					// subtract, because pin 1 is actually 0
-					card -= 1;
 					io -= 1;
 
 					String address = connection + "." + card + "." + io;
@@ -195,8 +197,10 @@ public class PlcAddressGenerator {
 					int card = Integer.parseInt(device);
 					int io = Integer.parseInt(pin);
 
+					// the device ID must be subtracted, as this defines the actual card
+					int dev = Integer.parseInt(connection.substring(connection.length() - 2));
+					card -= dev;
 					// decrement, because pin 1 is actually 0
-					card -= 1;
 					io -= 1;
 
 					String address = connection + "." + card + "." + io;
