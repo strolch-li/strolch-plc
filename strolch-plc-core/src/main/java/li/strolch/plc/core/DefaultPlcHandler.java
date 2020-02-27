@@ -1,8 +1,10 @@
 package li.strolch.plc.core;
 
 import static java.lang.System.nanoTime;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
 import static li.strolch.plc.model.PlcConstants.*;
+import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 import static li.strolch.utils.helper.StringHelper.formatNanoDuration;
 
@@ -183,7 +185,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			throws Exception {
 
 		Plc plc;
-		try (StrolchTransaction tx = openTx(ctx.getCertificate(), true)) {
+		try (StrolchTransaction tx = openTx(ctx.getCertificate(), getCallerMethod(), true)) {
 
 			String plcClassName = getConfiguration().getString("plcClass", DefaultPlc.class.getName());
 
@@ -218,24 +220,23 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			return;
 		}
 
-		try {
-			try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), "updatePlcAddress", false)) {
-				tx.lock(Resource.locatorFor(TYPE_PLC_ADDRESS, addressId));
-				Resource addressRes = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
+		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false)
+				.silentThreshold(10, MILLISECONDS)) {
+			tx.lock(Resource.locatorFor(TYPE_PLC_ADDRESS, addressId));
+			Resource addressRes = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
 
-				// see if we need to invert a boolean flag
-				if (address.valueType == StrolchValueType.BOOLEAN && address.inverted)
-					value = !((boolean) value);
+			// see if we need to invert a boolean flag
+			if (address.valueType == StrolchValueType.BOOLEAN && address.inverted)
+				value = !((boolean) value);
 
-				Parameter<?> valueP = addressRes.getParameter(PARAM_VALUE, true);
-				if (this.verbose)
-					logger.info("PlcAddress {}-{} has changed from {} to {}", address.resource, address.action,
-							valueP.getValue(), value);
+			Parameter<?> valueP = addressRes.getParameter(PARAM_VALUE, true);
+			if (this.verbose)
+				logger.info("PlcAddress {}-{} has changed from {} to {}", address.resource, address.action,
+						valueP.getValue(), value);
 
-				valueP.accept(new SetParameterValueVisitor(value));
-				tx.update(addressRes);
-				tx.commitOnClose();
-			}
+			valueP.accept(new SetParameterValueVisitor(value));
+			tx.update(addressRes);
+			tx.commitOnClose();
 		} catch (Exception e) {
 			logger.error("Failed to update PlcAddress " + addressId + " with new value " + value, e);
 		}
@@ -249,14 +250,13 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		if (this.verbose)
 			s = nanoTime();
 
-		try {
-			try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), "updateConnectionState", false)) {
-				tx.lock(Resource.locatorFor(TYPE_PLC_CONNECTION, plcConnection.getId()));
-				Resource connection = tx.getResourceBy(TYPE_PLC_CONNECTION, plcConnection.getId());
-				updateConnectionState(tx, connection, plcConnection);
-				tx.update(connection);
-				tx.commitOnClose();
-			}
+		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false)
+				.silentThreshold(10, MILLISECONDS)) {
+			tx.lock(Resource.locatorFor(TYPE_PLC_CONNECTION, plcConnection.getId()));
+			Resource connection = tx.getResourceBy(TYPE_PLC_CONNECTION, plcConnection.getId());
+			updateConnectionState(tx, connection, plcConnection);
+			tx.update(connection);
+			tx.commitOnClose();
 		} catch (Exception e) {
 			logger.error("Failed to update state for connection " + plcConnection.getId(), e);
 		}
