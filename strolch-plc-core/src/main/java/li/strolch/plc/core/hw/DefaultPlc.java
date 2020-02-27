@@ -60,13 +60,18 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void notify(String address, Object value) {
+		notify(address, value, true);
+	}
+
+	private void notify(String address, Object value, boolean verbose) {
 		PlcAddress plcAddress = this.notificationMappings.get(address);
 		if (plcAddress == null) {
 			logger.warn("No mapping to PlcAddress for hwAddress " + address);
 			return;
 		}
 
-		logger.info("Update for {} with value {}", plcAddress.toKey(), value);
+		if (verbose)
+			logger.info("Update for {} with value {}", plcAddress.toKey(), value);
 
 		List<PlcListener> listeners = this.listeners.getList(plcAddress);
 		if (listeners == null || listeners.isEmpty()) {
@@ -87,20 +92,18 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void send(PlcAddress plcAddress) {
-		if (this.verbose)
-			logger.info("Sending {}: {} (default)", plcAddress.toKey(), plcAddress.defaultValue);
+		logger.info("Sending {}: {} (default)", plcAddress.toKey(), plcAddress.defaultValue);
 		if (!isVirtual(plcAddress))
 			validateConnection(plcAddress).send(plcAddress.address, plcAddress.defaultValue);
-		notify(plcAddress.address, plcAddress.defaultValue);
+		notify(plcAddress.address, plcAddress.defaultValue, false);
 	}
 
 	@Override
 	public void send(PlcAddress plcAddress, Object value) {
-		if (this.verbose)
-			logger.info("Sending {}: {}", plcAddress.toKey(), value);
+		logger.info("Sending {}: {}", plcAddress.toKey(), value);
 		if (!isVirtual(plcAddress))
 			validateConnection(plcAddress).send(plcAddress.address, value);
-		notify(plcAddress.address, value);
+		notify(plcAddress.address, value, false);
 	}
 
 	private PlcConnection validateConnection(PlcAddress plcAddress) {

@@ -55,8 +55,8 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 			throw new IllegalArgumentException("Missing param interruptPinPullResistance");
 		if (!parameters.containsKey("interruptBcmPinAddress"))
 			throw new IllegalArgumentException("Missing param interruptBcmPinAddress");
-		this.verbose = parameters.containsKey("verbose") && (Boolean) parameters.get("verbose");
 
+		this.verbose = parameters.containsKey("verbose") && (Boolean) parameters.get("verbose");
 		this.i2cBusNr = (int) parameters.get("i2cBus");
 		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
 

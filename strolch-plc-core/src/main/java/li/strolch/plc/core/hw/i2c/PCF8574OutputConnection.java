@@ -20,6 +20,7 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 
 	private static final Logger logger = LoggerFactory.getLogger(PCF8574OutputConnection.class);
 
+	private boolean verbose;
 	private int i2cBusNr;
 	private boolean inverted;
 
@@ -41,6 +42,7 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 		if (!parameters.containsKey("addresses"))
 			throw new IllegalArgumentException("Missing param addresses");
 
+		this.verbose = parameters.containsKey("verbose") && (Boolean) parameters.get("verbose");
 		this.i2cBusNr = (int) parameters.get("i2cBus");
 		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
 
@@ -155,6 +157,9 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 				newState = clearBit(this.states[device], pin);
 			else
 				newState = setBit(this.states[device], pin);
+
+			if (this.verbose)
+				logger.info("Setting 0x" + toHexString((byte) device) + " to new state " + asBinary(newState));
 
 			this.outputDevices[device].write(newState);
 			this.states[device] = newState;
