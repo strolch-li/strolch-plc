@@ -1,8 +1,6 @@
 package li.strolch.plc.core.hw.connections;
 
-import static java.util.Collections.singletonList;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
-import static li.strolch.utils.helper.StringHelper.isEmpty;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,8 +21,10 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 	public static final String NO_CONNECTION = "*NoConnection*";
 	public static final String NO_READ = "*NoRead*";
-	public static final String CMD_START = "Start";
-	public static final String CMD_STOP = "Stop";
+
+	private static final String ADDR_TRIGGER = ".trigger";
+	private static final String ADDR_BARCODE = ".barcode";
+
 	private InetAddress address;
 	private int port;
 	private int readTimeout;
@@ -33,9 +33,15 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	private boolean triggered;
 	private boolean read;
 	private Future<?> readTask;
+	private HashSet<String> addresses;
+
+	private final String addressTrigger;
+	private final String addressBarcode;
 
 	public DataLogicScannerConnection(Plc plc, String id) {
 		super(plc, id);
+		this.addressTrigger = id + ADDR_TRIGGER;
+		this.addressBarcode = id + ADDR_BARCODE;
 	}
 
 	@Override
@@ -51,6 +57,10 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 		this.address = Inet4Address.getByName(parts[0]);
 		this.port = Integer.parseInt(parts[1]);
 		this.readTimeout = (int) parameters.get("readTimeout");
+
+		this.addresses = new HashSet<>();
+		this.addresses.add(this.addressTrigger);
+		this.addresses.add(this.addressBarcode);
 
 		logger.info("Configured DataLogic Scanner connection to " + this.address + ":" + this.port);
 	}
@@ -104,6 +114,11 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 		}
 	}
 
+	@Override
+	public Set<String> getAddresses() {
+		return this.addresses;
+	}
+
 	private void sendStartTrigger() throws IOException {
 		this.triggered = true;
 		this.socket.getOutputStream().write('T');
@@ -112,6 +127,35 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	private void sendStopTrigger() throws IOException {
 		this.triggered = false;
 		this.socket.getOutputStream().write('S');
+	}
+
+	@Override
+	public void send(String address, Object value) {
+		if (!this.addressTrigger.equals(address))
+			throw new IllegalStateException("Illegal Address " + address);
+
+		boolean trigger = (boolean) value;
+
+		try {
+			if (trigger) {
+				if (!connect())
+					throw new IllegalStateException("Could not connect to " + this.address + ":" + this.port);
+				sendStartTrigger();
+			} else {
+				if (isConnected()) {
+					sendStopTrigger();
+					disconnect();
+				}
+			}
+
+		} catch (IOException e) {
+			handleBrokenConnection(
+					"Failed to handle address " + address + " for " + this.address + ":" + this.port + ": "
+							+ getExceptionMessageWithCauses(e), e);
+
+			throw new IllegalStateException(
+					"Failed to handle address " + address + " for " + this.address + ":" + this.port, e);
+		}
 	}
 
 	private void read() {
@@ -152,13 +196,13 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 					String barcode = sb.toString();
 					logger.info("Received barcode " + barcode);
-					notify(this.id, barcode);
+					notify(this.addressBarcode, barcode);
 				}
 
 			} catch (Exception e) {
 				if (e instanceof SocketTimeoutException) {
 					if (this.triggered) {
-						notify(this.id, NO_READ);
+						notify(this.addressBarcode, NO_READ);
 						try {
 							sendStopTrigger();
 						} catch (IOException ex) {
@@ -171,11 +215,11 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 					} else {
 						logger.warn("Timeout while reading from scanner at " + this.address + ":" + this.port
 								+ ". Disconnected.");
-						notify(this.id, NO_CONNECTION);
+						notify(this.addressBarcode, NO_CONNECTION);
 						disconnect();
 					}
 				} else {
-					notify(this.id, NO_CONNECTION);
+					notify(this.addressBarcode, NO_CONNECTION);
 					internalDisconnect();
 					handleBrokenConnection("Failed to connect to " + this.address + ":" + this.port + ": "
 							+ getExceptionMessageWithCauses(e), e);
@@ -184,50 +228,5 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 		}
 
 		logger.info("Stopped reading from " + this.address + ":" + this.port);
-	}
-
-	@Override
-	public void send(String address, Object value) {
-
-		String command = (String) value;
-		if (isEmpty(command))
-			throw new IllegalArgumentException(
-					"PlcAddress " + address + " command empty. Must be one of " + CMD_START + " or " + CMD_STOP);
-
-		try {
-			switch (command) {
-
-			case CMD_START:
-
-				if (!connect())
-					throw new IllegalStateException("Could not connect to " + this.address + ":" + this.port);
-				sendStartTrigger();
-
-				break;
-
-			case CMD_STOP:
-				if (isConnected()) {
-					sendStopTrigger();
-					disconnect();
-				}
-				break;
-
-			default:
-				throw new IllegalStateException(
-						"Unhandled command " + command + ". Must be one of " + CMD_START + " or " + CMD_STOP);
-			}
-
-		} catch (IOException e) {
-			handleBrokenConnection("Failed to send command " + command + " to " + this.address + ":" + this.port + ": "
-					+ getExceptionMessageWithCauses(e), e);
-
-			throw new IllegalStateException(
-					"Failed to send command " + command + " to " + this.address + ":" + this.port, e);
-		}
-	}
-
-	@Override
-	public Set<String> getAddresses() {
-		return new HashSet<>(singletonList(this.id));
 	}
 }

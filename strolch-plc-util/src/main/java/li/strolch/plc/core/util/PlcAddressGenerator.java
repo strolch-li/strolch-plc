@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,7 +77,7 @@ public class PlcAddressGenerator {
 		addressT.setType(addressT.getId());
 		telegramT.setType(telegramT.getId());
 
-		Map<String, Resource> exportList = new HashMap<>();
+		Map<String, Resource> exportList = new LinkedHashMap<>();
 
 		CSVFormat csvFormat = CSVFormat.DEFAULT.withFirstRecordAsHeader();
 		try (InputStream in = new FileInputStream(importFile);
@@ -400,58 +400,109 @@ public class PlcAddressGenerator {
 						throw new IllegalArgumentException(
 								"Unhandled virtual connection " + connection + " for " + resource + "-" + action1);
 					}
-				} else if (type.equals("BarcodeReader")) {
+				} else if (type.equals("DataLogicScanner")) {
 
 					if (isEmpty(resource))
 						throw new IllegalStateException("resource missing for: " + record);
-					if (isEmpty(action1))
-						throw new IllegalStateException("action1 missing for: " + record);
-					if (isEmpty(connection))
-						throw new IllegalStateException("connection missing for: " + record);
 					if (logicalDevice == null)
 						throw new IllegalStateException(
 								"No PlcLogicalDevice exists for address with keys " + resource + "-" + action1);
 
-					// address for barcode reader
-					Resource addressR = addressT.getClone();
+					Resource addressR;
+					Resource telegramR;
+
+					// address for barcode
+					key = resource + "-Barcode";
+					keyName = resource + " - Barcode";
+					addressR = addressT.getClone();
 					addressR.setId("A_" + key);
 					addressR.setName(keyName);
 
 					addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					addressR.getParameter(PARAM_ADDRESS, true).setValue(connection);
+					addressR.getParameter(PARAM_ADDRESS, true).setValue(connection + ".barcode");
 					addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					addressR.getParameter(PARAM_ACTION, true).setValue(action1);
+					addressR.getParameter(PARAM_ACTION, true).setValue("Barcode");
 
 					addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
 					addressIndex += 10;
 
-					StringParameter valueP = new StringParameter(PARAM_VALUE, "Value", action2);
+					StringParameter valueP = new StringParameter(PARAM_VALUE, "Value", "");
 					valueP.setIndex(100);
 					addressR.addParameter(valueP);
 
 					add(exportList, addressR);
 					logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
-					logger.info("Added PlcAddress " + addressR.getId() + " " + addressR.getName() + " for connection "
-							+ connection);
+					logger.info("Added DataLogicScanner PlcAddress " + addressR.getId() + " " + addressR.getName()
+							+ " for connection " + connection);
 
-					// telegram for barcode reader
-					Resource telegramR = telegramT.getClone();
+					// address for on
+					key = resource + "-On";
+					keyName = resource + " - On";
+					addressR = addressT.getClone();
+					addressR.setId("A_" + key);
+					addressR.setName(keyName);
+
+					addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
+					addressR.getParameter(PARAM_ADDRESS, true).setValue(connection + ".trigger");
+					addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
+					addressR.getParameter(PARAM_ACTION, true).setValue("On");
+
+					addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+					addressIndex += 10;
+
+					BooleanParameter booleanValueP = new BooleanParameter(PARAM_VALUE, "Value", false);
+					booleanValueP.setIndex(100);
+					addressR.addParameter(booleanValueP);
+
+					add(exportList, addressR);
+					logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+					logger.info("Added DataLogicScanner PlcAddress " + addressR.getId() + " " + addressR.getName()
+							+ " for connection " + connection);
+
+					// telegram for trigger on
+					telegramR = telegramT.getClone();
 					telegramR.setId("T_" + key);
 					telegramR.setName(keyName);
 
 					telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection);
+					telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection + ".trigger");
 					telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					telegramR.getParameter(PARAM_ACTION, true).setValue(action1);
+					telegramR.getParameter(PARAM_ACTION, true).setValue("On");
 
 					telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
 					telegramIndex += 10;
 
-					telegramR.addParameter(valueP.getClone());
+					booleanValueP = new BooleanParameter(PARAM_VALUE, "Value", true);
+					booleanValueP.setIndex(100);
+					telegramR.addParameter(booleanValueP);
 
 					add(exportList, telegramR);
 					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
-					logger.info("Added Barcode PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
+					logger.info("Added DataLogicScanner PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
+							+ " for connection " + connection);
+
+					// telegram for trigger off
+					key = resource + "-Off";
+					keyName = resource + " - Off";
+					telegramR = telegramT.getClone();
+					telegramR.setId("T_" + key);
+					telegramR.setName(keyName);
+
+					telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
+					telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection + ".trigger");
+					telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
+					telegramR.getParameter(PARAM_ACTION, true).setValue("Off");
+
+					telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+					telegramIndex += 10;
+
+					booleanValueP = new BooleanParameter(PARAM_VALUE, "Value", false);
+					booleanValueP.setIndex(100);
+					telegramR.addParameter(booleanValueP);
+
+					add(exportList, telegramR);
+					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+					logger.info("Added DataLogicScanner PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 							+ " for connection " + connection);
 
 				} else {
