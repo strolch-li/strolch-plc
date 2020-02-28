@@ -192,7 +192,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			plc = PlcConfigurator.configurePlc(tx, plcClassName, plcAddresses, plcTelegrams, addressesToResourceId);
 			plc.setConnectionStateChangeListener(this);
 			plcAddresses.values().stream().filter(a -> a.type == PlcAddressType.Notification)
-					.forEach(plcAddress -> plc.register(plcAddress, this::asyncStateUpdate));
+					.forEach(plcAddress -> plc.register(plcAddress, this::asyncUpdateState));
 
 			if (tx.needsCommit())
 				tx.commitOnClose();
@@ -201,11 +201,11 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		return plc;
 	}
 
-	private void asyncStateUpdate(PlcAddress address, Object value) {
+	private void asyncUpdateState(PlcAddress address, Object value) {
 		getExecutorService("PlcAddressUpdater").submit(() -> updatePlcAddress(address, value));
 	}
 
-	private void asyncStateUpdate(PlcConnection connection) {
+	private void asyncUpdateState(PlcConnection connection) {
 		getExecutorService("PlcConnectionUpdater").submit(() -> updateConnectionState(connection));
 	}
 
@@ -315,7 +315,6 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			throw new IllegalStateException("Can not send PlcAddress as no default value set for " + plcAddress);
 
 		this.plc.send(plcAddress);
-		asyncStateUpdate(plcAddress, plcAddress.defaultValue);
 	}
 
 	@Override
@@ -325,7 +324,6 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			throw new IllegalStateException("No PlcTelegram exists for " + resource + "-" + action);
 
 		this.plc.send(plcAddress, value);
-		asyncStateUpdate(plcAddress, value);
 	}
 
 	@Override
@@ -348,6 +346,6 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 	@Override
 	public void notifyStateChange(PlcConnection connection) {
-		asyncStateUpdate(connection);
+		asyncUpdateState(connection);
 	}
 }
