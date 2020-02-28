@@ -1,14 +1,9 @@
 package li.strolch.plc.core.service;
 
-import static li.strolch.plc.model.PlcConstants.TYPE_PLC_CONNECTION;
-
-import li.strolch.plc.model.ConnectionState;
+import li.strolch.model.Tags;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.hw.PlcConnection;
-import li.strolch.model.Resource;
-import li.strolch.model.Tags;
-import li.strolch.persistence.api.Operation;
-import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.model.ConnectionState;
 import li.strolch.service.StringMapArgument;
 import li.strolch.service.api.AbstractService;
 import li.strolch.service.api.ServiceResult;
@@ -39,20 +34,14 @@ public class SetPlcConnectionStateService extends AbstractService<StringMapArgum
 			throw new IllegalArgumentException(
 					"Only " + ConnectionState.Connected + " and " + ConnectionState.Disconnected + " states allowed!");
 
-		try (StrolchTransaction tx = openArgOrUserTx(arg)) {
+		PlcHandler plcHandler = getComponent(PlcHandler.class);
+		PlcConnection plcConnection = plcHandler.getPlc().getConnection(id);
 
-			Resource connectionRes = tx.getResourceBy(TYPE_PLC_CONNECTION, id, true);
-			tx.assertHasPrivilege(Operation.UPDATE, connectionRes);
+		if (state == ConnectionState.Connected)
+			plcConnection.connect();
+		else
+			plcConnection.disconnect();
 
-			PlcHandler plcHandler = getComponent(PlcHandler.class);
-			PlcConnection plcConnection = plcHandler.getPlc().getConnection(connectionRes.getId());
-
-			if (state == ConnectionState.Connected)
-				plcConnection.connect();
-			else
-				plcConnection.disconnect();
-
-			return ServiceResult.success();
-		}
+		return ServiceResult.success();
 	}
 }
