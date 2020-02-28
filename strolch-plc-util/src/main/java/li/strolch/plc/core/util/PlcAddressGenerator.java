@@ -233,8 +233,8 @@ public class PlcAddressGenerator {
 
 					// action2 value
 					telegramR = telegramT.getClone();
-					telegramR.setId("T_" + resource + action2);
-					telegramR.setName(keyName);
+					telegramR.setId("T_" + resource + "-" + action2);
+					telegramR.setName(resource + " - " + action2);
 
 					telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
 					telegramR.getParameter(PARAM_ADDRESS, true).setValue(address);
