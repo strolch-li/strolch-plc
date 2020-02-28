@@ -221,7 +221,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		}
 
 		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false)
-				.silentThreshold(10, MILLISECONDS)) {
+				.silentThreshold(100, MILLISECONDS)) {
 			tx.lock(Resource.locatorFor(TYPE_PLC_ADDRESS, addressId));
 			Resource addressRes = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
 
@@ -251,7 +251,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			s = nanoTime();
 
 		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false)
-				.silentThreshold(10, MILLISECONDS)) {
+				.silentThreshold(100, MILLISECONDS)) {
 			tx.lock(Resource.locatorFor(TYPE_PLC_CONNECTION, plcConnection.getId()));
 			Resource connection = tx.getResourceBy(TYPE_PLC_CONNECTION, plcConnection.getId());
 			updateConnectionState(tx, connection, plcConnection);
