@@ -7,8 +7,8 @@
       <Parameter Id="index" Name="Index" Type="Integer" Index="30" Value="10"/>
     </ParameterBag>
     <ParameterBag Id="relations" Name="Relations" Type="Relations">
-      <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Index="10" Value="A_Conveyor01-Occupied, A_Conveyor02-Occupied, A_Conveyor03-Occupied, A_Conveyor04-Occupied, A_Conveyor01-MotorOn, A_Conveyor02-MotorOn, A_Conveyor03-MotorOn, A_Conveyor04-MotorOn, A_Conveyor03-Barcode"/>
-      <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Index="20" Value="T_Conveyor01-MotorOn, T_Conveyor01MotorOff, T_Conveyor02-MotorOn, T_Conveyor02MotorOff, T_Conveyor03-MotorOn, T_Conveyor03MotorOff, T_Conveyor04-MotorOn, T_Conveyor04MotorOff, T_Conveyor03-Barcode"/>
+      <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Index="10" Value="A_Conveyor01-Occupied, A_Conveyor02-Occupied, A_Conveyor03-Occupied, A_Conveyor04-Occupied, A_Conveyor01-MotorOn, A_Conveyor02-MotorOn, A_Conveyor03-MotorOn, A_Conveyor04-MotorOn, A_Conveyor03-Barcode, A_Conveyor03-On"/>
+      <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Index="20" Value="T_Conveyor01-MotorOn, T_Conveyor01-MotorOff, T_Conveyor02-MotorOn, T_Conveyor02-MotorOff, T_Conveyor03-MotorOn, T_Conveyor03-MotorOff, T_Conveyor04-MotorOn, T_Conveyor04-MotorOff, T_Conveyor03-On, T_Conveyor03-Off"/>
     </ParameterBag>
   </Resource>
   <Resource Id="A_Conveyor01-Occupied" Name="Conveyor01 - Occupied" Type="PlcAddress">
@@ -61,7 +61,7 @@
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
     </ParameterBag>
   </Resource>
-  <Resource Id="T_Conveyor01MotorOff" Name="Conveyor01 - MotorOn" Type="PlcTelegram">
+  <Resource Id="T_Conveyor01-MotorOff" Name="Conveyor01 - MotorOff" Type="PlcTelegram">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
       <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Conveyor 1"/>
       <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.0"/>
@@ -91,7 +91,7 @@
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
     </ParameterBag>
   </Resource>
-  <Resource Id="T_Conveyor02MotorOff" Name="Conveyor02 - MotorOn" Type="PlcTelegram">
+  <Resource Id="T_Conveyor02-MotorOff" Name="Conveyor02 - MotorOff" Type="PlcTelegram">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
       <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Conveyor 2"/>
       <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.1"/>
@@ -121,7 +121,7 @@
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
     </ParameterBag>
   </Resource>
-  <Resource Id="T_Conveyor03MotorOff" Name="Conveyor03 - MotorOn" Type="PlcTelegram">
+  <Resource Id="T_Conveyor03-MotorOff" Name="Conveyor03 - MotorOff" Type="PlcTelegram">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
       <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Conveyor 3"/>
       <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.2"/>
@@ -151,7 +151,7 @@
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
     </ParameterBag>
   </Resource>
-  <Resource Id="T_Conveyor04MotorOff" Name="Conveyor04 - MotorOn" Type="PlcTelegram">
+  <Resource Id="T_Conveyor04-MotorOff" Name="Conveyor04 - MotorOff" Type="PlcTelegram">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
       <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Conveyor 4"/>
       <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.3"/>
@@ -173,22 +173,42 @@
   </Resource>
   <Resource Id="A_Conveyor03-Barcode" Name="Conveyor03 - Barcode" Type="PlcAddress">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="BarcodeReader"/>
-      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="DataLogicScanner"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01.barcode"/>
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Barcode"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="90"/>
-      <Parameter Id="value" Name="Value" Type="String" Index="100" Value="ReadBarcode"/>
+      <Parameter Id="value" Name="Value" Type="String" Index="100" Value=""/>
     </ParameterBag>
   </Resource>
-  <Resource Id="T_Conveyor03-Barcode" Name="Conveyor03 - Barcode" Type="PlcTelegram">
+  <Resource Id="A_Conveyor03-On" Name="Conveyor03 - On" Type="PlcAddress">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="BarcodeReader"/>
-      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="DataLogicScanner"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01.trigger"/>
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
-      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Barcode"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="100"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Conveyor03-On" Name="Conveyor03 - On" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="DataLogicScanner"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01.trigger"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="On"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="90"/>
-      <Parameter Id="value" Name="Value" Type="String" Index="100" Value="ReadBarcode"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Conveyor03-Off" Name="Conveyor03 - Off" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="DataLogicScanner"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01.trigger"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Off"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="100"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
 </StrolchModel>
