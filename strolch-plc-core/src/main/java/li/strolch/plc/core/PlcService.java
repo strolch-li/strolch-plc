@@ -2,6 +2,7 @@ package li.strolch.plc.core;
 
 import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
+import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -81,7 +82,7 @@ public abstract class PlcService implements PlcListener {
 	}
 
 	protected StrolchTransaction openTx(PrivilegeContext ctx, boolean readOnly) {
-		return this.container.getRealm(ctx.getCertificate()).openTx(ctx.getCertificate(), getClass(), readOnly);
+		return this.container.getRealm(ctx.getCertificate()).openTx(ctx.getCertificate(), getCallerMethod(2), readOnly);
 	}
 
 	protected void runAsAgent(PrivilegedRunnable runnable) throws Exception {
