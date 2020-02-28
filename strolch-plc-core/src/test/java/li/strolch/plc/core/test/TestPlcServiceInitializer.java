@@ -17,8 +17,8 @@ public class TestPlcServiceInitializer extends PlcServiceInitializer {
 	@Override
 	protected List<PlcService> getPlcServices(PlcHandler plcHandler) {
 		ArrayList<PlcService> plcServices = new ArrayList<>();
-		plcServices.add(new StartupPlcService(getContainer(), plcHandler));
-		plcServices.add(new TogglePlcService(getContainer(), plcHandler));
+		plcServices.add(new StartupPlcService(plcHandler));
+		plcServices.add(new TogglePlcService(plcHandler));
 		return plcServices;
 	}
 }

@@ -41,7 +41,7 @@ public class PlcAddressKey {
 		return result;
 	}
 
-	public static PlcAddressKey valueOf(String resource, String action) {
+	public static PlcAddressKey keyFor(String resource, String action) {
 		return new PlcAddressKey(resource, action);
 	}
 }

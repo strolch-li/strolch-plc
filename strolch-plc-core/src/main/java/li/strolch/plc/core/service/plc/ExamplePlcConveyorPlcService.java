@@ -2,7 +2,6 @@ package li.strolch.plc.core.service.plc;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import li.strolch.agent.api.ComponentContainer;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.PlcService;
@@ -35,8 +34,8 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 	private AtomicBoolean conveyor2WaitingForTransfer;
 	private AtomicBoolean conveyor3WaitingForTransfer;
 
-	public ExamplePlcConveyorPlcService(ComponentContainer container, PlcHandler plcHandler) {
-		super(container, plcHandler);
+	public ExamplePlcConveyorPlcService(PlcHandler plcHandler) {
+		super(plcHandler);
 
 		this.conveyor1WaitingForTransfer = new AtomicBoolean(false);
 		this.conveyor2WaitingForTransfer = new AtomicBoolean(false);
@@ -221,23 +220,23 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 
 	@Override
 	public void register() {
-		this.plcHandler.registerListener(R_CONVEYOR_01, A_OCCUPIED, this);
-		this.plcHandler.registerListener(R_CONVEYOR_02, A_OCCUPIED, this);
-		this.plcHandler.registerListener(R_CONVEYOR_03, A_OCCUPIED, this);
-		this.plcHandler.registerListener(R_CONVEYOR_04, A_OCCUPIED, this);
+		this.plcHandler.register(R_CONVEYOR_01, A_OCCUPIED, this);
+		this.plcHandler.register(R_CONVEYOR_02, A_OCCUPIED, this);
+		this.plcHandler.register(R_CONVEYOR_03, A_OCCUPIED, this);
+		this.plcHandler.register(R_CONVEYOR_04, A_OCCUPIED, this);
 
-		this.plcHandler.registerListener(R_CONVEYOR_03, A_BARCODE, this);
+		this.plcHandler.register(R_CONVEYOR_03, A_BARCODE, this);
 		super.register();
 	}
 
 	@Override
 	public void unregister() {
-		this.plcHandler.unregisterListener(R_CONVEYOR_01, A_OCCUPIED, this);
-		this.plcHandler.unregisterListener(R_CONVEYOR_02, A_OCCUPIED, this);
-		this.plcHandler.unregisterListener(R_CONVEYOR_03, A_OCCUPIED, this);
-		this.plcHandler.unregisterListener(R_CONVEYOR_04, A_OCCUPIED, this);
+		this.plcHandler.unregister(R_CONVEYOR_01, A_OCCUPIED, this);
+		this.plcHandler.unregister(R_CONVEYOR_02, A_OCCUPIED, this);
+		this.plcHandler.unregister(R_CONVEYOR_03, A_OCCUPIED, this);
+		this.plcHandler.unregister(R_CONVEYOR_04, A_OCCUPIED, this);
 
-		this.plcHandler.unregisterListener(R_CONVEYOR_03, A_BARCODE, this);
+		this.plcHandler.unregister(R_CONVEYOR_03, A_BARCODE, this);
 		super.unregister();
 	}
 

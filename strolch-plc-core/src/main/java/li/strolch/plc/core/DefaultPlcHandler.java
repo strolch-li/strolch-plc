@@ -46,6 +46,11 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	@Override
+	public ComponentContainer getContainer() {
+		return super.getContainer();
+	}
+
+	@Override
 	public Plc getPlc() {
 		return this.plc;
 	}
@@ -288,7 +293,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	@Override
-	public void registerListener(String resource, String action, PlcListener listener) {
+	public void register(String resource, String action, PlcListener listener) {
 		PlcAddress plcAddress = this.plcAddresses.getElement(resource, action);
 		if (plcAddress == null)
 			throw new IllegalStateException("No PlcAddress exists for " + resource + "-" + action);
@@ -296,7 +301,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	@Override
-	public void unregisterListener(String resource, String action, PlcListener listener) {
+	public void unregister(String resource, String action, PlcListener listener) {
 		PlcAddress plcAddress = this.plcAddresses.getElement(resource, action);
 		if (plcAddress == null) {
 			logger.warn("No PlcAddress exists for " + resource + "-" + action);

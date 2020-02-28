@@ -1,5 +1,6 @@
 package li.strolch.plc.core;
 
+import li.strolch.agent.api.ComponentContainer;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.PlcListener;
@@ -8,6 +9,8 @@ import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.Certificate;
 
 public interface PlcHandler {
+
+	ComponentContainer getContainer();
 
 	PlcState getPlcState();
 
@@ -27,9 +30,9 @@ public interface PlcHandler {
 
 	void setGlobalListener(PlcListener listener);
 
-	void registerListener(String resource, String action, PlcListener listener);
+	void register(String resource, String action, PlcListener listener);
 
-	void unregisterListener(String resource, String action, PlcListener listener);
+	void unregister(String resource, String action, PlcListener listener);
 
 	void send(String resource, String action);
 

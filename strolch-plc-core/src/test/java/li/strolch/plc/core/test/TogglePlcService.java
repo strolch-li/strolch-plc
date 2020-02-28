@@ -3,7 +3,6 @@ package li.strolch.plc.core.test;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import li.strolch.agent.api.ComponentContainer;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.PlcService;
@@ -18,8 +17,8 @@ public class TogglePlcService extends PlcService {
 	private boolean on;
 	private ScheduledFuture<?> toggler;
 
-	public TogglePlcService(ComponentContainer container, PlcHandler plcHandler) {
-		super(container, plcHandler);
+	public TogglePlcService(PlcHandler plcHandler) {
+		super(plcHandler);
 	}
 
 	@Override

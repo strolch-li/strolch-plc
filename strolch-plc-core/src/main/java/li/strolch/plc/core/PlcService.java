@@ -4,6 +4,7 @@ import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
 import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +14,7 @@ import li.strolch.agent.api.ComponentContainer;
 import li.strolch.model.Resource;
 import li.strolch.model.parameter.Parameter;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcServiceState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.privilege.PrivilegedRunnable;
@@ -28,8 +30,8 @@ public abstract class PlcService implements PlcListener {
 
 	private PlcServiceState state;
 
-	public PlcService(ComponentContainer container, PlcHandler plcHandler) {
-		this.container = container;
+	public PlcService(PlcHandler plcHandler) {
+		this.container = plcHandler.getContainer();
 		this.plcHandler = plcHandler;
 		this.state = PlcServiceState.Unregistered;
 	}
@@ -81,6 +83,10 @@ public abstract class PlcService implements PlcListener {
 		this.plcHandler.notify(resource, action, value);
 	}
 
+	protected PlcAddressKey keyFor(String resource, String action) {
+		return PlcAddressKey.keyFor(resource, action);
+	}
+
 	protected StrolchTransaction openTx(PrivilegeContext ctx, boolean readOnly) {
 		return this.container.getRealm(ctx.getCertificate()).openTx(ctx.getCertificate(), getCallerMethod(2), readOnly);
 	}
@@ -93,8 +99,22 @@ public abstract class PlcService implements PlcListener {
 		return this.container.getPrivilegeHandler().runAsAgentWithResult(runnable);
 	}
 
+	private ScheduledExecutorService getScheduledExecutor() {
+		return this.container.getAgent().getScheduledExecutor(PlcService.class.getSimpleName());
+	}
+
+	protected ScheduledFuture<?> schedule(Runnable runnable, long delay, TimeUnit delayUnit) {
+		return getScheduledExecutor().schedule(() -> {
+			try {
+				runnable.run();
+			} catch (Exception e) {
+				handleFailedSchedule(e);
+			}
+		}, delay, delayUnit);
+	}
+
 	protected ScheduledFuture<?> schedule(PrivilegedRunnable runnable, long delay, TimeUnit delayUnit) {
-		return this.container.getAgent().getScheduledExecutor(PlcService.class.getSimpleName()).schedule(() -> {
+		return getScheduledExecutor().schedule(() -> {
 			try {
 				this.container.getPrivilegeHandler().runAsAgent(runnable);
 			} catch (Exception e) {
@@ -103,28 +123,48 @@ public abstract class PlcService implements PlcListener {
 		}, delay, delayUnit);
 	}
 
+	protected ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long initialDelay, long period,
+			TimeUnit delayUnit) {
+		return getScheduledExecutor().scheduleAtFixedRate(() -> {
+			try {
+				runnable.run();
+			} catch (Exception e) {
+				handleFailedSchedule(e);
+			}
+		}, initialDelay, period, delayUnit);
+	}
+
 	protected ScheduledFuture<?> scheduleAtFixedRate(PrivilegedRunnable runnable, long initialDelay, long period,
 			TimeUnit delayUnit) {
-		return this.container.getAgent().getScheduledExecutor(PlcService.class.getSimpleName())
-				.scheduleAtFixedRate(() -> {
-					try {
-						this.container.getPrivilegeHandler().runAsAgent(runnable);
-					} catch (Exception e) {
-						handleFailedSchedule(e);
-					}
-				}, initialDelay, period, delayUnit);
+		return getScheduledExecutor().scheduleAtFixedRate(() -> {
+			try {
+				this.container.getPrivilegeHandler().runAsAgent(runnable);
+			} catch (Exception e) {
+				handleFailedSchedule(e);
+			}
+		}, initialDelay, period, delayUnit);
+	}
+
+	protected ScheduledFuture<?> scheduleWithFixedDelay(Runnable runnable, long initialDelay, long period,
+			TimeUnit delayUnit) {
+		return getScheduledExecutor().scheduleWithFixedDelay(() -> {
+			try {
+				runnable.run();
+			} catch (Exception e) {
+				handleFailedSchedule(e);
+			}
+		}, initialDelay, period, delayUnit);
 	}
 
 	protected ScheduledFuture<?> scheduleWithFixedDelay(PrivilegedRunnable runnable, long initialDelay, long period,
 			TimeUnit delayUnit) {
-		return this.container.getAgent().getScheduledExecutor(PlcService.class.getSimpleName())
-				.scheduleWithFixedDelay(() -> {
-					try {
-						this.container.getPrivilegeHandler().runAsAgent(runnable);
-					} catch (Exception e) {
-						handleFailedSchedule(e);
-					}
-				}, initialDelay, period, delayUnit);
+		return getScheduledExecutor().scheduleWithFixedDelay(() -> {
+			try {
+				this.container.getPrivilegeHandler().runAsAgent(runnable);
+			} catch (Exception e) {
+				handleFailedSchedule(e);
+			}
+		}, initialDelay, period, delayUnit);
 	}
 
 	protected void handleFailedSchedule(Exception e) {

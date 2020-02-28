@@ -73,7 +73,7 @@ public class PlcHandlerTest {
 
 		PlcHandler plcHandler = runtimeMock.getComponent(PlcHandler.class);
 		AtomicReference<String> value = new AtomicReference<>("");
-		plcHandler.registerListener("BarcodeReader", "Barcode", (address, v) -> value.set((String) v));
+		plcHandler.register("BarcodeReader", "Barcode", (address, v) -> value.set((String) v));
 		plcHandler.send("BarcodeReader", "ReadBarcode", "DoRead");
 		assertNotEquals("", value.get());
 	}
@@ -90,7 +90,7 @@ public class PlcHandlerTest {
 		}
 		assertEquals(false, value.get());
 
-		plcHandler.registerListener("PLC", "Running", (address, v) -> value.set((Boolean) v));
+		plcHandler.register("PLC", "Running", (address, v) -> value.set((Boolean) v));
 		plcHandler.send("PLC", "Running");
 		assertEquals(true, value.get());
 		plcHandler.send("PLC", "NotRunning");
@@ -109,7 +109,7 @@ public class PlcHandlerTest {
 		}
 		assertEquals("Disconnected", value.get());
 
-		plcHandler.registerListener("Server", "Connected", (address, v) -> value.set((String) v));
+		plcHandler.register("Server", "Connected", (address, v) -> value.set((String) v));
 		plcHandler.send("Server", "Connected", "Connected");
 		assertEquals("Connected", value.get());
 		plcHandler.send("Server", "Connected", "Disconnected");

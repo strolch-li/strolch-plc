@@ -59,7 +59,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		return this.plcSessionsByPlcId.containsKey(plcId);
 	}
 
-	public void register(PlcAddressKey addressKey, String plcId, PlcNotificationListener listener) {
+	public void register(String plcId, PlcAddressKey addressKey, PlcNotificationListener listener) {
 		DBC.PRE.assertNotNull("addressKey must not be null", addressKey);
 		DBC.PRE.assertNotEmpty("plcId must not be empty", plcId);
 		MapOfLists<PlcAddressKey, PlcNotificationListener> plcListeners = this.plcAddressListenersByPlcId.get(plcId);
@@ -75,7 +75,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		logger.info("Registered listener on plc " + plcId + " key " + addressKey + ": " + listener);
 	}
 
-	public void unregister(PlcAddressKey addressKey, String plcId, PlcNotificationListener listener) {
+	public void unregister(String plcId, PlcAddressKey addressKey, PlcNotificationListener listener) {
 		DBC.PRE.assertNotNull("addressKey must not be null", addressKey);
 		DBC.PRE.assertNotEmpty("plcId must not be empty", plcId);
 		MapOfLists<PlcAddressKey, PlcNotificationListener> plcListeners = this.plcAddressListenersByPlcId.get(plcId);
@@ -169,28 +169,6 @@ public class PlcGwServerHandler extends StrolchComponent {
 		}
 	}
 
-	private void send(String plcId, String messageType, JsonObject jsonObject) {
-		try {
-
-			PlcSession plcSession = this.plcSessionsByPlcId.get(plcId);
-			if (plcSession == null)
-				throw new IllegalStateException("PLC " + plcId + " is not connected!");
-
-			assertPlcAuthed(plcId, plcSession.session.getId());
-
-			String data = jsonObject.toString();
-
-			synchronized (plcSession.session) {
-				sendDataToClient(data, plcSession.session.getBasicRemote());
-			}
-			logger.info("Sent " + messageType + " data to plc " + plcSession.plcId + " on Session " + plcSession.session
-					.getId());
-
-		} catch (Exception e) {
-			logger.error("Failed to send data to PLC " + plcId, e);
-		}
-	}
-
 	private PlcSession assertPlcAuthed(String plcId, String sessionId) throws NotAuthenticatedException {
 		PlcSession plcSession = this.plcSessionsBySessionId.get(sessionId);
 		if (plcSession.certificate == null)
@@ -253,14 +231,14 @@ public class PlcGwServerHandler extends StrolchComponent {
 		break;
 
 		default:
-			logger.error("Unhandled message type " + messageType);
+			logger.error(plcId + ": Unhandled message type " + messageType);
 		}
 	}
 
 	private void handleNotification(PlcSession plcSession, JsonObject notificationJ) {
 		String resource = notificationJ.get(PARAM_RESOURCE).getAsString();
 		String action = notificationJ.get(PARAM_ACTION).getAsString();
-		PlcAddressKey addressKey = PlcAddressKey.valueOf(resource, action);
+		PlcAddressKey addressKey = PlcAddressKey.keyFor(resource, action);
 
 		JsonPrimitive valueJ = notificationJ.get(PARAM_VALUE).getAsJsonPrimitive();
 		Object value;
@@ -273,12 +251,12 @@ public class PlcGwServerHandler extends StrolchComponent {
 		else
 			value = valueJ.getAsString();
 
-		logger.info("Received notification for " + addressKey.toKey() + ": " + value);
+		logger.info(plcSession.plcId + ": Received notification for " + addressKey.toKey() + ": " + value);
 
 		MapOfLists<PlcAddressKey, PlcNotificationListener> plcListeners = this.plcAddressListenersByPlcId
 				.get(plcSession.plcId);
 		if (plcListeners == null) {
-			logger.warn("No listeners for PLC " + plcSession.plcId);
+			logger.warn(plcSession.plcId + ": No listeners for PLC " + plcSession.plcId);
 			return;
 		}
 
@@ -286,7 +264,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		synchronized (plcListeners) {
 			listeners = plcListeners.getList(addressKey);
 			if (listeners == null) {
-				logger.warn("No listeners for " + addressKey.toKey());
+				logger.warn(plcSession.plcId + ": No listeners for " + addressKey.toKey());
 				return;
 			}
 		}
@@ -296,7 +274,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 			try {
 				listener.handleNotification(addressKey, value);
 			} catch (Exception e) {
-				logger.error("Failed to notify listener " + listener + " for " + addressKey.toKey(), e);
+				logger.error(
+						plcSession.plcId + ": Failed to notify listener " + listener + " for " + addressKey.toKey(), e);
 			}
 		}
 	}
@@ -306,7 +285,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		long sequenceId = responseJ.get(PARAM_SEQUENCE_ID).getAsLong();
 		PlcResponse plcResponse = this.plcResponses.remove(sequenceId);
 		if (plcResponse == null) {
-			logger.error("PlcResponse does not exist for sequenceId " + sequenceId);
+			logger.error(plcSession.plcId + ": PlcResponse does not exist for sequenceId " + sequenceId);
 			return;
 		}
 
@@ -341,9 +320,28 @@ public class PlcGwServerHandler extends StrolchComponent {
 		authResponseJ.addProperty(PARAM_STATE, PlcResponseState.Sent.name());
 		authResponseJ.addProperty(PARAM_STATE_MSG, "");
 		authResponseJ.addProperty(PARAM_AUTH_TOKEN, certificate.getAuthToken());
-		getExecutorService(THREAD_POOL).submit(() -> send(plcId, MSG_TYPE_AUTHENTICATION, authResponseJ));
+		getExecutorService(THREAD_POOL).submit(() -> sendAuthResponse(plcSession, authResponseJ));
 
 		this.plcStateHandler.handlePlcState(plcSession, ConnectionState.Connected, "", authJ);
+	}
+
+	private void sendAuthResponse(PlcSession plcSession, JsonObject jsonObject) {
+		try {
+			String data = jsonObject.toString();
+			synchronized (plcSession.session) {
+				sendDataToClient(data, plcSession.session.getBasicRemote());
+			}
+			logger.info(plcSession.plcId + ": Sent " + MSG_TYPE_AUTHENTICATION + " response on Session "
+					+ plcSession.session.getId());
+		} catch (Exception e) {
+			logger.error(plcSession.plcId + ": Failed to send data to PLC", e);
+			try {
+				plcSession.session.close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY,
+						"Failed to send auth response"));
+			} catch (IOException ex) {
+				logger.error(plcSession.plcId + ": Faild to close session to PLC");
+			}
+		}
 	}
 
 	public void onWsOpen(Session session) {

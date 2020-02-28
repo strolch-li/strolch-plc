@@ -65,11 +65,11 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 	}
 
 	protected void register(PlcAddressKey key) {
-		this.plcHandler.register(key, this.plcId, this);
+		this.plcHandler.register(this.plcId, key, this);
 	}
 
 	protected void unregister(PlcAddressKey key) {
-		this.plcHandler.unregister(key, this.plcId, this);
+		this.plcHandler.unregister(this.plcId, key, this);
 	}
 
 	public void sendMessage(PlcAddressKey addressKey, String plcId, boolean value,

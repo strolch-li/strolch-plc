@@ -1,6 +1,5 @@
 package li.strolch.plc.core.test;
 
-import li.strolch.agent.api.ComponentContainer;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.PlcService;
@@ -10,8 +9,8 @@ public class StartupPlcService extends PlcService {
 	public static final String PLC = "PLC";
 	public static final String STARTED = "Started";
 
-	public StartupPlcService(ComponentContainer container, PlcHandler plcHandler) {
-		super(container, plcHandler);
+	public StartupPlcService(PlcHandler plcHandler) {
+		super(plcHandler);
 	}
 
 	@Override
