@@ -34,12 +34,11 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 
 	private PlcServiceState state;
 
-	public PlcGwService(String plcId, ComponentContainer container, PlcGwServerHandler plcHandler) {
+	public PlcGwService(String plcId, PlcGwServerHandler plcHandler) {
 		DBC.PRE.assertNotEmpty("plcId must be set!", plcId);
-		DBC.PRE.assertNotNull("container must be set!", container);
 		DBC.PRE.assertNotNull("plcHandler must be set!", plcHandler);
 		this.plcId = plcId;
-		this.container = container;
+		this.container = plcHandler.getContainer();
 		this.plcHandler = plcHandler;
 		this.state = PlcServiceState.Unregistered;
 	}
