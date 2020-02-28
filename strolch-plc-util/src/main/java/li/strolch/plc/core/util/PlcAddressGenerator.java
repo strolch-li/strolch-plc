@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static li.strolch.model.xml.StrolchXmlHelper.parseToMap;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.StringHelper.isEmpty;
+import static li.strolch.utils.helper.StringHelper.isNotEmpty;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -323,8 +324,6 @@ public class PlcAddressGenerator {
 					Resource telegramR;
 
 					if (connection.startsWith("virtualBoolean.")) {
-						if (isEmpty(action2))
-							throw new IllegalStateException("action2 missing for: " + record);
 
 						// telegram for action1
 						telegramR = telegramT.getClone();
@@ -349,29 +348,32 @@ public class PlcAddressGenerator {
 								+ " for connection " + connection);
 
 						// telegram for action2
-						key = resource + "-" + action2;
-						keyName = resource + " - " + action2;
-						telegramR = telegramT.getClone();
-						telegramR.setId("T_" + key);
-						telegramR.setName(keyName);
+						if (isNotEmpty(action2)) {
+							key = resource + "-" + action2;
+							keyName = resource + " - " + action2;
+							telegramR = telegramT.getClone();
+							telegramR.setId("T_" + key);
+							telegramR.setName(keyName);
 
-						telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-						telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection);
-						telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-						telegramR.getParameter(PARAM_ACTION, true).setValue(action2);
+							telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
+							telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection);
+							telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
+							telegramR.getParameter(PARAM_ACTION, true).setValue(action2);
 
-						telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
-						telegramIndex += 10;
+							telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+							telegramIndex += 10;
 
-						valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
-						valueP.setIndex(100);
-						telegramR.addParameter(valueP);
+							valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
+							valueP.setIndex(100);
+							telegramR.addParameter(valueP);
 
-						add(exportList, telegramR);
-						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
-						logger.info("Added Virtual Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
-								+ " for connection " + connection);
-
+							add(exportList, telegramR);
+							logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true)
+									.addValueIfNotContains(telegramR.getId());
+							logger.info(
+									"Added Virtual Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
+											+ " for connection " + connection);
+						}
 					} else if (connection.startsWith("virtualString.")) {
 
 						// telegram for action1
