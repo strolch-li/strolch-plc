@@ -31,6 +31,7 @@ import li.strolch.utils.dbc.DBC;
 
 public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, PlcConnectionStateChangeListener {
 
+	public static final int SILENT_THRESHOLD = 60;
 	private PrivilegeContext ctx;
 	private Plc plc;
 	private PlcState plcState;
@@ -226,7 +227,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		}
 
 		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false)
-				.silentThreshold(100, MILLISECONDS)) {
+				.silentThreshold(SILENT_THRESHOLD, MILLISECONDS)) {
 			tx.lock(Resource.locatorFor(TYPE_PLC_ADDRESS, addressId));
 			Resource addressRes = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
 
@@ -256,7 +257,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			s = nanoTime();
 
 		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false)
-				.silentThreshold(100, MILLISECONDS)) {
+				.silentThreshold(SILENT_THRESHOLD, MILLISECONDS)) {
 			tx.lock(Resource.locatorFor(TYPE_PLC_CONNECTION, plcConnection.getId()));
 			Resource connection = tx.getResourceBy(TYPE_PLC_CONNECTION, plcConnection.getId());
 			updateConnectionState(tx, connection, plcConnection);
