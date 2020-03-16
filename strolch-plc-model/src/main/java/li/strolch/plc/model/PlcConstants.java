@@ -34,6 +34,8 @@ public class PlcConstants {
 	public static final String PARAM_PASSWORD = "password";
 	public static final String PARAM_PLC_ID = "plcId";
 	public static final String PARAM_SEQUENCE_ID = "sequenceId";
+	public static final String PARAM_ENABLED = "enabled";
+	public static final String PARAM_WARNING = "warning";
 	public static final String PARAM_RESOURCE = "resource";
 	public static final String PARAM_STATE = "state";
 	public static final String PARAM_STATE_MSG = "stateMsg";
