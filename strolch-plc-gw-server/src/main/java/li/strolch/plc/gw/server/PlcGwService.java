@@ -133,6 +133,10 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		return this.container.getComponent(OperationsLog.class);
 	}
 
+	protected <T> T getComponent(Class<T> clazz) {
+		return this.container.getComponent(clazz);
+	}
+
 	protected <T> T runAsAgentWithResult(PrivilegedRunnableWithResult<T> runnable) throws Exception {
 		return this.container.getPrivilegeHandler().runAsAgentWithResult(runnable);
 	}
