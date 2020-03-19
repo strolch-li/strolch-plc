@@ -19,6 +19,6 @@ public enum PlcResponseState {
 	}
 
 	public boolean isFailed() {
-		return this == Sent;
+		return this == Failed;
 	}
 }
