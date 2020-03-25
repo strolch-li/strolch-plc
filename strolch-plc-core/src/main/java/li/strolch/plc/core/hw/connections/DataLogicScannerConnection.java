@@ -97,7 +97,6 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	private void internalDisconnect() {
 		this.read = false;
 		if (this.readTask != null) {
-			logger.warn("Cancelling read task...");
 			this.readTask.cancel(true);
 		}
 
@@ -122,11 +121,13 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	private void sendStartTrigger() throws IOException {
 		this.triggered = true;
 		this.socket.getOutputStream().write('T');
+		logger.info("Triggered DataLogicScanner");
 	}
 
 	private void sendStopTrigger() throws IOException {
 		this.triggered = false;
 		this.socket.getOutputStream().write('S');
+		logger.info("Stopped DataLogicScanner");
 	}
 
 	@Override
