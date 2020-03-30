@@ -97,10 +97,6 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 
 	@Override
 	public Set<String> getAddresses() {
-		Set<String> addresses = new HashSet<>();
-		for (Integer address : this.outputBcmAddresses) {
-			addresses.add(this.id + "." + address);
-		}
-		return addresses;
+		return this.pinsByAddress.keySet();
 	}
 }
