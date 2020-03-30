@@ -16,7 +16,6 @@ import li.strolch.model.Resource;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcAddressResponse;
-import li.strolch.plc.model.PlcNotificationListener;
 import li.strolch.plc.model.PlcServiceState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.privilege.PrivilegedRunnable;

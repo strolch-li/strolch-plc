@@ -66,6 +66,7 @@
     </properties>
 
     <modules>
+        <module>strolch-plc-bom</module>
         <module>strolch-plc-model</module>
         <module>strolch-plc-util</module>
         <module>strolch-plc-core</module>

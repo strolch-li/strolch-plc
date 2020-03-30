@@ -15,7 +15,7 @@ import li.strolch.plc.gw.server.PlcAddressResponseListener;
 import li.strolch.plc.gw.server.PlcGwServerHandler;
 import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcAddressResponse;
-import li.strolch.plc.model.PlcNotificationListener;
+import li.strolch.plc.gw.server.PlcNotificationListener;
 
 public abstract class PlcExecutionPolicy extends SimpleExecution
 		implements PlcNotificationListener, PlcAddressResponseListener {
