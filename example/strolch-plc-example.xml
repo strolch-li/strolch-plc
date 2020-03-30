@@ -174,7 +174,7 @@
   <Resource Id="A_Conveyor03-Barcode" Name="Conveyor03 - Barcode" Type="PlcAddress">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
       <Parameter Id="description" Name="Description" Type="String" Index="5" Value="DataLogicScanner"/>
-      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01.barcode"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="dataLogicScanner.barcode"/>
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Barcode"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="90"/>
@@ -184,7 +184,7 @@
   <Resource Id="A_Conveyor03-On" Name="Conveyor03 - On" Type="PlcAddress">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
       <Parameter Id="description" Name="Description" Type="String" Index="5" Value="DataLogicScanner"/>
-      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01.trigger"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="dataLogicScanner.trigger"/>
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="On"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="100"/>
@@ -194,7 +194,7 @@
   <Resource Id="T_Conveyor03-On" Name="Conveyor03 - On" Type="PlcTelegram">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
       <Parameter Id="description" Name="Description" Type="String" Index="5" Value="DataLogicScanner"/>
-      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01.trigger"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="dataLogicScanner.trigger"/>
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="On"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="90"/>
@@ -204,7 +204,7 @@
   <Resource Id="T_Conveyor03-Off" Name="Conveyor03 - Off" Type="PlcTelegram">
     <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
       <Parameter Id="description" Name="Description" Type="String" Index="5" Value="DataLogicScanner"/>
-      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="barcodeReader01.trigger"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="dataLogicScanner.trigger"/>
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Off"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="100"/>

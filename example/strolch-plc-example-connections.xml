@@ -5,9 +5,11 @@
     <!--
         Barcode reader connection, currently place holder with RandomString
     -->
-    <Resource Id="barcodeReader01" Name="Barcode Reader 01" Type="PlcConnection">
+    <Resource Id="dataLogicScanner" Name="DataLogic Scanner Connection" Type="PlcConnection">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.RandomStringConnection"/>
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.DataLogicScannerConnection"/>
+            <Parameter Id="address" Name="Scanner IP Address" Type="String" Value="192.168.1.249:51236"/>
+            <Parameter Id="readTimeout" Name="Read Timeout (s)" Type="Integer" Value="60"/>
             <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
             <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
                        Value=""/>
@@ -25,6 +27,16 @@
                        Value=""/>
             <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
             <Parameter Id="bcmOutputPins" Name="BCM Output Pins" Type="IntegerList" Value="27"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="raspiBcmGpioInput" Name="Raspi BCM GPIO Input" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.gpio.RaspiBcmGpioInputConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="true"/>
+            <Parameter Id="bcmInputPins" Name="BCM Input Pins" Type="IntegerList" Value="4"/>
         </ParameterBag>
     </Resource>
 

@@ -93,10 +93,6 @@ public class PlcAddressGenerator {
 
 			for (CSVRecord record : parser) {
 
-				if (record.size() != 9) {
-					logger.error("Ignoring line with too few columns: " + record);
-					continue;
-				}
 				String type = record.get("Type");
 				if (type.isEmpty()) {
 					logger.info("Ignoring empty type for " + record);
@@ -104,13 +100,9 @@ public class PlcAddressGenerator {
 				}
 
 				String description = record.get("Description");
-				String device = record.get("Device");
-				String pin = record.get("Pin");
 				String resource = record.get("Resource");
 				String action1 = record.get("Action1");
-				String action2 = record.get("Action2");
 				String connection = record.get("Connection");
-				String deviceId = record.get("DeviceId");
 
 				String key = resource + "-" + action1;
 				String keyName = resource + " - " + action1;
@@ -120,6 +112,7 @@ public class PlcAddressGenerator {
 					addressIndex = 10;
 					telegramIndex = 10;
 
+					String deviceId = record.get("DeviceId");
 					if (isEmpty(deviceId))
 						throw new IllegalStateException("No device for new group: " + record);
 
@@ -148,16 +141,11 @@ public class PlcAddressGenerator {
 						throw new IllegalStateException(
 								"No PlcLogicalDevice exists for address with keys " + resource + "-" + action1);
 
-					int card = Integer.parseInt(device);
-					int io = Integer.parseInt(pin);
+					String subType = record.get("SubType");
+					if (isEmpty(connection))
+						throw new IllegalStateException("SubType missing for: " + record);
 
-					// the device ID must be subtracted, as this defines the actual card
-					int dev = Integer.parseInt(connection.substring(connection.length() - 2));
-					card -= dev;
-					// subtract, because pin 1 is actually 0
-					io -= 1;
-
-					String address = connection + "." + card + "." + io;
+					String address = evaluateAddress(subType, record, connection);
 
 					Resource addressR = addressT.getClone();
 					addressR.setId("A_" + key);
@@ -187,24 +175,21 @@ public class PlcAddressGenerator {
 						throw new IllegalStateException("resource missing for: " + record);
 					if (isEmpty(action1))
 						throw new IllegalStateException("action1 missing for: " + record);
-					if (isEmpty(action2))
-						throw new IllegalStateException("action2 missing for: " + record);
 					if (isEmpty(connection))
 						throw new IllegalStateException("connection missing for: " + record);
 					if (logicalDevice == null)
 						throw new IllegalStateException(
 								"No PlcLogicalDevice exists for address with keys " + resource + "-" + action1);
 
-					int card = Integer.parseInt(device);
-					int io = Integer.parseInt(pin);
+					String subType = record.get("SubType");
+					if (isEmpty(connection))
+						throw new IllegalStateException("SubType missing for: " + record);
 
-					// the device ID must be subtracted, as this defines the actual card
-					int dev = Integer.parseInt(connection.substring(connection.length() - 2));
-					card -= dev;
-					// decrement, because pin 1 is actually 0
-					io -= 1;
+					String action2 = record.get("Action2");
+					if (isEmpty(action2))
+						throw new IllegalStateException("action2 missing for: " + record);
 
-					String address = connection + "." + card + "." + io;
+					String address = evaluateAddress(subType, record, connection);
 
 					Resource telegramR;
 					BooleanParameter valueP;
@@ -291,6 +276,10 @@ public class PlcAddressGenerator {
 						throw new IllegalStateException(
 								"No PlcLogicalDevice exists for address with keys " + resource + "-" + action1);
 
+					String subType = record.get("SubType");
+					if (isEmpty(connection))
+						throw new IllegalStateException("SubType missing for: " + record);
+
 					// address for barcode reader
 					Resource addressR = addressT.getClone();
 					addressR.setId("A_" + key);
@@ -323,7 +312,7 @@ public class PlcAddressGenerator {
 
 					Resource telegramR;
 
-					if (connection.startsWith("virtualBoolean.")) {
+					if (subType.equals("Boolean")) {
 
 						// telegram for action1
 						telegramR = telegramT.getClone();
@@ -348,7 +337,8 @@ public class PlcAddressGenerator {
 								+ " for connection " + connection);
 
 						// telegram for action2
-						if (isNotEmpty(action2)) {
+						if (record.isSet("Action2") && isNotEmpty(record.get("Action2"))) {
+							String action2 = record.get("Action2");
 							key = resource + "-" + action2;
 							keyName = resource + " - " + action2;
 							telegramR = telegramT.getClone();
@@ -374,7 +364,7 @@ public class PlcAddressGenerator {
 									"Added Virtual Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 											+ " for connection " + connection);
 						}
-					} else if (connection.startsWith("virtualString.")) {
+					} else if (subType.equals("String")) {
 
 						// telegram for action1
 						telegramR = telegramT.getClone();
@@ -572,5 +562,41 @@ public class PlcAddressGenerator {
 
 		StrolchXmlHelper.writeToFile(exportFile, exportList.values());
 		logger.info("Wrote " + exportList.size() + " elements to " + exportFile);
+	}
+
+	private String evaluateAddress(String subType, CSVRecord record, String connection) {
+
+		String pin = record.get("Pin");
+		if (isEmpty(pin))
+			throw new IllegalStateException("Pin missing for: " + record);
+
+		String address;
+		if (subType.equals("GPIO")) {
+			int io = Integer.parseInt(pin);
+			address = connection + "." + io;
+			return address;
+		}
+
+		if (subType.equals("PCF8574")) {
+
+			String device = record.get("Device");
+			if (isEmpty(device))
+				throw new IllegalStateException("Device missing for: " + record);
+
+			int card = Integer.parseInt(device);
+			int io = Integer.parseInt(pin);
+
+			// the device ID must be subtracted, as this defines the actual card
+			int dev = Integer.parseInt(connection.substring(connection.length() - 2));
+			card -= dev;
+			// decrement, because pin 1 is actually 0
+			io -= 1;
+
+			address = connection + "." + card + "." + io;
+
+			return address;
+		}
+
+		throw new UnsupportedOperationException("Unhandled subType " + subType);
 	}
 }
