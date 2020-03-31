@@ -156,3 +156,7 @@ notifications. The following shows examples:
             <Parameter Id="index" Name="Index" Type="Integer" Value="5"/>
         </ParameterBag>
     </Resource>
+
+## More Information
+
+Find more to Strolch PLC at our website: https://strolch.li/plc.html
