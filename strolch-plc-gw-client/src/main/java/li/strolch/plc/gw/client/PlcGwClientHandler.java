@@ -3,8 +3,7 @@ package li.strolch.plc.gw.client;
 import static java.net.NetworkInterface.getByInetAddress;
 import static li.strolch.model.Tags.Json.*;
 import static li.strolch.plc.model.PlcConstants.*;
-import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessage;
-import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
+import static li.strolch.utils.helper.ExceptionHelper.*;
 import static li.strolch.utils.helper.NetworkHelper.formatMacAddress;
 import static li.strolch.utils.helper.StringHelper.isEmpty;
 
@@ -32,7 +31,6 @@ import li.strolch.plc.model.PlcResponseState;
 import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
-import li.strolch.utils.helper.ExceptionHelper;
 import li.strolch.utils.helper.NetworkHelper;
 import org.glassfish.tyrus.client.ClientManager;
 
@@ -50,6 +48,8 @@ public class PlcGwClientHandler extends StrolchComponent {
 	private String gwUsername;
 	private String gwPassword;
 	private String gwServerUrl;
+
+	private PlcHandler plcHandler;
 
 	private ClientManager gwClient;
 	private volatile Session gwSession;
@@ -81,11 +81,11 @@ public class PlcGwClientHandler extends StrolchComponent {
 	@Override
 	public void start() throws Exception {
 
-		PlcHandler plcHandler = getComponent(PlcHandler.class);
+		this.plcHandler = getComponent(PlcHandler.class);
 
-		if (plcHandler.getPlcState() == PlcState.Started)
+		if (this.plcHandler.getPlcState() == PlcState.Started)
 			notifyPlcConnectionState(ConnectionState.Disconnected);
-		plcHandler.setGlobalListener(
+		this.plcHandler.setGlobalListener(
 				(address, value) -> getExecutorService(THREAD_POOL).submit(() -> notifyServer(address, value)));
 
 		delayConnect(INITIAL_DELAY, TimeUnit.SECONDS);
@@ -139,7 +139,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 			this.gwClient = ClientManager.createClient();
 			this.gwSession = this.gwClient.connectToServer(new PlcGwClientEndpoint(this), new URI(this.gwServerUrl));
 		} catch (Exception e) {
-			Throwable rootCause = ExceptionHelper.getRootCause(e);
+			Throwable rootCause = getRootCause(e);
 			if (rootCause.getMessage() != null && rootCause.getMessage().contains("Connection refused")) {
 				logger.error(
 						"Connection refused to connect to server. Will try to connect again in " + RETRY_DELAY + "s: "
@@ -312,12 +312,63 @@ public class PlcGwClientHandler extends StrolchComponent {
 
 				if (MSG_TYPE_AUTHENTICATION.equals(messageType)) {
 					handleAuthResponse(ctx, jsonObject);
+				} else if (MSG_TYPE_PLC_TELEGRAM.equals(messageType)) {
+					handleTelegram(ctx, jsonObject);
 				} else {
 					logger.error("Unhandled message type " + messageType);
 				}
 			});
 		} catch (Exception e) {
 			throw new IllegalStateException("Failed to handle message of type " + messageType);
+		}
+	}
+
+	private void handleTelegram(PrivilegeContext ctx, JsonObject telegramJ) {
+
+		PlcAddress plcAddress = null;
+
+		try {
+			if (!telegramJ.has(PARAM_RESOURCE) || !telegramJ.has(PARAM_ACTION))
+				throw new IllegalArgumentException("Both " + PARAM_RESOURCE + " and " + PARAM_ACTION + " is required!");
+
+			String resource = telegramJ.get(PARAM_RESOURCE).getAsString();
+			String action = telegramJ.get(PARAM_ACTION).getAsString();
+
+			plcAddress = this.plcHandler.getPlcAddress(resource, action);
+
+			if (telegramJ.has(PARAM_VALUE)) {
+				String valueS = telegramJ.get(PARAM_VALUE).getAsString();
+				Object value = plcAddress.valueType.parseValue(valueS);
+				this.plcHandler.send(resource, action, value);
+			} else {
+				this.plcHandler.send(resource, action);
+			}
+
+			telegramJ.addProperty(PARAM_STATE, PlcResponseState.Done.name());
+			telegramJ.addProperty(PARAM_STATE_MSG, "");
+
+		} catch (Exception e) {
+
+			if (plcAddress == null) {
+				logger.error("Failed to handle telegram: " + telegramJ, e);
+				telegramJ.addProperty(PARAM_STATE, PlcResponseState.Failed.name());
+				telegramJ.addProperty(PARAM_STATE_MSG,
+						"Could not evaluate PlcAddress: " + getExceptionMessage(getRootCause(e), false));
+			} else {
+				logger.error("Failed to execute telegram: " + plcAddress.toKeyAddress(), e);
+				telegramJ.addProperty(PARAM_STATE, PlcResponseState.Failed.name());
+				telegramJ.addProperty(PARAM_STATE_MSG,
+						"Failed to perform " + plcAddress.toKey() + ": " + getExceptionMessage(getRootCause(e), false));
+			}
+		}
+
+		try {
+			sendDataToClient(telegramJ);
+			if (this.verbose)
+				logger.info("Sent Telegram response for " + (plcAddress == null ? "unknown" : plcAddress.toKey())
+						+ " to server");
+		} catch (IOException e) {
+			logger.error("Failed to send notification to server", e);
 		}
 	}
 
