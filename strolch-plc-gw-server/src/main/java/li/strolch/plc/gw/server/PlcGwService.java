@@ -72,23 +72,23 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 
 	public void sendMessage(PlcAddressKey addressKey, String plcId, boolean value,
 			PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, value, this);
+		this.plcHandler.sendMessage(addressKey, plcId, value, listener);
 	}
 
 	public void sendMessage(PlcAddressKey addressKey, String plcId, int value, PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, value, this);
+		this.plcHandler.sendMessage(addressKey, plcId, value, listener);
 	}
 
 	public void sendMessage(PlcAddressKey addressKey, String plcId, double value, PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, value, this);
+		this.plcHandler.sendMessage(addressKey, plcId, value, listener);
 	}
 
 	public void sendMessage(PlcAddressKey addressKey, String plcId, String value, PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, value, this);
+		this.plcHandler.sendMessage(addressKey, plcId, value, listener);
 	}
 
 	public void sendMessage(PlcAddressKey addressKey, String plcId, PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, this);
+		this.plcHandler.sendMessage(addressKey, plcId, listener);
 	}
 
 	@Override
