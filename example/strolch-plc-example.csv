@@ -1,11 +1,11 @@
 Description,Type,SubType,Device,Pin,Resource,Action1,Action2,Connection,DeviceId
 Material Flow,Group,,,,,,,,MaterialFlow
-Conveyor 1,Input,PCF8574,1,1,Conveyor01,Occupied,,i2cInput.dev01
-Conveyor 2,Input,PCF8574,1,2,Conveyor02,Occupied,,i2cInput.dev01
-Conveyor 3,Input,PCF8574,1,3,Conveyor03,Occupied,,i2cInput.dev01
-Conveyor 4,Input,PCF8574,1,4,Conveyor04,Occupied,,i2cInput.dev01
-Conveyor 1,Output,PCF8574,1,1,Conveyor01,MotorOn,MotorOff,i2cOutput.dev01
-Conveyor 2,Output,PCF8574,1,2,Conveyor02,MotorOn,MotorOff,i2cOutput.dev01
-Conveyor 3,Output,PCF8574,1,3,Conveyor03,MotorOn,MotorOff,i2cOutput.dev01
-Conveyor 4,Output,PCF8574,1,4,Conveyor04,MotorOn,MotorOff,i2cOutput.dev01
-DataLogicScanner,DataLogicScanner,,,,Conveyor03,,,dataLogicScanner
+Conveyor 1,Input,DevPin0,1,1,Conveyor01,Occupied,,i2cInput.dev01,
+Conveyor 2,Input,DevPin0,1,2,Conveyor02,Occupied,,i2cInput.dev01,
+Conveyor 3,Input,DevPin0,1,3,Conveyor03,Occupied,,i2cInput.dev01,
+Conveyor 4,Input,DevPin0,1,4,Conveyor04,Occupied,,i2cInput.dev01,
+Conveyor 1,Output,DevPin0,1,1,Conveyor01,MotorOn,MotorOff,i2cOutput.dev01,
+Conveyor 2,Output,DevPin0,1,2,Conveyor02,MotorOn,MotorOff,i2cOutput.dev01,
+Conveyor 3,Output,DevPin0,1,3,Conveyor03,MotorOn,MotorOff,i2cOutput.dev01,
+Conveyor 4,Output,DevPin0,1,4,Conveyor04,MotorOn,MotorOff,i2cOutput.dev01,
+DataLogicScanner,DataLogicScanner,,,,Conveyor03,,,dataLogicScanner,

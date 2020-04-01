@@ -571,13 +571,13 @@ public class PlcAddressGenerator {
 			throw new IllegalStateException("Pin missing for: " + record);
 
 		String address;
-		if (subType.equals("GPIO")) {
+		if (subType.equals("Pin")) {
 			int io = Integer.parseInt(pin);
 			address = connection + "." + io;
 			return address;
 		}
 
-		if (subType.equals("PCF8574")) {
+		if (subType.equals("DevPin0") || subType.equals("DevPin")) {
 
 			String device = record.get("Device");
 			if (isEmpty(device))
@@ -586,11 +586,11 @@ public class PlcAddressGenerator {
 			int card = Integer.parseInt(device);
 			int io = Integer.parseInt(pin);
 
-			// the device ID must be subtracted, as this defines the actual card
-			int dev = Integer.parseInt(connection.substring(connection.length() - 2));
-			card -= dev;
-			// decrement, because pin 1 is actually 0
-			io -= 1;
+			if (subType.equals("DevPin0")) {
+				int dev = Integer.parseInt(connection.substring(connection.length() - 2));
+				card -= dev;
+				io -= 1;
+			}
 
 			address = connection + "." + card + "." + io;
 
