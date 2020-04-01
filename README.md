@@ -14,6 +14,114 @@ Strolch PLC supports the following features:
 * WebSocket connection to Strolch Agent for notifying of changes
 * Simple two key addressing of hardware addresses to store semantics, e.g. `Convey01 - MotorOn`, instead of `i2cInput.dev01.0.0`
 
+## PlcService
+PlcServices are sub classes of `PlcService`. You can register for notifications, send keys and delay actions:
+
+    import java.util.concurrent.ScheduledFuture;
+    import java.util.concurrent.TimeUnit;
+    
+    import li.strolch.plc.core.PlcHandler;
+    import li.strolch.plc.core.PlcService;
+    import li.strolch.plc.model.PlcAddress;
+    
+    public class ConveyorPlcService extends PlcService {
+    
+      public static final int BOX_TRANSFER_DURATION = 30;
+    
+      private static final String R_CONVEYOR_01 = "Conveyor01";
+      private static final String A_START_BUTTON = "StartButton";
+      private static final String T_MOTOR_ON = "MotorOn";
+      private static final String T_MOTOR_OFF = "MotorOff";
+      private static final String A_BOX_DETECTED = "BoxDetected";
+    
+      private boolean motorOn;
+      private ScheduledFuture<?> motorStopTask;
+    
+      public ConveyorPlcService(PlcHandler plcHandler) {
+        super(plcHandler);
+      }
+    
+      @Override
+      public void handleNotification(PlcAddress address, Object value) {
+        String action = address.action;
+
+        boolean active = (boolean) value;
+    
+        if (action.equals(A_START_BUTTON)) {
+    
+          if (active) {
+            logger.info("Start button pressed. Starting motors...");
+            send(R_CONVEYOR_01, T_MOTOR_ON);
+            this.motorOn = true;
+            scheduleStopTask();
+          }
+    
+        } else if (action.equals(A_BOX_DETECTED)) {
+    
+          if (active && this.motorOn) {
+            logger.info("Container detected, refreshing stop task...");
+            scheduleStopTask();
+          }
+    
+        } else {
+          logger.info("Unhandled notification " + address.toKeyAddress());
+        }
+      }
+    
+      private void scheduleStopTask() {
+        if (this.motorStopTask != null)
+          this.motorStopTask.cancel(false);
+        this.motorStopTask = schedule(this::stopMotor, BOX_TRANSFER_DURATION, TimeUnit.SECONDS);
+      }
+    
+      private void stopMotor() {
+        send(R_CONVEYOR_01, T_MOTOR_OFF);
+      }
+    
+      @Override
+      public void register() {
+        this.plcHandler.register(R_CONVEYOR_01, A_START_BUTTON, this);
+        this.plcHandler.register(R_CONVEYOR_01, A_BOX_DETECTED, this);
+        super.register();
+      }
+    
+      @Override
+      public void unregister() {
+        this.plcHandler.unregister(R_CONVEYOR_01, A_START_BUTTON, this);
+        this.plcHandler.unregister(R_CONVEYOR_01, A_BOX_DETECTED, this);
+        super.unregister();
+      }
+
+This example registered for changes to the keys `Conveyor01 - StartButton` and 
+`Conveyor01 - BoxDetected`. When the start button is pressed, then it sends the 
+keys `Conveyor01 - MotorOn` and schedules the motor off action with a delay of 
+30s.
+
+This class should then be registered in the `PlcServiceInitializer`:
+
+    public class CustomPlcServiceInitializer extends PlcServiceInitializer {
+    
+      public CustomPlcServiceInitializer(ComponentContainer container, String componentName) {
+        super(container, componentName);
+      }
+    
+      @Override
+      protected List<PlcService> getPlcServices(PlcHandler plcHandler) {
+        ArrayList<PlcService> plcServices = new ArrayList<>();
+    
+        StartupPlcService startupPlcService = new StartupPlcService(plcHandler);
+        ConveyorPlcService conveyorPlcService = new ConveyorPlcService(plcHandler);
+    
+        plcServices.add(conveyorPlcService);
+        plcServices.add(startupPlcService);
+    
+        return plcServices;
+      }
+
+As one can see, there is little fuss for writing business logic, state is
+persisted automatically so it is visible in the UI, and the PlcServices can 
+handle their state as needed.
+
 ## PlcAddress
 PlcAddresses store the value of a hardware address: 
 
