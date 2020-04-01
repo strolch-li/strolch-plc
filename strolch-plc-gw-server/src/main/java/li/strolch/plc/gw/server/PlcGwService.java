@@ -62,12 +62,24 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		this.state = PlcServiceState.Unregistered;
 	}
 
+	protected void register(String resource, String action) {
+		this.plcHandler.register(this.plcId, keyFor(resource, action), this);
+	}
+
 	protected void register(PlcAddressKey key) {
 		this.plcHandler.register(this.plcId, key, this);
 	}
 
+	protected void unregister(String resource, String action) {
+		this.plcHandler.unregister(this.plcId, keyFor(resource, action), this);
+	}
+
 	protected void unregister(PlcAddressKey key) {
 		this.plcHandler.unregister(this.plcId, key, this);
+	}
+
+	protected PlcAddressKey keyFor(String resource, String action) {
+		return PlcAddressKey.keyFor(resource, action);
 	}
 
 	public void sendMessage(PlcAddressKey addressKey, String plcId, boolean value,
