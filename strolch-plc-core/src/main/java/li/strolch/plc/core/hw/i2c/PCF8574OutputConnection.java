@@ -169,9 +169,4 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 			throw new IllegalStateException("Failed to write to I2C address " + address, e);
 		}
 	}
-
-	@Override
-	public String toString() {
-		return this.id;
-	}
 }

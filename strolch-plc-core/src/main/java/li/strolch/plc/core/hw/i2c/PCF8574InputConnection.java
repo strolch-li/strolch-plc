@@ -240,9 +240,4 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 	public void send(String address, Object value) {
 		throw new UnsupportedOperationException(getClass() + " does not support output!");
 	}
-
-	@Override
-	public String toString() {
-		return this.id;
-	}
 }

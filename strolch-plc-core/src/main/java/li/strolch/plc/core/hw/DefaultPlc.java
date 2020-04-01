@@ -117,8 +117,7 @@ public class DefaultPlc implements Plc {
 			return connection;
 
 		throw new IllegalStateException(
-				"PlcConnection " + connection.getId() + " could not connect to " + plcAddress + " due to " + connection
-						.getStateMsg());
+				"Could not connect to " + connection.getId() + " due to " + connection.getStateMsg());
 	}
 
 	@Override

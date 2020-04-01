@@ -70,4 +70,9 @@ public abstract class PlcConnection {
 	protected void notify(String address, Object value) {
 		this.plc.notify(address, value);
 	}
+
+	@Override
+	public String toString() {
+		return this.id;
+	}
 }
