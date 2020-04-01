@@ -34,6 +34,12 @@ public class PlcResponse {
 		this.state = state;
 	}
 
+	public PlcResponse state(PlcResponseState state, String stateMsg) {
+		this.state = state;
+		this.stateMsg = stateMsg;
+		return this;
+	}
+
 	public boolean isSent() {
 		return this.state == PlcResponseState.Sent;
 	}

@@ -9,6 +9,12 @@ public class PlcAddressResponse extends PlcResponse {
 		this.plcAddressKey = plcAddressKey;
 	}
 
+	@Override
+	public PlcAddressResponse state(PlcResponseState state, String stateMsg) {
+		super.state(state, stateMsg);
+		return this;
+	}
+
 	public PlcAddressKey getPlcAddressKey() {
 		return this.plcAddressKey;
 	}
