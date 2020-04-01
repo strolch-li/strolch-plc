@@ -101,25 +101,6 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		throw new UnsupportedOperationException("Not implemented!");
 	}
 
-	protected StrolchTransaction openTx(PrivilegeContext ctx, boolean readOnly) {
-		return this.container.getRealm(ctx.getCertificate()).openTx(ctx.getCertificate(), getClass(), readOnly);
-	}
-
-	protected void runAsAgent(PrivilegedRunnable runnable) {
-		try {
-			this.container.getPrivilegeHandler().runAsAgent(runnable);
-		} catch (Exception e) {
-			logger.error("Runnable " + runnable + " failed!", e);
-			if (hasOperationsLogs()) {
-				getOperationsLogs().addMessage(
-						new LogMessage(this.container.getRealmNames().iterator().next(), SYSTEM_USER_AGENT,
-								Resource.locatorFor(TYPE_PLC, this.plcId), LogSeverity.Exception,
-								ResourceBundle.getBundle("strolch-plc-gw-server"), "systemAction.failed")
-								.withException(e).value("action", runnable).value("reason", e));
-			}
-		}
-	}
-
 	protected ExecutionHandler getExecutionHandler() {
 		return this.container.getComponent(ExecutionHandler.class);
 	}
@@ -136,8 +117,27 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		return this.container.getComponent(clazz);
 	}
 
-	protected <T> T runAsAgentWithResult(PrivilegedRunnableWithResult<T> runnable) throws Exception {
-		return this.container.getPrivilegeHandler().runAsAgentWithResult(runnable);
+	protected void run(PrivilegedRunnable runnable) {
+		try {
+			this.plcHandler.run(runnable);
+		} catch (Exception e) {
+			logger.error("Runnable " + runnable + " failed!", e);
+			if (hasOperationsLogs()) {
+				getOperationsLogs().addMessage(
+						new LogMessage(this.container.getRealmNames().iterator().next(), SYSTEM_USER_AGENT,
+								Resource.locatorFor(TYPE_PLC, this.plcId), LogSeverity.Exception,
+								ResourceBundle.getBundle("strolch-plc-gw-server"), "systemAction.failed")
+								.withException(e).value("action", runnable).value("reason", e));
+			}
+		}
+	}
+
+	protected <T> T runWithResult(PrivilegedRunnableWithResult<T> runnable) throws Exception {
+		return this.plcHandler.runWithResult(runnable);
+	}
+
+	protected StrolchTransaction openTx(PrivilegeContext ctx, String action, boolean readOnly) {
+		return this.container.getRealm(ctx.getCertificate()).openTx(ctx.getCertificate(), action, readOnly);
 	}
 
 	protected ScheduledFuture<?> schedule(PrivilegedRunnable runnable, long delay, TimeUnit delayUnit) {

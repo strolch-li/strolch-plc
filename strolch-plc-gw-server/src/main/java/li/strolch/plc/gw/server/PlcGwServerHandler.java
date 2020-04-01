@@ -11,6 +11,7 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonObject;
@@ -23,6 +24,8 @@ import li.strolch.privilege.base.NotAuthenticatedException;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.rest.StrolchSessionHandler;
 import li.strolch.runtime.configuration.ComponentConfiguration;
+import li.strolch.runtime.privilege.PrivilegedRunnable;
+import li.strolch.runtime.privilege.PrivilegedRunnableWithResult;
 import li.strolch.utils.collections.MapOfLists;
 import li.strolch.utils.dbc.DBC;
 import li.strolch.websocket.WebSocketRemoteIp;
@@ -32,6 +35,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 	public static final String MSG_DISCONNECTED_TIMED_OUT = "Disconnected / Timed out";
 	public static final String THREAD_POOL = "PlcRequests";
 
+	private String runAsUser;
 	private PlcStateHandler plcStateHandler;
 
 	private Map<String, PlcSession> plcSessionsBySessionId;
@@ -46,6 +50,9 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 	@Override
 	public void initialize(ComponentConfiguration configuration) throws Exception {
+
+		this.runAsUser = configuration.getString("runAsUser", "agent");
+
 		this.plcStateHandler = new PlcStateHandler(getContainer());
 		this.plcSessionsBySessionId = new ConcurrentHashMap<>();
 		this.plcSessionsByPlcId = new ConcurrentHashMap<>();
@@ -89,6 +96,14 @@ public class PlcGwServerHandler extends StrolchComponent {
 		logger.info("Unregistered listener from plc " + plcId + " key " + addressKey + ": " + listener);
 	}
 
+	public void run(PrivilegedRunnable runnable) throws Exception {
+		super.runAs(this.runAsUser, runnable);
+	}
+
+	public <T> T runWithResult(PrivilegedRunnableWithResult<T> runnable) throws Exception {
+		return super.runAsWithResult(this.runAsUser, runnable);
+	}
+
 	public void sendMessage(PlcAddressKey addressKey, String plcId, boolean value,
 			PlcAddressResponseListener listener) {
 		sendMessage(addressKey, plcId, new JsonPrimitive(value), listener);
@@ -108,6 +123,51 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 	public void sendMessage(PlcAddressKey addressKey, String plcId, PlcAddressResponseListener listener) {
 		sendMessage(addressKey, plcId, (JsonPrimitive) null, listener);
+	}
+
+	public PlcAddressResponse sendMessageSync(PlcAddressKey addressKey, String plcId, boolean value) {
+		return sendMessageSync(addressKey, plcId, new JsonPrimitive(value));
+	}
+
+	public PlcAddressResponse sendMessage(PlcAddressKey addressKey, String plcId, int value) {
+		return sendMessageSync(addressKey, plcId, new JsonPrimitive(value));
+	}
+
+	public PlcAddressResponse sendMessage(PlcAddressKey addressKey, String plcId, double value) {
+		return sendMessageSync(addressKey, plcId, new JsonPrimitive(value));
+	}
+
+	public PlcAddressResponse sendMessage(PlcAddressKey addressKey, String plcId, String value) {
+		return sendMessageSync(addressKey, plcId, new JsonPrimitive(value));
+	}
+
+	public PlcAddressResponse sendMessage(PlcAddressKey addressKey, String plcId) {
+		return sendMessageSync(addressKey, plcId, (JsonPrimitive) null);
+	}
+
+	public PlcAddressResponse sendMessageSync(PlcAddressKey addressKey, String plcId) {
+		return sendMessageSync(addressKey, plcId, null);
+	}
+
+	public PlcAddressResponse sendMessageSync(PlcAddressKey addressKey, String plcId, JsonPrimitive valueJ) {
+
+		PlcAddressResponse[] response = new PlcAddressResponse[1];
+
+		CountDownLatch latch = new CountDownLatch(1);
+		sendMessage(addressKey, plcId, valueJ, r -> {
+			response[0] = r;
+			latch.countDown();
+		});
+
+		try {
+			if (!latch.await(30, TimeUnit.SECONDS))
+				return new PlcAddressResponse(plcId, addressKey).state(PlcResponseState.Failed, "Timeout after 30s!");
+		} catch (InterruptedException e) {
+			logger.error("Interrupted!");
+			return new PlcAddressResponse(plcId, addressKey).state(PlcResponseState.Failed, "Interrupted!");
+		}
+
+		return response[0];
 	}
 
 	private void sendMessage(PlcAddressKey addressKey, String plcId, JsonPrimitive valueJ,
@@ -132,9 +192,9 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 			JsonObject jsonObject = new JsonObject();
 			jsonObject.addProperty(PARAM_SEQUENCE_ID, plcResponse.getSequenceId());
-			jsonObject.addProperty(PARAM_MESSAGE_TYPE, PlcAddressType.Telegram.name());
+			jsonObject.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_PLC_TELEGRAM);
 			jsonObject.addProperty(PARAM_PLC_ID, plcSession.plcId);
-			jsonObject.addProperty(PARAM_RESOURCE, plcAddressKey.action);
+			jsonObject.addProperty(PARAM_RESOURCE, plcAddressKey.resource);
 			jsonObject.addProperty(PARAM_ACTION, plcAddressKey.action);
 			if (valueJ != null)
 				jsonObject.add(PARAM_VALUE, valueJ);

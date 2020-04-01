@@ -87,16 +87,16 @@ public abstract class PlcService implements PlcListener {
 		return PlcAddressKey.keyFor(resource, action);
 	}
 
-	protected StrolchTransaction openTx(PrivilegeContext ctx, boolean readOnly) {
-		return this.container.getRealm(ctx.getCertificate()).openTx(ctx.getCertificate(), getCallerMethod(2), readOnly);
-	}
-
-	protected void runAsAgent(PrivilegedRunnable runnable) throws Exception {
+	protected void run(PrivilegedRunnable runnable) throws Exception {
 		this.container.getPrivilegeHandler().runAsAgent(runnable);
 	}
 
-	protected <T> T runAsAgentWithResult(PrivilegedRunnableWithResult<T> runnable) throws Exception {
+	protected <T> T runWithResult(PrivilegedRunnableWithResult<T> runnable) throws Exception {
 		return this.container.getPrivilegeHandler().runAsAgentWithResult(runnable);
+	}
+
+	protected StrolchTransaction openTx(PrivilegeContext ctx, boolean readOnly) {
+		return this.container.getRealm(ctx.getCertificate()).openTx(ctx.getCertificate(), getCallerMethod(2), readOnly);
 	}
 
 	private ScheduledExecutorService getScheduledExecutor() {
