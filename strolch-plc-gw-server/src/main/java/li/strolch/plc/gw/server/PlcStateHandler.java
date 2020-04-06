@@ -89,6 +89,8 @@ public class PlcStateHandler {
 						setSystemState(stateJ.getAsJsonObject(PARAM_SYSTEM_STATE), plc);
 					}
 
+					logger.info("Updated connection state for PLC " + plc.getId() + " to " + connectionState + ": "
+							+ connectionStateMsg);
 					tx.commitOnClose();
 				}
 			});
