@@ -99,10 +99,10 @@ public class PlcAddressGenerator {
 					continue;
 				}
 
-				String description = record.get("Description");
-				String resource = record.get("Resource");
-				String action1 = record.get("Action1");
-				String connection = record.get("Connection");
+				String description = record.get("Description").trim();
+				String resource = record.get("Resource").trim();
+				String action1 = record.get("Action1").trim();
+				String connection = record.get("Connection").trim();
 
 				String key = resource + "-" + action1;
 				String keyName = resource + " - " + action1;
@@ -112,7 +112,7 @@ public class PlcAddressGenerator {
 					addressIndex = 10;
 					telegramIndex = 10;
 
-					String deviceId = record.get("DeviceId");
+					String deviceId = record.get("DeviceId").trim();
 					if (isEmpty(deviceId))
 						throw new IllegalStateException("No device for new group: " + record);
 
@@ -141,7 +141,7 @@ public class PlcAddressGenerator {
 						throw new IllegalStateException(
 								"No PlcLogicalDevice exists for address with keys " + resource + "-" + action1);
 
-					String subType = record.get("SubType");
+					String subType = record.get("SubType").trim();
 					if (isEmpty(connection))
 						throw new IllegalStateException("SubType missing for: " + record);
 
@@ -181,11 +181,11 @@ public class PlcAddressGenerator {
 						throw new IllegalStateException(
 								"No PlcLogicalDevice exists for address with keys " + resource + "-" + action1);
 
-					String subType = record.get("SubType");
+					String subType = record.get("SubType").trim();
 					if (isEmpty(connection))
 						throw new IllegalStateException("SubType missing for: " + record);
 
-					String action2 = record.get("Action2");
+					String action2 = record.get("Action2").trim();
 					if (isEmpty(action2))
 						throw new IllegalStateException("action2 missing for: " + record);
 
@@ -276,7 +276,7 @@ public class PlcAddressGenerator {
 						throw new IllegalStateException(
 								"No PlcLogicalDevice exists for address with keys " + resource + "-" + action1);
 
-					String subType = record.get("SubType");
+					String subType = record.get("SubType").trim();
 					if (isEmpty(connection))
 						throw new IllegalStateException("SubType missing for: " + record);
 
@@ -338,7 +338,7 @@ public class PlcAddressGenerator {
 
 						// telegram for action2
 						if (record.isSet("Action2") && isNotEmpty(record.get("Action2"))) {
-							String action2 = record.get("Action2");
+							String action2 = record.get("Action2").trim();
 							key = resource + "-" + action2;
 							keyName = resource + " - " + action2;
 							telegramR = telegramT.getClone();
@@ -566,7 +566,7 @@ public class PlcAddressGenerator {
 
 	private String evaluateAddress(String subType, CSVRecord record, String connection) {
 
-		String pin = record.get("Pin");
+		String pin = record.get("Pin").trim();
 		if (isEmpty(pin))
 			throw new IllegalStateException("Pin missing for: " + record);
 
@@ -579,7 +579,7 @@ public class PlcAddressGenerator {
 
 		if (subType.equals("DevPin0") || subType.equals("DevPin")) {
 
-			String device = record.get("Device");
+			String device = record.get("Device").trim();
 			if (isEmpty(device))
 				throw new IllegalStateException("Device missing for: " + record);
 
