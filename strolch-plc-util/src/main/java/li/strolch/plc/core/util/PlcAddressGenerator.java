@@ -156,6 +156,9 @@ public class PlcAddressGenerator {
 					addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
 					addressR.getParameter(PARAM_ACTION, true).setValue(action1);
 
+					if (record.isSet("Inverted") && record.get("Inverted").equalsIgnoreCase("true"))
+						addressR.getParameter(PARAM_INVERTED, true).setValue(true);
+
 					addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
 					addressIndex += 10;
 

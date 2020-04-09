@@ -19,7 +19,8 @@
             <Parameter Id="address" Name="HW Address" Index="10" Type="String" Interpretation="PlcConnection" Value=""/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Index="20" Type="String" Value=""/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Index="30" Type="String" Value=""/>
-            <Parameter Id="index" Name="Index" Index="40" Type="Integer" Value="10"/>
+            <Parameter Id="inverted" Name="Inverted" Index="40" Type="Boolean" Value="false"/>
+            <Parameter Id="index" Name="Index" Index="40" Type="Integer" Value="50"/>
         </ParameterBag>
     </Resource>
 
