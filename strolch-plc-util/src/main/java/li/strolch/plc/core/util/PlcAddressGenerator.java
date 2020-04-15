@@ -188,10 +188,6 @@ public class PlcAddressGenerator {
 					if (isEmpty(connection))
 						throw new IllegalStateException("SubType missing for: " + record);
 
-					String action2 = record.get("Action2").trim();
-					if (isEmpty(action2))
-						throw new IllegalStateException("action2 missing for: " + record);
-
 					String address = evaluateAddress(subType, record, connection);
 
 					Resource telegramR;
@@ -220,26 +216,30 @@ public class PlcAddressGenerator {
 							+ " for address " + address);
 
 					// action2 value
-					telegramR = telegramT.getClone();
-					telegramR.setId("T_" + resource + "-" + action2);
-					telegramR.setName(resource + " - " + action2);
+					if (record.isSet("Action2") && isNotEmpty(record.get("Action2").trim())) {
+						String action2 = record.get("Action2").trim();
 
-					telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					telegramR.getParameter(PARAM_ADDRESS, true).setValue(address);
-					telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					telegramR.getParameter(PARAM_ACTION, true).setValue(action2);
+						telegramR = telegramT.getClone();
+						telegramR.setId("T_" + resource + "-" + action2);
+						telegramR.setName(resource + " - " + action2);
 
-					telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
-					telegramIndex += 10;
+						telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
+						telegramR.getParameter(PARAM_ADDRESS, true).setValue(address);
+						telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
+						telegramR.getParameter(PARAM_ACTION, true).setValue(action2);
 
-					valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
-					valueP.setIndex(100);
-					telegramR.addParameter(valueP);
+						telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+						telegramIndex += 10;
 
-					add(exportList, telegramR);
-					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
-					logger.info("Added Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
-							+ " for address " + address);
+						valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
+						valueP.setIndex(100);
+						telegramR.addParameter(valueP);
+
+						add(exportList, telegramR);
+						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+						logger.info("Added Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
+								+ " for address " + address);
+					}
 
 					// validate address exists for this address
 					if (exportList.values().stream().filter(e -> e.getType().equals(TYPE_PLC_ADDRESS))
@@ -340,7 +340,7 @@ public class PlcAddressGenerator {
 								+ " for connection " + connection);
 
 						// telegram for action2
-						if (record.isSet("Action2") && isNotEmpty(record.get("Action2"))) {
+						if (record.isSet("Action2") && isNotEmpty(record.get("Action2").trim())) {
 							String action2 = record.get("Action2").trim();
 							key = resource + "-" + action2;
 							keyName = resource + " - " + action2;
