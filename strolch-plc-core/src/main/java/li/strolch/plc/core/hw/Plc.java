@@ -15,7 +15,9 @@ public interface Plc {
 
 	void unregister(PlcAddress address, PlcListener listener);
 
-	void notify(String address, Object value);
+	void syncNotify(String address, Object value);
+
+	void queueNotify(String address, Object value);
 
 	void send(PlcAddress address);
 

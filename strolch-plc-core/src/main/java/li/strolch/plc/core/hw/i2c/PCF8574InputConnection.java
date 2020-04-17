@@ -192,7 +192,7 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 
 				if (this.states[i][j] != newState) {
 					this.states[i][j] = newState;
-					this.plc.notify(this.id + "." + i + "." + j, newState);
+					this.plc.queueNotify(this.id + "." + i + "." + j, newState);
 				}
 			}
 		}
@@ -218,7 +218,7 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 						bitSet = !bitSet;
 
 					this.states[i][j] = bitSet;
-					this.plc.notify(this.id + "." + i + "." + j, this.states[i][j]);
+					this.plc.queueNotify(this.id + "." + i + "." + j, this.states[i][j]);
 				}
 			} catch (Exception e) {
 				ok = false;

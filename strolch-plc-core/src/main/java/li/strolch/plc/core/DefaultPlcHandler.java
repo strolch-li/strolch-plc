@@ -342,7 +342,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			throw new IllegalStateException(
 					"Can not notify PlcAddress " + plcAddress + " as it is not a notification!");
 
-		this.plc.notify(plcAddress.address, value);
+		this.plc.syncNotify(plcAddress.address, value);
 	}
 
 	@Override

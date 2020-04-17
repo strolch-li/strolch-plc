@@ -111,7 +111,7 @@ public class PlcTest {
 		}
 
 		public void notify(String address, Object value) {
-			this.plc.notify(address, value);
+			this.plc.syncNotify(address, value);
 		}
 	}
 }

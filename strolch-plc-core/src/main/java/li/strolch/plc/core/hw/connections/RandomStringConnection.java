@@ -20,6 +20,6 @@ public class RandomStringConnection extends SimplePlcConnection {
 		new SecureRandom().nextBytes(data);
 		String newValue = StringHelper.toHexString(data);
 		PlcConnection.logger.info("Generated random value " + newValue);
-		this.plc.notify(address, newValue);
+		this.plc.syncNotify(address, newValue);
 	}
 }

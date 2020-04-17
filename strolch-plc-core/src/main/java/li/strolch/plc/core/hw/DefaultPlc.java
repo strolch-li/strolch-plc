@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressType;
@@ -22,14 +24,20 @@ public class DefaultPlc implements Plc {
 	private PlcListener globalListener;
 	private MapOfLists<PlcAddress, PlcListener> listeners;
 	private PlcConnectionStateChangeListener connectionStateChangeListener;
+
 	private boolean verbose;
 	private ExecutorPool executorPool;
+
+	private boolean run;
+	private Future<?> doNotificationsTask;
+	private LinkedBlockingQueue<NotificationTask> notificationTasks;
 
 	public DefaultPlc() {
 		this.notificationMappings = new HashMap<>();
 		this.listeners = new MapOfLists<>();
 		this.connections = new HashMap<>();
 		this.connectionsByAddress = new HashMap<>();
+		this.notificationTasks = new LinkedBlockingQueue<>();
 	}
 
 	@Override
@@ -59,11 +67,16 @@ public class DefaultPlc implements Plc {
 	}
 
 	@Override
-	public void notify(String address, Object value) {
-		notify(address, value, true);
+	public void syncNotify(String address, Object value) {
+		doNotify(address, value, true);
 	}
 
-	private void notify(String address, Object value, boolean verbose) {
+	@Override
+	public void queueNotify(String address, Object value) {
+		this.notificationTasks.add(new NotificationTask(address, value, true));
+	}
+
+	private void doNotify(String address, Object value, boolean verbose) {
 		PlcAddress plcAddress = this.notificationMappings.get(address);
 		if (plcAddress == null) {
 			logger.warn("No mapping to PlcAddress for hwAddress " + address);
@@ -71,7 +84,7 @@ public class DefaultPlc implements Plc {
 		}
 
 		if (verbose)
-			logger.info("Update for {} with value {}", plcAddress.toKey(), value);
+			logger.info("Update for {}: {}", plcAddress.toKey(), value);
 
 		List<PlcListener> listeners = this.listeners.getList(plcAddress);
 		if (listeners == null || listeners.isEmpty()) {
@@ -90,12 +103,31 @@ public class DefaultPlc implements Plc {
 			this.globalListener.handleNotification(plcAddress, value);
 	}
 
+	private void doNotifications() {
+		logger.info("Notifications Task running...");
+		while (this.run) {
+			NotificationTask task = null;
+			try {
+				task = this.notificationTasks.take();
+				doNotify(task.address, task.value, task.verbose);
+			} catch (InterruptedException e) {
+				logger.error("Interrupted: " + e.getMessage());
+			} catch (Exception e) {
+				if (task != null)
+					logger.error("Failed to perform notification for " + task.address + ": " + task.value, e);
+				else
+					logger.error("Failed to get notification task", e);
+			}
+		}
+		logger.info("Notifications Task stopped.");
+	}
+
 	@Override
 	public void send(PlcAddress plcAddress) {
 		logger.info("Sending {}: {} (default)", plcAddress.toKey(), plcAddress.defaultValue);
 		if (!isVirtual(plcAddress))
 			validateConnection(plcAddress).send(plcAddress.address, plcAddress.defaultValue);
-		notify(plcAddress.address, plcAddress.defaultValue, false);
+		doNotify(plcAddress.address, plcAddress.defaultValue, false);
 	}
 
 	@Override
@@ -103,7 +135,7 @@ public class DefaultPlc implements Plc {
 		logger.info("Sending {}: {}", plcAddress.toKey(), value);
 		if (!isVirtual(plcAddress))
 			validateConnection(plcAddress).send(plcAddress.address, value);
-		notify(plcAddress.address, value, false);
+		doNotify(plcAddress.address, value, false);
 	}
 
 	private PlcConnection validateConnection(PlcAddress plcAddress) {
@@ -136,11 +168,16 @@ public class DefaultPlc implements Plc {
 	@Override
 	public void start() {
 		this.executorPool = new ExecutorPool();
+		this.run = true;
+		this.doNotificationsTask = this.executorPool.getSingleThreadExecutor("PlcNotify").submit(this::doNotifications);
 		this.connections.values().stream().filter(PlcConnection::isAutoConnect).forEach(PlcConnection::connect);
 	}
 
 	@Override
 	public void stop() {
+		this.run = false;
+		if (this.doNotificationsTask != null)
+			this.doNotificationsTask.cancel(true);
 		this.connections.values().forEach(PlcConnection::disconnect);
 		if (this.executorPool != null)
 			this.executorPool.destroy();
@@ -213,5 +250,18 @@ public class DefaultPlc implements Plc {
 	@Override
 	public ExecutorPool getExecutorPool() {
 		return this.executorPool;
+	}
+
+	private class NotificationTask {
+		private final String address;
+		private final Object value;
+		private final boolean verbose;
+
+		public NotificationTask(String address, Object value, boolean verbose) {
+
+			this.address = address;
+			this.value = value;
+			this.verbose = verbose;
+		}
 	}
 }
