@@ -22,6 +22,7 @@ import li.strolch.agent.api.StrolchComponent;
 import li.strolch.plc.model.*;
 import li.strolch.privilege.base.NotAuthenticatedException;
 import li.strolch.privilege.model.Certificate;
+import li.strolch.privilege.model.Usage;
 import li.strolch.rest.StrolchSessionHandler;
 import li.strolch.runtime.configuration.ComponentConfiguration;
 import li.strolch.runtime.privilege.PrivilegedRunnable;
@@ -372,7 +373,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 		StrolchSessionHandler sessionHandler = getContainer().getComponent(StrolchSessionHandler.class);
 		Certificate certificate = sessionHandler
-				.authenticate(username, password.toCharArray(), WebSocketRemoteIp.get());
+				.authenticate(username, password.toCharArray(), WebSocketRemoteIp.get(), Usage.ANY);
 		plcSession.certificate = certificate;
 
 		JsonObject authResponseJ = new JsonObject();
