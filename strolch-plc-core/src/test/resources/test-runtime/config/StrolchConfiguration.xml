@@ -85,7 +85,6 @@
             <name>PostInitializer</name>
             <api>li.strolch.agent.api.PostInitializer</api>
             <impl>li.strolch.plc.core.PlcPostInitializer</impl>
-            <depends>StrolchJobsHandler</depends>
             <depends>PlcServiceInitializer</depends>
             <Properties>
             </Properties>
