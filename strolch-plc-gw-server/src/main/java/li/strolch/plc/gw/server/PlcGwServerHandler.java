@@ -373,7 +373,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 		StrolchSessionHandler sessionHandler = getContainer().getComponent(StrolchSessionHandler.class);
 		Certificate certificate = sessionHandler
-				.authenticate(username, password.toCharArray(), WebSocketRemoteIp.get(), Usage.ANY);
+				.authenticate(username, password.toCharArray(), WebSocketRemoteIp.get(), Usage.ANY, false);
 		plcSession.certificate = certificate;
 
 		JsonObject authResponseJ = new JsonObject();
