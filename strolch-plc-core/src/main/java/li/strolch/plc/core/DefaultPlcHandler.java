@@ -20,12 +20,11 @@ import li.strolch.model.parameter.StringParameter;
 import li.strolch.model.visitor.SetParameterValueVisitor;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.*;
-import li.strolch.plc.model.PlcAddress;
-import li.strolch.plc.model.PlcAddressType;
-import li.strolch.plc.model.PlcState;
+import li.strolch.plc.model.*;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
+import li.strolch.utils.I18nMessage;
 import li.strolch.utils.collections.MapOfMaps;
 import li.strolch.utils.dbc.DBC;
 
@@ -39,7 +38,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	private MapOfMaps<String, String, PlcAddress> plcAddresses;
 	private MapOfMaps<String, String, PlcAddress> plcTelegrams;
 	private Map<PlcAddress, String> addressesToResourceId;
-	private PlcListener globalListener;
+	private GlobalPlcListener globalListener;
 	private boolean verbose;
 
 	public DefaultPlcHandler(ComponentContainer container, String componentName) {
@@ -287,7 +286,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	@Override
-	public void setGlobalListener(PlcListener listener) {
+	public void setGlobalListener(GlobalPlcListener listener) {
 		this.globalListener = listener;
 		if (this.plc != null)
 			this.plc.setGlobalListener(listener);
@@ -309,6 +308,11 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		} else {
 			this.plc.unregister(plcAddress, listener);
 		}
+	}
+
+	@Override
+	public void sendMsg(I18nMessage msg, MessageState state) {
+		this.globalListener.sendMsg(msg, state);
 	}
 
 	@Override

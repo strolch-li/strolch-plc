@@ -8,17 +8,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import li.strolch.plc.model.PlcAddress;
-import li.strolch.plc.core.hw.PlcListener;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.model.Resource;
 import li.strolch.model.parameter.Parameter;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.core.hw.PlcListener;
+import li.strolch.plc.model.MessageState;
+import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcServiceState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.privilege.PrivilegedRunnable;
 import li.strolch.runtime.privilege.PrivilegedRunnableWithResult;
+import li.strolch.utils.I18nMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +63,14 @@ public abstract class PlcService implements PlcListener {
 		this.state = PlcServiceState.Unregistered;
 	}
 
+	public void register(String resource, String action) {
+		this.plcHandler.register(resource, action, this);
+	}
+
+	public void unregister(String resource, String action) {
+		this.plcHandler.unregister(resource, action, this);
+	}
+
 	protected Resource getPlcAddress(StrolchTransaction tx, String resource, String action) {
 		String plcAddressId = this.plcHandler.getPlcAddressId(resource, action);
 		return tx.getResourceBy(TYPE_PLC_ADDRESS, plcAddressId, true);
@@ -69,6 +79,10 @@ public abstract class PlcService implements PlcListener {
 	protected <T> T getAddressState(StrolchTransaction tx, String resource, String action) {
 		Parameter<T> addressParam = getPlcAddress(tx, resource, action).getParameter(PARAM_VALUE, true);
 		return addressParam.getValue();
+	}
+
+	protected void sendMsg(I18nMessage msg, MessageState state) {
+		this.plcHandler.sendMsg(msg, state);
 	}
 
 	protected void send(String resource, String action) {

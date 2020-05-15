@@ -276,20 +276,26 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 		case MSG_TYPE_AUTHENTICATION: {
 			handleAuth(session.getId(), jsonObject);
+			break;
 		}
-		break;
+
+		case MSG_TYPE_MESSAGE: {
+			PlcSession plcSession = assertPlcAuthed(plcId, session.getId());
+			handleMessage(plcSession, jsonObject);
+			break;
+		}
 
 		case MSG_TYPE_PLC_NOTIFICATION: {
 			PlcSession plcSession = assertPlcAuthed(plcId, session.getId());
 			handleNotification(plcSession, jsonObject);
+			break;
 		}
-		break;
 
 		case MSG_TYPE_PLC_TELEGRAM: {
 			PlcSession plcSession = assertPlcAuthed(plcId, session.getId());
 			handleTelegramResponse(plcSession, jsonObject);
+			break;
 		}
-		break;
 
 		default:
 			logger.error(plcId + ": Unhandled message type " + messageType);
@@ -356,6 +362,17 @@ public class PlcGwServerHandler extends StrolchComponent {
 		plcResponse.setStateMsg(stateMsg);
 
 		plcResponse.getListener().run();
+	}
+
+	private void handleMessage(PlcSession plcSession, JsonObject jsonObject) {
+
+		MessageState state = MessageState.valueOf(jsonObject.get(PARAM_STATE).getAsString());
+		JsonObject msgJ = jsonObject.get(PARAM_MESSAGE).getAsJsonObject();
+
+		// I18nMessage i18nMessage = new I18nMessage();
+
+
+		// TODO
 	}
 
 	private void handleAuth(String sessionId, JsonObject authJ) {

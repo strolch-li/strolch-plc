@@ -1,13 +1,17 @@
 package li.strolch.plc.core.hw;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Stream;
 
 import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcAddressType;
 import li.strolch.utils.ExecutorPool;
 import li.strolch.utils.collections.MapOfLists;
@@ -18,19 +22,20 @@ public class DefaultPlc implements Plc {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPlc.class);
 
-	private Map<String, PlcAddress> notificationMappings;
-	private Map<String, PlcConnection> connections;
-	private Map<String, PlcConnection> connectionsByAddress;
+	private final Map<String, PlcAddress> notificationMappings;
+	private final Map<String, PlcConnection> connections;
+	private final Map<String, PlcConnection> connectionsByAddress;
+	private final MapOfLists<PlcAddress, PlcListener> listeners;
+
+	private final LinkedBlockingQueue<NotificationTask> notificationTasks;
+
 	private PlcListener globalListener;
-	private MapOfLists<PlcAddress, PlcListener> listeners;
 	private PlcConnectionStateChangeListener connectionStateChangeListener;
-
 	private boolean verbose;
-	private ExecutorPool executorPool;
 
+	private ExecutorPool executorPool;
+	private Future<?> notificationsTask;
 	private boolean run;
-	private Future<?> doNotificationsTask;
-	private LinkedBlockingQueue<NotificationTask> notificationTasks;
 
 	public DefaultPlc() {
 		this.notificationMappings = new HashMap<>();
@@ -48,6 +53,26 @@ public class DefaultPlc implements Plc {
 	@Override
 	public void setGlobalListener(PlcListener listener) {
 		this.globalListener = listener;
+	}
+
+	@Override
+	public void notifyConnectionStateChanged(PlcConnection connection) {
+		if (this.connectionStateChangeListener != null)
+			this.connectionStateChangeListener.notifyStateChange(connection);
+	}
+
+	public void setConnectionStateChangeListener(PlcConnectionStateChangeListener listener) {
+		this.connectionStateChangeListener = listener;
+	}
+
+	@Override
+	public Stream<PlcAddressKey> getAddressKeysStream() {
+		return this.notificationMappings.values().stream().map(PlcAddress::toPlcAddressKey);
+	}
+
+	@Override
+	public Set<PlcAddressKey> getAddressKeys() {
+		return getAddressKeysStream().collect(toSet());
 	}
 
 	@Override
@@ -169,28 +194,18 @@ public class DefaultPlc implements Plc {
 	public void start() {
 		this.executorPool = new ExecutorPool();
 		this.run = true;
-		this.doNotificationsTask = this.executorPool.getSingleThreadExecutor("PlcNotify").submit(this::doNotifications);
+		this.notificationsTask = this.executorPool.getSingleThreadExecutor("PlcNotify").submit(this::doNotifications);
 		this.connections.values().stream().filter(PlcConnection::isAutoConnect).forEach(PlcConnection::connect);
 	}
 
 	@Override
 	public void stop() {
 		this.run = false;
-		if (this.doNotificationsTask != null)
-			this.doNotificationsTask.cancel(true);
+		if (this.notificationsTask != null)
+			this.notificationsTask.cancel(true);
 		this.connections.values().forEach(PlcConnection::disconnect);
 		if (this.executorPool != null)
 			this.executorPool.destroy();
-	}
-
-	@Override
-	public void notifyConnectionStateChanged(PlcConnection connection) {
-		if (this.connectionStateChangeListener != null)
-			this.connectionStateChangeListener.notifyStateChange(connection);
-	}
-
-	public void setConnectionStateChangeListener(PlcConnectionStateChangeListener listener) {
-		this.connectionStateChangeListener = listener;
 	}
 
 	@Override
@@ -252,7 +267,7 @@ public class DefaultPlc implements Plc {
 		return this.executorPool;
 	}
 
-	private class NotificationTask {
+	private static class NotificationTask {
 		private final String address;
 		private final Object value;
 		private final boolean verbose;

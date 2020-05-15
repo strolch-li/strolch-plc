@@ -10,8 +10,22 @@ public class PlcAddress {
 
 	public final String resource;
 	public final String action;
+	public final PlcAddressKey plcAddressKey;
 
+	/**
+	 * Format: <code>resource</code>-<code>action</code>
+	 */
+	public final String key;
+	/**
+	 * Format: <code>resource</code>-<code>action</code> @ <code>address</code>
+	 */
+	public final String keyAddress;
+
+	/**
+	 * Actual hardware address
+	 */
 	public final String address;
+
 	public final StrolchValueType valueType;
 	public final Object defaultValue;
 	public final boolean inverted;
@@ -22,6 +36,11 @@ public class PlcAddress {
 		this.resource = resource.intern();
 		this.action = action.intern();
 		this.address = address.intern();
+
+		this.plcAddressKey = PlcAddressKey.keyFor(this.resource, this.action);
+		this.key = this.resource + "-" + this.action;
+		this.keyAddress = this.resource + "-" + this.action + " @ " + this.address;
+
 		this.valueType = valueType;
 		this.defaultValue = defaultValue;
 		this.inverted = inverted;
@@ -55,10 +74,14 @@ public class PlcAddress {
 	}
 
 	public String toKey() {
-		return this.resource + "-" + this.action;
+		return this.key;
 	}
 
 	public String toKeyAddress() {
-		return this.resource + "-" + this.action + " @ " + this.address;
+		return this.keyAddress;
+	}
+
+	public PlcAddressKey toPlcAddressKey() {
+		return this.plcAddressKey;
 	}
 }

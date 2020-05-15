@@ -22,19 +22,19 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import li.strolch.agent.api.*;
 import li.strolch.model.Resource;
+import li.strolch.model.i18n.I18nMessageToJsonVisitor;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.core.GlobalPlcListener;
 import li.strolch.plc.core.PlcHandler;
-import li.strolch.plc.model.ConnectionState;
-import li.strolch.plc.model.PlcAddress;
-import li.strolch.plc.model.PlcResponseState;
-import li.strolch.plc.model.PlcState;
+import li.strolch.plc.model.*;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
+import li.strolch.utils.I18nMessage;
 import li.strolch.utils.helper.NetworkHelper;
 import org.glassfish.tyrus.client.ClientManager;
 
-public class PlcGwClientHandler extends StrolchComponent {
+public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcListener {
 
 	private static final String THREAD_POOL = "PlcNotifications";
 
@@ -85,8 +85,7 @@ public class PlcGwClientHandler extends StrolchComponent {
 
 		if (this.plcHandler.getPlcState() == PlcState.Started)
 			notifyPlcConnectionState(ConnectionState.Disconnected);
-		this.plcHandler.setGlobalListener(
-				(address, value) -> getExecutorService(THREAD_POOL).submit(() -> notifyServer(address, value)));
+		this.plcHandler.setGlobalListener(this);
 
 		delayConnect(INITIAL_DELAY, TimeUnit.SECONDS);
 
@@ -263,6 +262,28 @@ public class PlcGwClientHandler extends StrolchComponent {
 		} catch (Exception e) {
 			logger.error("Failed to send Ping to Server, closing server session due to: " + getExceptionMessage(e));
 			return true;
+		}
+	}
+
+	private void sendMsgToServer(I18nMessage msg, MessageState state) {
+		if (!this.authenticated) {
+			logger.warn("Not yet authenticated with server, ignoring update for msg " + msg.getKey() + ": " + msg
+					.getMessage());
+			return;
+		}
+
+		JsonObject messageJ = new JsonObject();
+		messageJ.addProperty(PARAM_PLC_ID, this.plcId);
+		messageJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_MESSAGE);
+		messageJ.addProperty(PARAM_STATE, state.name());
+		messageJ.add(PARAM_MESSAGE, msg.accept(new I18nMessageToJsonVisitor()));
+
+		try {
+			sendDataToClient(messageJ);
+			if (this.verbose)
+				logger.info("Sent msg " + msg.getKey() + " to server");
+		} catch (IOException e) {
+			logger.error("Failed to send notification to server", e);
 		}
 	}
 
@@ -504,10 +525,20 @@ public class PlcGwClientHandler extends StrolchComponent {
 		return this.ipAddresses;
 	}
 
+	@Override
+	public void sendMsg(I18nMessage msg, MessageState state) {
+		sendMsgToServer(msg, state);
+	}
+
+	@Override
+	public void handleNotification(PlcAddress address, Object value) {
+		getExecutorService(THREAD_POOL).submit(() -> notifyServer(address, value));
+	}
+
 	@ClientEndpoint
 	public static class PlcGwClientEndpoint {
 
-		private PlcGwClientHandler gwHandler;
+		private final PlcGwClientHandler gwHandler;
 
 		public PlcGwClientEndpoint(PlcGwClientHandler gwHandler) {
 			this.gwHandler = gwHandler;

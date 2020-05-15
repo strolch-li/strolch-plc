@@ -220,23 +220,23 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 
 	@Override
 	public void register() {
-		this.plcHandler.register(R_CONVEYOR_01, A_OCCUPIED, this);
-		this.plcHandler.register(R_CONVEYOR_02, A_OCCUPIED, this);
-		this.plcHandler.register(R_CONVEYOR_03, A_OCCUPIED, this);
-		this.plcHandler.register(R_CONVEYOR_04, A_OCCUPIED, this);
+		register(R_CONVEYOR_01, A_OCCUPIED);
+		register(R_CONVEYOR_02, A_OCCUPIED);
+		register(R_CONVEYOR_03, A_OCCUPIED);
+		register(R_CONVEYOR_04, A_OCCUPIED);
 
-		this.plcHandler.register(R_CONVEYOR_03, A_BARCODE, this);
+		register(R_CONVEYOR_03, A_BARCODE);
 		super.register();
 	}
 
 	@Override
 	public void unregister() {
-		this.plcHandler.unregister(R_CONVEYOR_01, A_OCCUPIED, this);
-		this.plcHandler.unregister(R_CONVEYOR_02, A_OCCUPIED, this);
-		this.plcHandler.unregister(R_CONVEYOR_03, A_OCCUPIED, this);
-		this.plcHandler.unregister(R_CONVEYOR_04, A_OCCUPIED, this);
+		unregister(R_CONVEYOR_01, A_OCCUPIED);
+		unregister(R_CONVEYOR_02, A_OCCUPIED);
+		unregister(R_CONVEYOR_03, A_OCCUPIED);
+		unregister(R_CONVEYOR_04, A_OCCUPIED);
 
-		this.plcHandler.unregister(R_CONVEYOR_03, A_BARCODE, this);
+		unregister(R_CONVEYOR_03, A_BARCODE);
 		super.unregister();
 	}
 

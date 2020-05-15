@@ -1,6 +1,10 @@
 package li.strolch.plc.core.hw;
 
+import java.util.Set;
+import java.util.stream.Stream;
+
 import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.utils.ExecutorPool;
 
 public interface Plc {
@@ -8,6 +12,10 @@ public interface Plc {
 	void start();
 
 	void stop();
+
+	Stream<PlcAddressKey> getAddressKeysStream();
+
+	Set<PlcAddressKey> getAddressKeys();
 
 	void setGlobalListener(PlcListener listener);
 
