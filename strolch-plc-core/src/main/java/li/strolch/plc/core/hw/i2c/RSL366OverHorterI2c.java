@@ -1,5 +1,6 @@
 package li.strolch.plc.core.hw.i2c;
 
+import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 import static li.strolch.utils.helper.StringHelper.toHexString;
 
@@ -66,6 +67,7 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 
 	@Override
 	public void initialize(Map<String, Object> parameters) {
+		this.simulated = parameters.containsKey(PARAM_SIMULATED) && (boolean) parameters.get(PARAM_SIMULATED);
 
 		if (!parameters.containsKey("i2cBus"))
 			throw new IllegalArgumentException("Missing param i2cBus");
@@ -89,6 +91,11 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 
 	@Override
 	public boolean connect() {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return super.connect();
+		}
+
 		if (isConnected()) {
 			logger.warn(this.id + ": Already connected");
 			return true;
@@ -123,12 +130,30 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 	}
 
 	@Override
+	public void disconnect() {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			super.disconnect();
+			return;
+		}
+
+		this.device = null;
+
+		super.disconnect();
+	}
+
+	@Override
 	public Set<String> getAddresses() {
 		return new TreeSet<>(this.positionsByAddress.keySet());
 	}
 
 	@Override
 	public void send(String address, Object value) {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return;
+		}
+
 		assertConnected();
 
 		byte[] pos = this.positionsByAddress.get(address);

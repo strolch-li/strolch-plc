@@ -19,6 +19,10 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
+import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.handler.operationslog.LogMessageState;
+import li.strolch.handler.operationslog.OperationsLog;
+import li.strolch.model.Locator;
 import li.strolch.plc.model.*;
 import li.strolch.privilege.base.NotAuthenticatedException;
 import li.strolch.privilege.model.Certificate;
@@ -261,7 +265,6 @@ public class PlcGwServerHandler extends StrolchComponent {
 	}
 
 	public void onWsMessage(String message, Session session) {
-		//logger.info(session.getId() + ": Handling message");
 
 		JsonObject jsonObject = new JsonParser().parse(message).getAsJsonObject();
 		if (!jsonObject.has(PARAM_MESSAGE_TYPE))
@@ -280,8 +283,14 @@ public class PlcGwServerHandler extends StrolchComponent {
 		}
 
 		case MSG_TYPE_MESSAGE: {
-			PlcSession plcSession = assertPlcAuthed(plcId, session.getId());
-			handleMessage(plcSession, jsonObject);
+			assertPlcAuthed(plcId, session.getId());
+			handleMessage(jsonObject);
+			break;
+		}
+
+		case MSG_TYPE_DISABLE_MESSAGE: {
+			assertPlcAuthed(plcId, session.getId());
+			handleDisableMessage(jsonObject);
 			break;
 		}
 
@@ -364,15 +373,20 @@ public class PlcGwServerHandler extends StrolchComponent {
 		plcResponse.getListener().run();
 	}
 
-	private void handleMessage(PlcSession plcSession, JsonObject jsonObject) {
-
-		MessageState state = MessageState.valueOf(jsonObject.get(PARAM_STATE).getAsString());
+	private void handleMessage(JsonObject jsonObject) {
 		JsonObject msgJ = jsonObject.get(PARAM_MESSAGE).getAsJsonObject();
+		LogMessage logMessage = LogMessage.fromJson(msgJ);
+		logger.info("Received message " + logMessage.getLocator());
+		getComponent(OperationsLog.class).addMessage(logMessage);
+	}
 
-		// I18nMessage i18nMessage = new I18nMessage();
+	private void handleDisableMessage(JsonObject jsonObject) {
+		String realm = jsonObject.get(PARAM_REALM).getAsString();
+		Locator locator = Locator.valueOf(jsonObject.get(PARAM_LOCATOR).getAsString());
+		logger.info("Received disable for messages with locator " + locator);
 
-
-		// TODO
+		OperationsLog operationsLog = getComponent(OperationsLog.class);
+		operationsLog.updateState(realm, locator, LogMessageState.Inactive);
 	}
 
 	private void handleAuth(String sessionId, JsonObject authJ) {
@@ -577,7 +591,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 	}
 
 	public void onWsError(Session session, Throwable throwable) {
-		logger.error(session.getId() + ": Error: " + throwable.getMessage(), true);
+		logger.error(session.getId() + ": Error: " + throwable.getMessage(), throwable);
 	}
 
 	public static class PlcSession {

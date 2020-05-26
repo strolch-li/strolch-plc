@@ -1,5 +1,6 @@
 package li.strolch.plc.core.hw.i2c;
 
+import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
 import static li.strolch.utils.helper.ByteHelper.*;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 import static li.strolch.utils.helper.StringHelper.toHexString;
@@ -12,7 +13,6 @@ import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.connections.SimplePlcConnection;
-import li.strolch.plc.model.ConnectionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +36,7 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 
 	@Override
 	public void initialize(Map<String, Object> parameters) {
+		this.simulated = parameters.containsKey(PARAM_SIMULATED) && (boolean) parameters.get(PARAM_SIMULATED);
 
 		if (!parameters.containsKey("i2cBus"))
 			throw new IllegalArgumentException("Missing param i2cBus");
@@ -65,6 +66,11 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 
 	@Override
 	public boolean connect() {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return super.connect();
+		}
+
 		if (isConnected()) {
 			logger.warn(this.id + ": Already connected");
 			return true;
@@ -121,12 +127,16 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 
 	@Override
 	public void disconnect() {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			super.disconnect();
+			return;
+		}
+
 		this.outputDevices = null;
 		this.states = null;
 
-		this.connectionState = ConnectionState.Disconnected;
-		this.connectionStateMsg = "-";
-		this.plc.notifyConnectionStateChanged(this);
+		super.disconnect();
 	}
 
 	@Override
@@ -136,6 +146,11 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 
 	@Override
 	public void send(String address, Object value) {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return;
+		}
+
 		assertConnected();
 
 		int[] pos = this.positionsByAddress.get(address);

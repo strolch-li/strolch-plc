@@ -3,6 +3,7 @@ package li.strolch.plc.gw.client;
 import static java.net.NetworkInterface.getByInetAddress;
 import static li.strolch.model.Tags.Json.*;
 import static li.strolch.plc.model.PlcConstants.*;
+import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
 import static li.strolch.utils.helper.ExceptionHelper.*;
 import static li.strolch.utils.helper.NetworkHelper.formatMacAddress;
 import static li.strolch.utils.helper.StringHelper.isEmpty;
@@ -13,24 +14,26 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import li.strolch.agent.api.*;
+import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.model.Locator;
 import li.strolch.model.Resource;
-import li.strolch.model.i18n.I18nMessageToJsonVisitor;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.GlobalPlcListener;
 import li.strolch.plc.core.PlcHandler;
-import li.strolch.plc.model.*;
+import li.strolch.plc.model.ConnectionState;
+import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcResponseState;
+import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
-import li.strolch.utils.I18nMessage;
 import li.strolch.utils.helper.NetworkHelper;
 import org.glassfish.tyrus.client.ClientManager;
 
@@ -57,6 +60,11 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 	private ScheduledFuture<?> serverConnectFuture;
 
+	private LinkedBlockingDeque<Callable<?>> messageQueue;
+	private int maxMessageQueue;
+	private boolean run;
+	private Future<?> messageSenderTask;
+
 	private long lastSystemStateNotification;
 	private long ipAddressesUpdateTime;
 	private JsonArray ipAddresses;
@@ -70,10 +78,13 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	public void initialize(ComponentConfiguration configuration) throws Exception {
 
 		this.verbose = configuration.getBoolean("verbose", false);
-		this.plcId = configuration.getString("plcId", null);
+		this.plcId = getComponent(PlcHandler.class).getPlcId();
 		this.gwUsername = configuration.getString("gwUsername", null);
 		this.gwPassword = configuration.getString("gwPassword", null);
 		this.gwServerUrl = configuration.getString("gwServerUrl", null);
+
+		this.maxMessageQueue = configuration.getInt("maxMessageQueue", 100);
+		this.messageQueue = new LinkedBlockingDeque<>();
 
 		super.initialize(configuration);
 	}
@@ -89,6 +100,9 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 		delayConnect(INITIAL_DELAY, TimeUnit.SECONDS);
 
+		this.run = true;
+		this.messageSenderTask = getExecutorService("MessageSender").submit(this::sendMessages);
+
 		super.start();
 	}
 
@@ -102,6 +116,9 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 	@Override
 	public void stop() throws Exception {
+
+		this.run = false;
+		this.messageSenderTask.cancel(false);
 
 		notifyPlcConnectionState(ConnectionState.Disconnected);
 
@@ -212,7 +229,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		if (this.serverConnectFuture != null)
 			this.serverConnectFuture.cancel(true);
 
-		if (this.gwSession != null) {
+		if (this.gwSession != null && this.gwSession.isOpen()) {
 			try {
 				this.gwSession.close(new CloseReason(CloseCodes.UNEXPECTED_CONDITION, msg));
 			} catch (Exception e) {
@@ -253,6 +270,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 				stateJ.add(PARAM_IP_ADDRESSES, getIpAddresses());
 				stateJ.add(PARAM_VERSIONS, getVersions());
 				stateJ.add(PARAM_SYSTEM_STATE, getContainer().getAgent().getSystemState(1, TimeUnit.HOURS));
+
 				sendDataToClient(stateJ);
 				this.lastSystemStateNotification = System.currentTimeMillis();
 			}
@@ -265,61 +283,75 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		}
 	}
 
-	private void sendMsgToServer(I18nMessage msg, MessageState state) {
-		if (!this.authenticated) {
-			logger.warn("Not yet authenticated with server, ignoring update for msg " + msg.getKey() + ": " + msg
-					.getMessage());
-			return;
-		}
+	private void addMsg(Callable<?> callable) {
+		if (this.messageQueue.size() > this.maxMessageQueue)
+			this.messageQueue.removeFirst();
+		this.messageQueue.addLast(callable);
+	}
 
-		JsonObject messageJ = new JsonObject();
-		messageJ.addProperty(PARAM_PLC_ID, this.plcId);
-		messageJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_MESSAGE);
-		messageJ.addProperty(PARAM_STATE, state.name());
-		messageJ.add(PARAM_MESSAGE, msg.accept(new I18nMessageToJsonVisitor()));
+	@Override
+	public void sendMsg(LogMessage message) {
+		addMsg(() -> {
 
-		try {
+			JsonObject messageJ = new JsonObject();
+			messageJ.addProperty(PARAM_PLC_ID, this.plcId);
+			messageJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_MESSAGE);
+			messageJ.add(PARAM_MESSAGE, message.toJson());
+
 			sendDataToClient(messageJ);
 			if (this.verbose)
-				logger.info("Sent msg " + msg.getKey() + " to server");
-		} catch (IOException e) {
-			logger.error("Failed to send notification to server", e);
-		}
+				logger.info("Sent msg " + message.getLocator() + " to server");
+
+			return null;
+		});
+	}
+
+	@Override
+	public void disableMsg(Locator locator) {
+		addMsg(() -> {
+
+			JsonObject messageJ = new JsonObject();
+			messageJ.addProperty(PARAM_PLC_ID, this.plcId);
+			messageJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_DISABLE_MESSAGE);
+			messageJ.addProperty(PARAM_REALM, DEFAULT_REALM);
+			messageJ.addProperty(PARAM_LOCATOR, locator.toString());
+
+			sendDataToClient(messageJ);
+			if (this.verbose)
+				logger.info("Sent msg " + locator + " to server");
+
+			return null;
+		});
 	}
 
 	private void notifyServer(PlcAddress plcAddress, Object value) {
-		if (!this.authenticated) {
-			logger.warn("Not yet authenticated with server, ignoring update for " + plcAddress + ": " + value);
-			return;
-		}
+		addMsg(() -> {
 
-		JsonObject notificationJ = new JsonObject();
-		notificationJ.addProperty(PARAM_PLC_ID, this.plcId);
-		notificationJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_PLC_NOTIFICATION);
-		notificationJ.addProperty(PARAM_RESOURCE, plcAddress.resource);
-		notificationJ.addProperty(PARAM_ACTION, plcAddress.action);
+			JsonObject notificationJ = new JsonObject();
+			notificationJ.addProperty(PARAM_PLC_ID, this.plcId);
+			notificationJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_PLC_NOTIFICATION);
+			notificationJ.addProperty(PARAM_RESOURCE, plcAddress.resource);
+			notificationJ.addProperty(PARAM_ACTION, plcAddress.action);
 
-		if (value instanceof Boolean)
-			notificationJ.add(PARAM_VALUE, new JsonPrimitive((Boolean) value));
-		else if (value instanceof Number)
-			notificationJ.add(PARAM_VALUE, new JsonPrimitive((Number) value));
-		else if (value instanceof String)
-			notificationJ.add(PARAM_VALUE, new JsonPrimitive((String) value));
-		else
-			notificationJ.add(PARAM_VALUE, new JsonPrimitive(value.toString()));
+			if (value instanceof Boolean)
+				notificationJ.add(PARAM_VALUE, new JsonPrimitive((Boolean) value));
+			else if (value instanceof Number)
+				notificationJ.add(PARAM_VALUE, new JsonPrimitive((Number) value));
+			else if (value instanceof String)
+				notificationJ.add(PARAM_VALUE, new JsonPrimitive((String) value));
+			else
+				notificationJ.add(PARAM_VALUE, new JsonPrimitive(value.toString()));
 
-		try {
 			sendDataToClient(notificationJ);
+
 			if (this.verbose)
 				logger.info("Sent notification for " + plcAddress.toKey() + " to server");
-		} catch (IOException e) {
-			logger.error("Failed to send notification to server", e);
-		}
+
+			return null;
+		});
 	}
 
-	public void onWsMessage(Session session, String message) {
-		//logger.info(session.getId() + ": Handling message");
-
+	public void onWsMessage(String message) {
 		JsonObject jsonObject = new JsonParser().parse(message).getAsJsonObject();
 		if (!jsonObject.has(PARAM_MESSAGE_TYPE)) {
 			logger.error("Received data has no message type!");
@@ -334,7 +366,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 				if (MSG_TYPE_AUTHENTICATION.equals(messageType)) {
 					handleAuthResponse(ctx, jsonObject);
 				} else if (MSG_TYPE_PLC_TELEGRAM.equals(messageType)) {
-					handleTelegram(ctx, jsonObject);
+					handleTelegram(jsonObject);
 				} else {
 					logger.error("Unhandled message type " + messageType);
 				}
@@ -344,7 +376,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		}
 	}
 
-	private void handleTelegram(PrivilegeContext ctx, JsonObject telegramJ) {
+	private void handleTelegram(JsonObject telegramJ) {
 
 		PlcAddress plcAddress = null;
 
@@ -383,14 +415,15 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			}
 		}
 
-		try {
+		// async sending of response
+		PlcAddress address = plcAddress;
+		addMsg(() -> {
 			sendDataToClient(telegramJ);
 			if (this.verbose)
-				logger.info("Sent Telegram response for " + (plcAddress == null ? "unknown" : plcAddress.toKey())
-						+ " to server");
-		} catch (IOException e) {
-			logger.error("Failed to send notification to server", e);
-		}
+				logger.info(
+						"Sent Telegram response for " + (address == null ? "unknown" : address.toKey()) + " to server");
+			return null;
+		});
 	}
 
 	private void handleAuthResponse(PrivilegeContext ctx, JsonObject response) {
@@ -452,7 +485,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	}
 
 	@SuppressWarnings("SynchronizeOnNonFinalField")
-	private synchronized void sendDataToClient(JsonObject jsonObject) throws IOException {
+	private void sendDataToClient(JsonObject jsonObject) throws IOException {
 		String data = jsonObject.toString();
 		synchronized (this.gwSession) {
 			RemoteEndpoint.Basic basic = this.gwSession.getBasicRemote();
@@ -462,6 +495,36 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 				pos += 8192;
 			}
 			basic.sendText(data.substring(pos), true);
+		}
+	}
+
+	private void sendMessages() {
+		while (this.run) {
+
+			if (!this.authenticated) {
+				try {
+					Thread.sleep(100L);
+				} catch (InterruptedException e) {
+					logger.error("Interrupted!");
+					if (!this.run)
+						return;
+				}
+
+				continue;
+			}
+
+			Callable<?> callable = null;
+			try {
+				callable = this.messageQueue.takeFirst();
+				callable.call();
+			} catch (Exception e) {
+				if (e instanceof IOException) {
+					closeBrokenGwSessionUpdateState("Failed to send message", "Failed to send message");
+					this.messageQueue.addFirst(callable);
+				}
+
+				logger.error("Failed to send message", e);
+			}
 		}
 	}
 
@@ -526,11 +589,6 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	}
 
 	@Override
-	public void sendMsg(I18nMessage msg, MessageState state) {
-		sendMsgToServer(msg, state);
-	}
-
-	@Override
 	public void handleNotification(PlcAddress address, Object value) {
 		getExecutorService(THREAD_POOL).submit(() -> notifyServer(address, value));
 	}
@@ -545,8 +603,8 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		}
 
 		@OnMessage
-		public void onMessage(String message, Session session) {
-			this.gwHandler.onWsMessage(session, message);
+		public void onMessage(String message) {
+			this.gwHandler.onWsMessage(message);
 		}
 
 		@OnMessage

@@ -5,11 +5,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import li.strolch.plc.model.ConnectionState;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.PlcConnection;
+import li.strolch.plc.model.ConnectionState;
 
 public abstract class SimplePlcConnection extends PlcConnection {
+
+	protected boolean simulated;
+
 	public SimplePlcConnection(Plc plc, String id) {
 		super(plc, id);
 	}
@@ -22,6 +25,8 @@ public abstract class SimplePlcConnection extends PlcConnection {
 	@Override
 	public boolean connect() {
 		logger.info(this.id + ": Is now connected.");
+		if (this.simulated)
+			logger.info("Running SIMULATED");
 		this.connectionState = ConnectionState.Connected;
 		this.connectionStateMsg = "-";
 		this.plc.notifyConnectionStateChanged(this);

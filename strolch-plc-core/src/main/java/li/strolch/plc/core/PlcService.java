@@ -2,25 +2,30 @@ package li.strolch.plc.core;
 
 import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
+import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
+import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
 import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
+import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import li.strolch.agent.api.ComponentContainer;
+import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.handler.operationslog.LogMessageState;
+import li.strolch.handler.operationslog.LogSeverity;
+import li.strolch.model.Locator;
 import li.strolch.model.Resource;
 import li.strolch.model.parameter.Parameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.PlcListener;
-import li.strolch.plc.model.MessageState;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcServiceState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.privilege.PrivilegedRunnable;
 import li.strolch.runtime.privilege.PrivilegedRunnableWithResult;
-import li.strolch.utils.I18nMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,8 +86,54 @@ public abstract class PlcService implements PlcListener {
 		return addressParam.getValue();
 	}
 
-	protected void sendMsg(I18nMessage msg, MessageState state) {
-		this.plcHandler.sendMsg(msg, state);
+	protected void enableMsg(PlcAddressKey addressKey, ResourceBundle bundle, LogSeverity severity) {
+		sendMsg(logMessageFor(addressKey, bundle, severity, LogMessageState.Active));
+	}
+
+	protected void disableMsg(PlcAddressKey addressKey) {
+		disableMsg(Locator.valueOf("Plc", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action));
+	}
+
+	protected void enableMsg(String i18nKey, ResourceBundle bundle, LogSeverity severity) {
+		sendMsg(logMessageFor(i18nKey, bundle, severity, LogMessageState.Active));
+	}
+
+	protected void disableMsg(String i18nKey, ResourceBundle bundle) {
+		disableMsg(Locator.valueOf("Plc", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey));
+	}
+
+	protected void sendMsg(String i18nKey, ResourceBundle bundle, LogSeverity severity) {
+		sendMsg(logMessageFor(i18nKey, bundle, severity));
+	}
+
+	protected LogMessage logMessageFor(PlcAddressKey addressKey, ResourceBundle bundle, LogSeverity severity) {
+		return logMessageFor(addressKey, bundle, severity, LogMessageState.Information);
+	}
+
+	protected LogMessage logMessageFor(PlcAddressKey addressKey, ResourceBundle bundle, LogSeverity severity,
+			LogMessageState state) {
+		return new LogMessage(DEFAULT_REALM, SYSTEM_USER_AGENT,
+				Locator.valueOf("Plc", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action), severity,
+				state, bundle, addressKey.toKey());
+	}
+
+	protected LogMessage logMessageFor(String i18nKey, ResourceBundle bundle, LogSeverity severity) {
+		return logMessageFor(i18nKey, bundle, severity, LogMessageState.Information);
+	}
+
+	protected LogMessage logMessageFor(String i18nKey, ResourceBundle bundle, LogSeverity severity,
+			LogMessageState state) {
+		return new LogMessage(DEFAULT_REALM, SYSTEM_USER_AGENT,
+				Locator.valueOf("Plc", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey), severity,
+				state, bundle, i18nKey);
+	}
+
+	protected void sendMsg(LogMessage logMessage) {
+		this.plcHandler.sendMsg(logMessage);
+	}
+
+	protected void disableMsg(Locator locator) {
+		this.plcHandler.disableMsg(locator);
 	}
 
 	protected void send(String resource, String action) {

@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.execution.ExecutionHandler;
 import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.handler.operationslog.LogMessageState;
 import li.strolch.handler.operationslog.LogSeverity;
 import li.strolch.handler.operationslog.OperationsLog;
 import li.strolch.model.Resource;
@@ -140,7 +141,7 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 				getOperationsLogs().addMessage(
 						new LogMessage(this.container.getRealmNames().iterator().next(), SYSTEM_USER_AGENT,
 								Resource.locatorFor(TYPE_PLC, this.plcId), LogSeverity.Exception,
-								ResourceBundle.getBundle("strolch-plc-gw-server"), "systemAction.failed")
+								LogMessageState.Information, ResourceBundle.getBundle("strolch-plc-gw-server"), "systemAction.failed")
 								.withException(e).value("action", runnable).value("reason", e));
 			}
 		}

@@ -1,5 +1,6 @@
 package li.strolch.plc.core.hw.i2c;
 
+import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
 import static li.strolch.utils.helper.ByteHelper.asBinary;
 import static li.strolch.utils.helper.ByteHelper.isBitSet;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
@@ -46,6 +47,7 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 
 	@Override
 	public void initialize(Map<String, Object> parameters) {
+		this.simulated = parameters.containsKey(PARAM_SIMULATED) && (boolean) parameters.get(PARAM_SIMULATED);
 
 		if (!parameters.containsKey("i2cBus"))
 			throw new IllegalArgumentException("Missing param i2cBus");
@@ -86,6 +88,11 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 
 	@Override
 	public boolean connect() {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return super.connect();
+		}
+
 		if (isConnected()) {
 			logger.warn(this.id + ": Already connected");
 			return true;
@@ -148,6 +155,12 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 
 	@Override
 	public void disconnect() {
+		if (this.simulated) {
+			super.disconnect();
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return;
+		}
+
 		if (this.interruptGpioPin != null) {
 			this.interruptGpioPin.removeAllListeners();
 			PlcGpioController.getInstance().unprovisionPin(this.interruptGpioPin);

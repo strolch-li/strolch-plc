@@ -1,9 +1,13 @@
 package li.strolch.plc.core.hw.gpio;
 
 import static java.util.stream.Collectors.joining;
+import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.pi4j.io.gpio.*;
 import li.strolch.plc.core.hw.Plc;
@@ -22,6 +26,8 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 
 	@Override
 	public void initialize(Map<String, Object> parameters) {
+		this.simulated = parameters.containsKey(PARAM_SIMULATED) && (boolean) parameters.get(PARAM_SIMULATED);
+
 		@SuppressWarnings("unchecked")
 		List<Integer> bcmOutputPins = (List<Integer>) parameters.get("bcmOutputPins");
 		this.outputBcmAddresses = bcmOutputPins;
@@ -44,6 +50,11 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 
 	@Override
 	public boolean connect() {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return super.connect();
+		}
+
 		try {
 			GpioController gpioController = PlcGpioController.getInstance();
 
@@ -65,6 +76,12 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 
 	@Override
 	public void disconnect() {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			super.disconnect();
+			return;
+		}
+
 		try {
 			GpioController gpioController = PlcGpioController.getInstance();
 			for (GpioPinDigitalOutput outputPin : this.gpioPinsByAddress.values()) {
@@ -80,6 +97,10 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 
 	@Override
 	public void send(String address, Object value) {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return;
+		}
 
 		boolean high = (boolean) value;
 		if (this.inverted)

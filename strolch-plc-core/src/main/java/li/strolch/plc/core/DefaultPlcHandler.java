@@ -10,9 +10,13 @@ import static li.strolch.utils.helper.StringHelper.formatNanoDuration;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
+import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.model.Locator;
 import li.strolch.model.Resource;
 import li.strolch.model.StrolchValueType;
 import li.strolch.model.parameter.Parameter;
@@ -20,11 +24,12 @@ import li.strolch.model.parameter.StringParameter;
 import li.strolch.model.visitor.SetParameterValueVisitor;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.*;
-import li.strolch.plc.model.*;
+import li.strolch.plc.model.PlcAddress;
+import li.strolch.plc.model.PlcAddressType;
+import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
-import li.strolch.utils.I18nMessage;
 import li.strolch.utils.collections.MapOfMaps;
 import li.strolch.utils.dbc.DBC;
 
@@ -32,13 +37,21 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 	public static final int SILENT_THRESHOLD = 60;
 	private PrivilegeContext ctx;
+	private String plcId;
 	private Plc plc;
 	private PlcState plcState;
 	private String plcStateMsg;
 	private MapOfMaps<String, String, PlcAddress> plcAddresses;
 	private MapOfMaps<String, String, PlcAddress> plcTelegrams;
 	private Map<PlcAddress, String> addressesToResourceId;
+
 	private GlobalPlcListener globalListener;
+
+	private LinkedBlockingDeque<MessageTask> messageQueue;
+	private int maxMessageQueue;
+	private boolean run;
+	private Future<?> messageSenderTask;
+
 	private boolean verbose;
 
 	public DefaultPlcHandler(ComponentContainer container, String componentName) {
@@ -48,6 +61,11 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	@Override
 	public ComponentContainer getContainer() {
 		return super.getContainer();
+	}
+
+	@Override
+	public String getPlcId() {
+		return this.plcId;
 	}
 
 	@Override
@@ -90,6 +108,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	@Override
 	public void initialize(ComponentConfiguration configuration) throws Exception {
 
+		this.plcId = configuration.getString("plcId", null);
+
 		// validate Plc class name
 		String plcClassName = configuration.getString("plcClass", DefaultPlc.class.getName());
 		Class.forName(plcClassName);
@@ -101,12 +121,19 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		this.addressesToResourceId = new HashMap<>();
 		this.verbose = configuration.getBoolean("verbose", false);
 
+		this.maxMessageQueue = configuration.getInt("maxMessageQueue", 100);
+		this.messageQueue = new LinkedBlockingDeque<>();
+
 		super.initialize(configuration);
 	}
 
 	@Override
 	public void start() throws Exception {
 		this.ctx = getContainer().getPrivilegeHandler().openAgentSystemUserContext();
+
+		this.run = true;
+		this.messageSenderTask = getExecutorService("LogSender").submit(this::sendMessages);
+
 		if (reconfigurePlc())
 			startPlc();
 		super.start();
@@ -117,6 +144,10 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		stopPlc();
 		if (this.ctx != null)
 			getContainer().getPrivilegeHandler().invalidate(this.ctx.getCertificate());
+
+		this.run = false;
+		this.messageSenderTask.cancel(false);
+
 		super.stop();
 	}
 
@@ -311,8 +342,35 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	@Override
-	public void sendMsg(I18nMessage msg, MessageState state) {
-		this.globalListener.sendMsg(msg, state);
+	public void sendMsg(LogMessage message) {
+		addMsg(new LogMessageTask(message));
+	}
+
+	@Override
+	public void disableMsg(Locator locator) {
+		addMsg(new DisableMessageTask(locator));
+	}
+
+	private synchronized void addMsg(MessageTask task) {
+		if (this.messageQueue.size() > this.maxMessageQueue)
+			this.messageQueue.removeFirst();
+		this.messageQueue.addLast(task);
+	}
+
+	private void sendMessages() {
+		while (this.run) {
+			try {
+
+				if (this.globalListener == null) {
+					Thread.sleep(100L);
+					continue;
+				}
+
+				this.messageQueue.takeFirst().accept(this.globalListener);
+			} catch (Exception e) {
+				logger.error("Failed to send message", e);
+			}
+		}
 	}
 
 	@Override
@@ -357,5 +415,35 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	@Override
 	public void notifyStateChange(PlcConnection connection) {
 		asyncUpdateState(connection);
+	}
+
+	private interface MessageTask {
+		void accept(GlobalPlcListener listener);
+	}
+
+	private static class LogMessageTask implements MessageTask {
+		private LogMessage message;
+
+		private LogMessageTask(LogMessage message) {
+			this.message = message;
+		}
+
+		@Override
+		public void accept(GlobalPlcListener listener) {
+			listener.sendMsg(message);
+		}
+	}
+
+	private static class DisableMessageTask implements MessageTask {
+		private Locator locator;
+
+		private DisableMessageTask(Locator locator) {
+			this.locator = locator;
+		}
+
+		@Override
+		public void accept(GlobalPlcListener listener) {
+			listener.disableMsg(locator);
+		}
 	}
 }

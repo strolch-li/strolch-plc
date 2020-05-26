@@ -1,5 +1,6 @@
 package li.strolch.plc.core.hw.connections;
 
+import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 
 import java.io.IOException;
@@ -51,6 +52,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 	@Override
 	public void initialize(Map<String, Object> parameters) throws Exception {
+		this.simulated = parameters.containsKey(PARAM_SIMULATED) && (boolean) parameters.get(PARAM_SIMULATED);
 
 		String address = (String) parameters.get("address");
 		String[] parts = address.split(":");
@@ -67,6 +69,11 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 	@Override
 	public boolean connect() {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return super.connect();
+		}
+
 		if (isConnected())
 			return true;
 
@@ -90,6 +97,12 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 	@Override
 	public void disconnect() {
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			super.disconnect();
+			return;
+		}
+
 		internalDisconnect();
 		super.disconnect();
 	}

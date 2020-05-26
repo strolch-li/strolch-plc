@@ -1,18 +1,20 @@
 package li.strolch.plc.core;
 
 import li.strolch.agent.api.ComponentContainer;
+import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.model.Locator;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.PlcListener;
-import li.strolch.plc.model.MessageState;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.Certificate;
-import li.strolch.utils.I18nMessage;
 
 public interface PlcHandler {
 
 	ComponentContainer getContainer();
+
+	String getPlcId();
 
 	PlcState getPlcState();
 
@@ -42,7 +44,9 @@ public interface PlcHandler {
 
 	void notify(String resource, String action, Object value);
 
-	void sendMsg(I18nMessage msg, MessageState state);
+	void sendMsg(LogMessage message);
+
+	void disableMsg(Locator locator);
 
 	StrolchTransaction openTx(Certificate cert, boolean readOnly);
 }
