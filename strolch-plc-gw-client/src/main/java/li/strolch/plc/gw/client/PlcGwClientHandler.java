@@ -118,6 +118,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	public void stop() throws Exception {
 
 		this.run = false;
+		this.authenticated = false;
 		this.messageSenderTask.cancel(false);
 
 		notifyPlcConnectionState(ConnectionState.Disconnected);
@@ -225,6 +226,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	}
 
 	private void closeGwSession(String msg) {
+		this.authenticated = false;
 
 		if (this.serverConnectFuture != null)
 			this.serverConnectFuture.cancel(true);
@@ -243,7 +245,6 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 		this.gwClient = null;
 		this.gwSession = null;
-		this.authenticated = false;
 	}
 
 	private void pingServer() {
@@ -467,9 +468,9 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	}
 
 	public void onWsClose(Session session, CloseReason closeReason) {
+		this.authenticated = false;
 		logger.info("Session closed with ID " + session.getId() + " due to " + closeReason.getCloseCode() + " "
 				+ closeReason.getReasonPhrase() + ". Reconnecting in " + RETRY_DELAY + "s.");
-		this.authenticated = false;
 
 		if (this.gwSession != null) {
 			closeBrokenGwSessionUpdateState(closeReason.getReasonPhrase(),
@@ -486,6 +487,8 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 	@SuppressWarnings("SynchronizeOnNonFinalField")
 	private void sendDataToClient(JsonObject jsonObject) throws IOException {
+		if (this.gwSession == null)
+			throw new IOException("gwSession null! Not authenticated!");
 		String data = jsonObject.toString();
 		synchronized (this.gwSession) {
 			RemoteEndpoint.Basic basic = this.gwSession.getBasicRemote();
@@ -518,11 +521,8 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 				callable = this.messageQueue.takeFirst();
 				callable.call();
 			} catch (Exception e) {
-				if (e instanceof IOException) {
-					closeBrokenGwSessionUpdateState("Failed to send message", "Failed to send message");
-					this.messageQueue.addFirst(callable);
-				}
-
+				closeBrokenGwSessionUpdateState("Failed to send message", "Failed to send message");
+				this.messageQueue.addFirst(callable);
 				logger.error("Failed to send message", e);
 			}
 		}
