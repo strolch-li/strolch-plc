@@ -69,6 +69,7 @@
             <depends>RealmHandler</depends>
             <Properties>
                 <plcClass>li.strolch.plc.core.hw.DefaultPlc</plcClass>
+                <plcId>plc</plcId>
             </Properties>
         </Component>
 
