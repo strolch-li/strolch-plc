@@ -1,6 +1,6 @@
 package li.strolch.plc.core;
 
-import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.model.log.LogMessage;
 import li.strolch.model.Locator;
 import li.strolch.plc.core.hw.PlcListener;
 

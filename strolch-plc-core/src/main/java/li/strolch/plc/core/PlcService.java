@@ -12,9 +12,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import li.strolch.agent.api.ComponentContainer;
-import li.strolch.handler.operationslog.LogMessage;
-import li.strolch.handler.operationslog.LogMessageState;
-import li.strolch.handler.operationslog.LogSeverity;
+import li.strolch.model.log.LogMessage;
+import li.strolch.model.log.LogMessageState;
+import li.strolch.model.log.LogSeverity;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
 import li.strolch.model.parameter.Parameter;

@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import li.strolch.execution.policy.SimpleExecution;
-import li.strolch.handler.operationslog.LogMessage;
-import li.strolch.handler.operationslog.LogMessageState;
-import li.strolch.handler.operationslog.LogSeverity;
+import li.strolch.model.log.LogMessage;
+import li.strolch.model.log.LogMessageState;
+import li.strolch.model.log.LogSeverity;
 import li.strolch.model.activity.Action;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.gw.server.PlcAddressResponseListener;

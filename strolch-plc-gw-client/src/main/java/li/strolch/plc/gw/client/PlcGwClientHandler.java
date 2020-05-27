@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import li.strolch.agent.api.*;
-import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.model.log.LogMessage;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
 import li.strolch.model.parameter.StringParameter;

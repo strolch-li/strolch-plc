@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
-import li.strolch.handler.operationslog.LogMessage;
+import li.strolch.model.log.LogMessage;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
 import li.strolch.model.StrolchValueType;

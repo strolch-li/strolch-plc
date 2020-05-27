@@ -9,9 +9,9 @@ import java.util.concurrent.TimeUnit;
 
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.execution.ExecutionHandler;
-import li.strolch.handler.operationslog.LogMessage;
-import li.strolch.handler.operationslog.LogMessageState;
-import li.strolch.handler.operationslog.LogSeverity;
+import li.strolch.model.log.LogMessage;
+import li.strolch.model.log.LogMessageState;
+import li.strolch.model.log.LogSeverity;
 import li.strolch.handler.operationslog.OperationsLog;
 import li.strolch.model.Resource;
 import li.strolch.persistence.api.StrolchTransaction;
