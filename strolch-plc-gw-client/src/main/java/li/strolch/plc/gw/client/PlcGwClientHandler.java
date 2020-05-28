@@ -28,16 +28,17 @@ import li.strolch.model.parameter.StringParameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.GlobalPlcListener;
 import li.strolch.plc.core.PlcHandler;
-import li.strolch.plc.model.ConnectionState;
-import li.strolch.plc.model.PlcAddress;
-import li.strolch.plc.model.PlcResponseState;
-import li.strolch.plc.model.PlcState;
+import li.strolch.plc.model.*;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
 import li.strolch.utils.helper.NetworkHelper;
 import org.glassfish.tyrus.client.ClientManager;
 
 public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcListener {
+
+	public static final String PLC = "PLC";
+	public static final String SERVER_CONNECTED = "ServerConnected";
+	public static final PlcAddressKey K_PLC_SERVER_CONNECTED = PlcAddressKey.keyFor(PLC, SERVER_CONNECTED);
 
 	private static final String THREAD_POOL = "PlcNotifications";
 
@@ -108,7 +109,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 	private void notifyPlcConnectionState(ConnectionState disconnected) {
 		try {
-			getComponent(PlcHandler.class).notify("PLC", "ServerConnected", disconnected.name());
+			getComponent(PlcHandler.class).notify(PLC, SERVER_CONNECTED, disconnected.name());
 		} catch (Exception e) {
 			logger.error("Failed to notify PLC of connection state", e);
 		}
@@ -521,9 +522,13 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 				callable = this.messageQueue.takeFirst();
 				callable.call();
 			} catch (Exception e) {
-				closeBrokenGwSessionUpdateState("Failed to send message", "Failed to send message");
+				closeBrokenGwSessionUpdateState("Failed to send message",
+						"Failed to send message, reconnecting in " + RETRY_DELAY + "s.");
 				this.messageQueue.addFirst(callable);
-				logger.error("Failed to send message", e);
+				logger.error("Failed to send message, reconnecting in " + RETRY_DELAY + "s. And then retrying message.",
+						e);
+
+				delayConnect(RETRY_DELAY, TimeUnit.SECONDS);
 			}
 		}
 	}
@@ -590,6 +595,11 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 	@Override
 	public void handleNotification(PlcAddress address, Object value) {
+
+		// ignore updates for connection state, if not connected
+		if (!this.authenticated && address.plcAddressKey.equals(K_PLC_SERVER_CONNECTED))
+			return;
+
 		getExecutorService(THREAD_POOL).submit(() -> notifyServer(address, value));
 	}
 
