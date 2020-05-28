@@ -6,6 +6,7 @@ import static li.strolch.model.Tags.Json.AGENT_VERSION;
 import static li.strolch.model.Tags.Json.APP_VERSION;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.StringHelper.DASH;
+import static li.strolch.utils.helper.StringHelper.isEmpty;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ public class PlcStateHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlcStateHandler.class);
 
-	private ComponentContainer container;
+	private final ComponentContainer container;
 
 	public PlcStateHandler(ComponentContainer container) {
 		this.container = container;
@@ -89,8 +90,8 @@ public class PlcStateHandler {
 						setSystemState(stateJ.getAsJsonObject(PARAM_SYSTEM_STATE), plc);
 					}
 
-					logger.info("Updated connection state for PLC " + plc.getId() + " to " + connectionState + ": "
-							+ connectionStateMsg);
+					logger.info("Updated connection state for PLC " + plc.getId() + " to " + connectionState + (isEmpty(
+							connectionStateMsg) ? "" : ": " + connectionStateMsg));
 					tx.commitOnClose();
 				}
 			});
