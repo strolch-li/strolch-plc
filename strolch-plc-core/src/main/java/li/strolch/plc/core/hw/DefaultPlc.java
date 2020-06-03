@@ -259,7 +259,8 @@ public class DefaultPlc implements Plc {
 
 	private boolean isVirtual(PlcAddress address) {
 		return address.address.startsWith("virtualBoolean") //
-				|| address.address.startsWith("virtualString");
+				|| address.address.startsWith("virtualString") //
+				|| address.address.startsWith("virtualInteger");
 	}
 
 	@Override

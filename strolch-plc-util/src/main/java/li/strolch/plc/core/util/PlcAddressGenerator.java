@@ -1,5 +1,6 @@
 package li.strolch.plc.core.util;
 
+import static java.lang.Integer.parseInt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static li.strolch.model.xml.StrolchXmlHelper.parseToMap;
 import static li.strolch.plc.model.PlcConstants.*;
@@ -19,6 +20,7 @@ import li.strolch.model.Resource;
 import li.strolch.model.StrolchRootElement;
 import li.strolch.model.StrolchValueType;
 import li.strolch.model.parameter.BooleanParameter;
+import li.strolch.model.parameter.IntegerParameter;
 import li.strolch.model.parameter.Parameter;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.model.xml.StrolchXmlHelper;
@@ -283,39 +285,33 @@ public class PlcAddressGenerator {
 					if (isEmpty(connection))
 						throw new IllegalStateException("SubType missing for: " + record);
 
-					// address for barcode reader
-					Resource addressR = addressT.getClone();
-					addressR.setId("A_" + key);
-					addressR.setName(keyName);
-
-					addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					addressR.getParameter(PARAM_ADDRESS, true).setValue(connection);
-					addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					addressR.getParameter(PARAM_ACTION, true).setValue(action1);
-
-					addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
-					addressIndex += 10;
-
-					Parameter<?> valueP;
-					if (connection.startsWith("virtualBoolean.")) {
-						valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
-					} else if (connection.startsWith("virtualString.")) {
-						valueP = new StringParameter(PARAM_VALUE, "Value", "");
-					} else {
-						throw new IllegalArgumentException(
-								"Unhandled virtual connection " + connection + " for " + resource + "-" + action1);
-					}
-					valueP.setIndex(100);
-					addressR.addParameter(valueP);
-
-					add(exportList, addressR);
-					logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
-					logger.info("Added Virtual PlcAddress " + addressR.getId() + " " + addressR.getName()
-							+ " for connection " + connection);
-
 					Resource telegramR;
 
+					String value = record.isSet("Value") ? record.get("Value") : null;
+
 					if (subType.equals("Boolean")) {
+
+						// address for virtual boolean
+						Resource addressR = addressT.getClone();
+						addressR.setId("A_" + key);
+						addressR.setName(keyName);
+
+						addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
+						addressR.getParameter(PARAM_ADDRESS, true).setValue(connection);
+						addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
+						addressR.getParameter(PARAM_ACTION, true).setValue(action1);
+
+						addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+						addressIndex += 10;
+
+						Parameter<?> valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
+						valueP.setIndex(100);
+						addressR.addParameter(valueP);
+
+						add(exportList, addressR);
+						logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+						logger.info("Added Virtual Boolean PlcAddress " + addressR.getId() + " " + addressR.getName()
+								+ " for connection " + connection);
 
 						// telegram for action1
 						telegramR = telegramT.getClone();
@@ -367,7 +363,30 @@ public class PlcAddressGenerator {
 									"Added Virtual Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 											+ " for connection " + connection);
 						}
+
 					} else if (subType.equals("String")) {
+
+						// address for virtual string
+						Resource addressR = addressT.getClone();
+						addressR.setId("A_" + key);
+						addressR.setName(keyName);
+
+						addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
+						addressR.getParameter(PARAM_ADDRESS, true).setValue(connection);
+						addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
+						addressR.getParameter(PARAM_ACTION, true).setValue(action1);
+
+						addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+						addressIndex += 10;
+
+						Parameter<?> valueP = new StringParameter(PARAM_VALUE, "Value", value == null ? "" : value);
+						valueP.setIndex(100);
+						addressR.addParameter(valueP);
+
+						add(exportList, addressR);
+						logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+						logger.info("Added Virtual String PlcAddress " + addressR.getId() + " " + addressR.getName()
+								+ " for connection " + connection);
 
 						// telegram for action1
 						telegramR = telegramT.getClone();
@@ -391,10 +410,59 @@ public class PlcAddressGenerator {
 						logger.info("Added Virtual String PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for connection " + connection);
 
+					} else if (subType.equals("Integer")) {
+
+						// address for virtual integer
+						Resource addressR = addressT.getClone();
+						addressR.setId("A_" + key);
+						addressR.setName(keyName);
+
+						addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
+						addressR.getParameter(PARAM_ADDRESS, true).setValue(connection);
+						addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
+						addressR.getParameter(PARAM_ACTION, true).setValue(action1);
+
+						addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+						addressIndex += 10;
+
+						Parameter<?> valueP = new IntegerParameter(PARAM_VALUE, "Value",
+								value == null ? 0 : parseInt(record.get("Value")));
+						valueP.setIndex(100);
+						addressR.addParameter(valueP);
+
+						add(exportList, addressR);
+						logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+						logger.info("Added Virtual Integer PlcAddress " + addressR.getId() + " " + addressR.getName()
+								+ " for connection " + connection);
+
+						// telegram for action1
+						telegramR = telegramT.getClone();
+						telegramR.setId("T_" + key);
+						telegramR.setName(keyName);
+
+						telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
+						telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection);
+						telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
+						telegramR.getParameter(PARAM_ACTION, true).setValue(action1);
+
+						telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+						telegramIndex += 10;
+
+						valueP = new IntegerParameter(PARAM_VALUE, "Value",
+								value == null ? 0 : parseInt(record.get("Value")));
+						valueP.setIndex(100);
+						telegramR.addParameter(valueP);
+
+						add(exportList, telegramR);
+						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+						logger.info("Added Virtual Integer PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
+								+ " for connection " + connection);
+
 					} else {
 						throw new IllegalArgumentException(
 								"Unhandled virtual connection " + connection + " for " + resource + "-" + action1);
 					}
+
 				} else if (type.equals("DataLogicScanner")) {
 
 					if (isEmpty(resource))
@@ -575,7 +643,7 @@ public class PlcAddressGenerator {
 
 		String address;
 		if (subType.equals("Pin")) {
-			int io = Integer.parseInt(pin);
+			int io = parseInt(pin);
 			address = connection + "." + io;
 			return address;
 		}
@@ -586,11 +654,11 @@ public class PlcAddressGenerator {
 			if (isEmpty(device))
 				throw new IllegalStateException("Device missing for: " + record);
 
-			int card = Integer.parseInt(device);
-			int io = Integer.parseInt(pin);
+			int card = parseInt(device);
+			int io = parseInt(pin);
 
 			if (subType.equals("DevPin0")) {
-				int dev = Integer.parseInt(connection.substring(connection.length() - 2));
+				int dev = parseInt(connection.substring(connection.length() - 2));
 				card -= dev;
 				io -= 1;
 			}
