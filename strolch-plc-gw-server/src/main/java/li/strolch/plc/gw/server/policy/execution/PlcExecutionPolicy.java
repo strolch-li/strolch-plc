@@ -115,13 +115,18 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 	}
 
 	protected LogMessage msgPlcNotConnected() {
-		return new LogMessage(this.realm, SYSTEM_USER_AGENT, this.actionLoc, LogSeverity.Error,
-				LogMessageState.Information, BUNDLE_STROLCH_PLC_GW_SERVER, "execution.plc.notConnected").value("plc", getPlcId());
+		return new LogMessage(this.realm, getLogMessageUsername(), this.actionLoc, LogSeverity.Error,
+				LogMessageState.Information, BUNDLE_STROLCH_PLC_GW_SERVER, "execution.plc.notConnected")
+				.value("plc", getPlcId());
+	}
+
+	protected String getLogMessageUsername() {
+		return SYSTEM_USER_AGENT;
 	}
 
 	protected LogMessage msgFailedToSendMessage(PlcAddressResponse response) {
 		PlcAddressKey key = response.getPlcAddressKey();
-		return new LogMessage(this.realm, SYSTEM_USER_AGENT, this.actionLoc, LogSeverity.Error,
+		return new LogMessage(this.realm, getLogMessageUsername(), this.actionLoc, LogSeverity.Error,
 				LogMessageState.Information, BUNDLE_STROLCH_PLC_GW_SERVER, "execution.plc.sendMessage.failed") //
 				.value("plc", getPlcId()) //
 				.value("key", key) //
@@ -129,7 +134,8 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 	}
 
 	protected LogMessage msgConnectionLostToPlc() {
-		return new LogMessage(this.realm, SYSTEM_USER_AGENT, this.actionLoc, LogSeverity.Error,
-				LogMessageState.Information, BUNDLE_STROLCH_PLC_GW_SERVER, "execution.plc.connectionLost").value("plc", getPlcId());
+		return new LogMessage(this.realm, getLogMessageUsername(), this.actionLoc, LogSeverity.Error,
+				LogMessageState.Information, BUNDLE_STROLCH_PLC_GW_SERVER, "execution.plc.connectionLost")
+				.value("plc", getPlcId());
 	}
 }

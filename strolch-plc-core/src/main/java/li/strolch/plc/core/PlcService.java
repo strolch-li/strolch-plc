@@ -3,7 +3,6 @@ package li.strolch.plc.core;
 import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
 import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
-import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
 import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
 import java.util.ResourceBundle;
@@ -112,7 +111,7 @@ public abstract class PlcService implements PlcListener {
 
 	protected LogMessage logMessageFor(PlcAddressKey addressKey, ResourceBundle bundle, LogSeverity severity,
 			LogMessageState state) {
-		return new LogMessage(DEFAULT_REALM, SYSTEM_USER_AGENT,
+		return new LogMessage(DEFAULT_REALM, this.plcHandler.getPlcId(),
 				Locator.valueOf("Plc", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action), severity,
 				state, bundle, addressKey.toKey());
 	}
@@ -123,7 +122,7 @@ public abstract class PlcService implements PlcListener {
 
 	protected LogMessage logMessageFor(String i18nKey, ResourceBundle bundle, LogSeverity severity,
 			LogMessageState state) {
-		return new LogMessage(DEFAULT_REALM, SYSTEM_USER_AGENT,
+		return new LogMessage(DEFAULT_REALM, this.plcHandler.getPlcId(),
 				Locator.valueOf("Plc", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey), severity,
 				state, bundle, i18nKey);
 	}

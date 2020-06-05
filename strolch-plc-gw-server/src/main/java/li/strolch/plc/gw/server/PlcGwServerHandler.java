@@ -1,6 +1,7 @@
 package li.strolch.plc.gw.server;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 
@@ -27,6 +28,7 @@ import li.strolch.plc.model.*;
 import li.strolch.privilege.base.NotAuthenticatedException;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.privilege.model.Usage;
+import li.strolch.privilege.model.UserRep;
 import li.strolch.rest.StrolchSessionHandler;
 import li.strolch.runtime.configuration.ComponentConfiguration;
 import li.strolch.runtime.privilege.PrivilegedRunnable;
@@ -41,6 +43,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 	public static final String THREAD_POOL = "PlcRequests";
 
 	private String runAsUser;
+	private Set<String> plcIds;
 	private PlcStateHandler plcStateHandler;
 
 	private Map<String, PlcSession> plcSessionsBySessionId;
@@ -53,10 +56,20 @@ public class PlcGwServerHandler extends StrolchComponent {
 		super(container, componentName);
 	}
 
+	public Set<String> getPlcIds() {
+		return this.plcIds;
+	}
+
 	@Override
 	public void initialize(ComponentConfiguration configuration) throws Exception {
 
-		this.runAsUser = configuration.getString("runAsUser", "agent");
+		this.runAsUser = configuration.getString("runAsUser", "plc-server");
+
+		this.plcIds = runAsAgentWithResult(
+				ctx -> getContainer().getPrivilegeHandler().getPrivilegeHandler().getUsers(ctx.getCertificate())
+						.stream() //
+						.filter(user -> user.hasRole(ROLE_PLC)).map(UserRep::getUsername) //
+						.collect(toSet()));
 
 		this.plcStateHandler = new PlcStateHandler(getContainer());
 		this.plcSessionsBySessionId = new ConcurrentHashMap<>();
@@ -377,7 +390,9 @@ public class PlcGwServerHandler extends StrolchComponent {
 		JsonObject msgJ = jsonObject.get(PARAM_MESSAGE).getAsJsonObject();
 		LogMessage logMessage = LogMessage.fromJson(msgJ);
 		logger.info("Received message " + logMessage.getLocator());
-		getComponent(OperationsLog.class).addMessage(logMessage);
+		OperationsLog log = getComponent(OperationsLog.class);
+		log.updateState(logMessage.getRealm(), logMessage.getLocator(), LogMessageState.Inactive);
+		log.addMessage(logMessage);
 	}
 
 	private void handleDisableMessage(JsonObject jsonObject) {

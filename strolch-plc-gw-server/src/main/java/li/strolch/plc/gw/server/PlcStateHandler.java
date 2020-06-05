@@ -2,8 +2,10 @@ package li.strolch.plc.gw.server;
 
 import static li.strolch.agent.api.AgentVersion.*;
 import static li.strolch.agent.api.ComponentVersion.COMPONENT_VERSION;
+import static li.strolch.model.Resource.locatorFor;
 import static li.strolch.model.Tags.Json.AGENT_VERSION;
 import static li.strolch.model.Tags.Json.APP_VERSION;
+import static li.strolch.plc.gw.server.PlcServerContants.BUNDLE_STROLCH_PLC_GW_SERVER;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.StringHelper.DASH;
 import static li.strolch.utils.helper.StringHelper.isEmpty;
@@ -15,10 +17,15 @@ import java.util.stream.StreamSupport;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import li.strolch.agent.api.ComponentContainer;
+import li.strolch.handler.operationslog.OperationsLog;
+import li.strolch.model.Locator;
 import li.strolch.model.ParameterBag;
 import li.strolch.model.Resource;
 import li.strolch.model.Tags;
 import li.strolch.model.json.ResourceSystemStateFromJson;
+import li.strolch.model.log.LogMessage;
+import li.strolch.model.log.LogMessageState;
+import li.strolch.model.log.LogSeverity;
 import li.strolch.model.parameter.StringListParameter;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.persistence.api.StrolchTransaction;
@@ -74,7 +81,9 @@ public class PlcStateHandler {
 			String connectionStateMsg, JsonObject stateJ) {
 		try {
 			runAsAgent(ctx -> {
+				String realm;
 				try (StrolchTransaction tx = openTx(plcSession.certificate)) {
+					realm = tx.getRealmName();
 
 					// get the gateway and set the state
 					Resource plc = tx.getResourceBy(TYPE_PLC, plcSession.plcId, true);
@@ -93,6 +102,22 @@ public class PlcStateHandler {
 					logger.info("Updated connection state for PLC " + plc.getId() + " to " + connectionState + (isEmpty(
 							connectionStateMsg) ? "" : ": " + connectionStateMsg));
 					tx.commitOnClose();
+				}
+
+				if (this.container.hasComponent(OperationsLog.class)) {
+					OperationsLog operationsLog = this.container.getComponent(OperationsLog.class);
+					Locator msgLocator = locatorFor(TYPE_PLC, plcSession.plcId)
+							.append(ConnectionState.class.getSimpleName());
+					operationsLog.updateState(realm, msgLocator, LogMessageState.Inactive);
+					if (connectionState == ConnectionState.Connected) {
+						operationsLog.addMessage(new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Info,
+								LogMessageState.Information, BUNDLE_STROLCH_PLC_GW_SERVER, "execution.plc.connected")
+								.value("plc", plcSession.plcId));
+					} else {
+						operationsLog.addMessage(new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Error,
+								LogMessageState.Active, BUNDLE_STROLCH_PLC_GW_SERVER, "execution.plc.connectionLost")
+								.value("plc", plcSession.plcId));
+					}
 				}
 			});
 		} catch (Exception e) {

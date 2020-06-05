@@ -61,4 +61,6 @@ public class PlcConstants {
 	public static final String MSG_TYPE_MESSAGE = "Message";
 	public static final String MSG_TYPE_DISABLE_MESSAGE = "DisableMessage";
 	public static final String MSG_TYPE_STATE_NOTIFICATION = "StateNotification";
+
+	public static final String ROLE_PLC = "PLC";
 }
