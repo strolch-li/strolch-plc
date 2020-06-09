@@ -375,6 +375,15 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 	@Override
 	public void send(String resource, String action) {
+		send(resource, action, true, true);
+	}
+
+	@Override
+	public void send(String resource, String action, Object value) {
+		send(resource, action, value, true, true);
+	}
+
+	public void send(String resource, String action, boolean catchExceptions, boolean notifyGlobalListener) {
 		PlcAddress plcAddress = this.plcTelegrams.getElement(resource, action);
 		if (plcAddress == null)
 			throw new IllegalStateException("No PlcTelegram exists for " + resource + "-" + action);
@@ -382,16 +391,16 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		if (plcAddress.defaultValue == null)
 			throw new IllegalStateException("Can not send PlcAddress as no default value set for " + plcAddress);
 
-		this.plc.send(plcAddress);
+		this.plc.send(plcAddress, catchExceptions, notifyGlobalListener);
 	}
 
-	@Override
-	public void send(String resource, String action, Object value) {
+	public void send(String resource, String action, Object value, boolean catchExceptions,
+			boolean notifyGlobalListener) {
 		PlcAddress plcAddress = this.plcTelegrams.getElement(resource, action);
 		if (plcAddress == null)
 			throw new IllegalStateException("No PlcTelegram exists for " + resource + "-" + action);
 
-		this.plc.send(plcAddress, value);
+		this.plc.send(plcAddress, value, catchExceptions, notifyGlobalListener);
 	}
 
 	@Override

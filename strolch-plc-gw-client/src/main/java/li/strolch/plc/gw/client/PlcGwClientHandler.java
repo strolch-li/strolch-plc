@@ -394,9 +394,9 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			if (telegramJ.has(PARAM_VALUE)) {
 				String valueS = telegramJ.get(PARAM_VALUE).getAsString();
 				Object value = plcAddress.valueType.parseValue(valueS);
-				this.plcHandler.send(resource, action, value);
+				this.plcHandler.send(resource, action, value, false, false);
 			} else {
-				this.plcHandler.send(resource, action);
+				this.plcHandler.send(resource, action, false, false);
 			}
 
 			telegramJ.addProperty(PARAM_STATE, PlcResponseState.Done.name());

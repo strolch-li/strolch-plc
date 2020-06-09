@@ -29,7 +29,11 @@ public interface Plc {
 
 	void send(PlcAddress address);
 
+	void send(PlcAddress address, boolean catchExceptions, boolean notifyGlobalListener);
+
 	void send(PlcAddress address, Object value);
+
+	void send(PlcAddress address, Object value, boolean catchExceptions, boolean notifyGlobalListener);
 
 	void addConnection(PlcConnection connection);
 

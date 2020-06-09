@@ -74,11 +74,12 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 	}
 
 	protected boolean assertResponse(PlcAddressResponse response) {
-		if (response.getState().isSent())
-			return true;
+		if (response.getState().isFailed()) {
+			toError(msgFailedToSendMessage(response));
+			return false;
+		}
 
-		toError(msgFailedToSendMessage(response));
-		return false;
+		return true;
 	}
 
 	protected void send(PlcAddressKey key, boolean value) {

@@ -148,6 +148,11 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 		if (!this.addressTrigger.equals(address))
 			throw new IllegalStateException("Illegal Address " + address);
 
+		if (this.simulated) {
+			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			return;
+		}
+
 		boolean trigger = (boolean) value;
 
 		try {

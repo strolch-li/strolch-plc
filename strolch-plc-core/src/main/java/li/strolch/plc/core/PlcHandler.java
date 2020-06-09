@@ -40,7 +40,11 @@ public interface PlcHandler {
 
 	void send(String resource, String action);
 
+	void send(String resource, String action, boolean catchExceptions, boolean notifyGlobalListener);
+
 	void send(String resource, String action, Object value);
+
+	void send(String resource, String action, Object value, boolean catchExceptions, boolean notifyGlobalListener);
 
 	void notify(String resource, String action, Object value);
 

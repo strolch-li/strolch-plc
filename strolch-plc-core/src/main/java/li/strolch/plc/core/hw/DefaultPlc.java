@@ -93,7 +93,7 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void syncNotify(String address, Object value) {
-		doNotify(address, value, true);
+		doNotify(address, value, true, true, true);
 	}
 
 	@Override
@@ -101,12 +101,22 @@ public class DefaultPlc implements Plc {
 		this.notificationTasks.add(new NotificationTask(address, value, true));
 	}
 
-	private void doNotify(String address, Object value, boolean verbose) {
+	private void doNotify(String address, Object value, boolean verbose, boolean catchExceptions,
+			boolean notifyGlobalListener) {
 		PlcAddress plcAddress = this.notificationMappings.get(address);
 		if (plcAddress == null) {
-			logger.warn("No mapping to PlcAddress for hwAddress " + address);
+			if (catchExceptions)
+				logger.warn("No mapping to PlcAddress for hwAddress " + address);
+			else
+				throw new IllegalArgumentException("No mapping to PlcAddress for hwAddress " + address);
 			return;
 		}
+
+		doNotify(plcAddress, value, verbose, catchExceptions, notifyGlobalListener);
+	}
+
+	private void doNotify(PlcAddress plcAddress, Object value, boolean verbose, boolean catchExceptions,
+			boolean notifyGlobalListener) {
 
 		if (verbose)
 			logger.info("Update for {}: {}", plcAddress.toKey(), value);
@@ -119,12 +129,16 @@ public class DefaultPlc implements Plc {
 				try {
 					listener.handleNotification(plcAddress, value);
 				} catch (Exception e) {
-					logger.error("Failed to notify listener " + listener + " for address " + plcAddress, e);
+					if (catchExceptions) {
+						logger.error("Failed to notify listener " + listener + " for address " + plcAddress, e);
+					} else {
+						throw e;
+					}
 				}
 			}
 		}
 
-		if (this.globalListener != null)
+		if (notifyGlobalListener && this.globalListener != null)
 			this.globalListener.handleNotification(plcAddress, value);
 	}
 
@@ -134,7 +148,7 @@ public class DefaultPlc implements Plc {
 			NotificationTask task = null;
 			try {
 				task = this.notificationTasks.take();
-				doNotify(task.address, task.value, task.verbose);
+				doNotify(task.address, task.value, task.verbose, true, true);
 			} catch (InterruptedException e) {
 				logger.error("Interrupted: " + e.getMessage());
 			} catch (Exception e) {
@@ -149,18 +163,26 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void send(PlcAddress plcAddress) {
-		logger.info("Sending {}: {} (default)", plcAddress.toKey(), plcAddress.defaultValue);
-		if (!isVirtual(plcAddress))
-			validateConnection(plcAddress).send(plcAddress.address, plcAddress.defaultValue);
-		doNotify(plcAddress.address, plcAddress.defaultValue, false);
+		send(plcAddress, true, true);
 	}
 
 	@Override
 	public void send(PlcAddress plcAddress, Object value) {
+		send(plcAddress, value, true, true);
+	}
+
+	public void send(PlcAddress plcAddress, boolean catchExceptions, boolean notifyGlobalListener) {
+		logger.info("Sending {}: {} (default)", plcAddress.toKey(), plcAddress.defaultValue);
+		if (!isVirtual(plcAddress))
+			validateConnection(plcAddress).send(plcAddress.address, plcAddress.defaultValue);
+		doNotify(plcAddress, plcAddress.defaultValue, false, catchExceptions, notifyGlobalListener);
+	}
+
+	public void send(PlcAddress plcAddress, Object value, boolean catchExceptions, boolean notifyGlobalListener) {
 		logger.info("Sending {}: {}", plcAddress.toKey(), value);
 		if (!isVirtual(plcAddress))
 			validateConnection(plcAddress).send(plcAddress.address, value);
-		doNotify(plcAddress.address, value, false);
+		doNotify(plcAddress, value, false, catchExceptions, notifyGlobalListener);
 	}
 
 	private PlcConnection validateConnection(PlcAddress plcAddress) {
