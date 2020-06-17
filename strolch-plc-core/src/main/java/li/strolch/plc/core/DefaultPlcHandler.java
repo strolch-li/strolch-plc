@@ -52,6 +52,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	private boolean run;
 	private Future<?> messageSenderTask;
 
+	private boolean asyncAddressUpdate;
 	private boolean verbose;
 
 	public DefaultPlcHandler(ComponentContainer container, String componentName) {
@@ -119,6 +120,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		this.plcAddresses = new MapOfMaps<>();
 		this.plcTelegrams = new MapOfMaps<>();
 		this.addressesToResourceId = new HashMap<>();
+		this.asyncAddressUpdate = configuration.getBoolean("asyncAddressUpdate", false);
 		this.verbose = configuration.getBoolean("verbose", false);
 
 		this.maxMessageQueue = configuration.getInt("maxMessageQueue", 100);
@@ -227,8 +229,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 			plc = PlcConfigurator.configurePlc(tx, plcClassName, plcAddresses, plcTelegrams, addressesToResourceId);
 			plc.setConnectionStateChangeListener(this);
-			plcAddresses.values().stream().filter(a -> a.type == PlcAddressType.Notification)
-					.forEach(plcAddress -> plc.register(plcAddress, this::asyncUpdateState));
+			plcAddresses.values().forEach(plcAddress -> plc.register(plcAddress, this::asyncUpdateState));
 
 			if (tx.needsCommit())
 				tx.commitOnClose();
@@ -238,7 +239,10 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	private void asyncUpdateState(PlcAddress address, Object value) {
-		getExecutorService("PlcAddressUpdater").submit(() -> updatePlcAddress(address, value));
+		if (this.asyncAddressUpdate)
+			getExecutorService("PlcAddressUpdater").submit(() -> updatePlcAddress(address, value));
+		else
+			updatePlcAddress(address, value);
 	}
 
 	private void asyncUpdateState(PlcConnection connection) {

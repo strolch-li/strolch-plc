@@ -39,7 +39,7 @@ public class DefaultPlc implements Plc {
 
 	public DefaultPlc() {
 		this.notificationMappings = new HashMap<>();
-		this.listeners = new MapOfLists<>();
+		this.listeners = new MapOfLists<>(true);
 		this.connections = new HashMap<>();
 		this.connectionsByAddress = new HashMap<>();
 		this.notificationTasks = new LinkedBlockingQueue<>();
@@ -98,7 +98,7 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void queueNotify(String address, Object value) {
-		this.notificationTasks.add(new NotificationTask(address, value, true));
+		this.notificationTasks.add(new NotificationTask(address, value, this.verbose));
 	}
 
 	private void doNotify(String address, Object value, boolean verbose, boolean catchExceptions,
@@ -150,7 +150,7 @@ public class DefaultPlc implements Plc {
 				task = this.notificationTasks.take();
 				doNotify(task.address, task.value, task.verbose, true, true);
 			} catch (InterruptedException e) {
-				logger.error("Interrupted: " + e.getMessage());
+				logger.error("Interrupted!");
 			} catch (Exception e) {
 				if (task != null)
 					logger.error("Failed to perform notification for " + task.address + ": " + task.value, e);

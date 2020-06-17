@@ -203,6 +203,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 	private void send(PlcSession plcSession, PlcAddressKey plcAddressKey, JsonPrimitive valueJ,
 			PlcAddressResponseListener listener) {
 
+		logger.info("Sending " + plcAddressKey + " with value " + valueJ + " to " + plcSession.plcId + "...");
+
 		PlcAddressResponse plcResponse = new PlcAddressResponse(plcSession.plcId, plcAddressKey);
 		plcResponse.setListener(() -> handleResponse(listener, plcResponse));
 
@@ -223,7 +225,6 @@ public class PlcGwServerHandler extends StrolchComponent {
 			synchronized (plcSession.session) {
 				sendDataToClient(data, plcSession.session.getBasicRemote());
 			}
-			logger.info("Sent data to plc " + plcSession.plcId + " on Session " + plcSession.session.getId());
 
 		} catch (Exception e) {
 			logger.error("Failed to send " + plcAddressKey + " to PLC " + plcSession.plcId, e);

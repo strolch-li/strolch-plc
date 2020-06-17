@@ -108,11 +108,13 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	}
 
 	private void notifyPlcConnectionState(ConnectionState disconnected) {
-		try {
-			getComponent(PlcHandler.class).notify(PLC, SERVER_CONNECTED, disconnected.name());
-		} catch (Exception e) {
-			logger.error("Failed to notify PLC of connection state", e);
-		}
+		getExecutorService("MessageSender").submit(() -> {
+			try {
+				getComponent(PlcHandler.class).notify(PLC, SERVER_CONNECTED, disconnected.name());
+			} catch (Exception e) {
+				logger.error("Failed to notify PLC of connection state", e);
+			}
+		});
 	}
 
 	@Override
@@ -146,7 +148,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	private void delayConnect(long delay, TimeUnit unit) {
 		if (this.serverConnectFuture != null)
 			this.serverConnectFuture.cancel(true);
-		this.serverConnectFuture = getScheduledExecutor("Server").schedule(this::connectToServer, delay, unit);
+		this.serverConnectFuture = getScheduledExecutor("ConnectionTimer").schedule(this::connectToServer, delay, unit);
 	}
 
 	private void connectToServer() {

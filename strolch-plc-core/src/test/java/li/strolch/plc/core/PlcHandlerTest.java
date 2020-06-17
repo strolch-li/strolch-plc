@@ -2,16 +2,19 @@ package li.strolch.plc.core;
 
 import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import li.strolch.model.Locator;
 import li.strolch.model.Resource;
+import li.strolch.model.log.LogMessage;
 import li.strolch.model.parameter.BooleanParameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.PlcConnection;
 import li.strolch.plc.model.ConnectionState;
+import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcState;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.testbase.runtime.RuntimeMock;
@@ -79,22 +82,70 @@ public class PlcHandlerTest {
 	}
 
 	@Test
-	public void shouldSendVirtualBoolean() {
+	public void shouldSendVirtualBoolean() throws InterruptedException {
 
 		PlcHandler plcHandler = runtimeMock.getComponent(PlcHandler.class);
 		String addressId = plcHandler.getPlcAddressId("PLC", "Running");
-		AtomicReference<Boolean> value;
-		try (StrolchTransaction tx = runtimeMock.openUserTx(cert, true)) {
-			Resource address = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
-			value = new AtomicReference<>(address.getParameter(PARAM_VALUE, true).getValue());
-		}
-		assertEquals(false, value.get());
+		AtomicBoolean value = new AtomicBoolean(getAddress(addressId).getBoolean(PARAM_VALUE));
+		assertFalse(value.get());
 
-		plcHandler.register("PLC", "Running", (address, v) -> value.set((Boolean) v));
+		plcHandler.register("PLC", "Running", (address, v) -> {
+			logger.error("Setting " + address + " to " + v);
+			value.set((Boolean) v);
+		});
+		plcHandler.register("PLC", "NotRunning", (address, v) -> {
+			logger.error("Setting " + address + " to " + v);
+			value.set((Boolean) v);
+		});
+
 		plcHandler.send("PLC", "Running");
-		assertEquals(true, value.get());
+		assertTrue(value.get());
+		assertTrue(getAddress(addressId).getBoolean(PARAM_VALUE));
+
 		plcHandler.send("PLC", "NotRunning");
-		assertEquals(false, value.get());
+		assertFalse(value.get());
+		assertFalse(getAddress(addressId).getBoolean(PARAM_VALUE));
+	}
+
+	private Resource getAddress(String addressId) {
+		try (StrolchTransaction tx = runtimeMock.openUserTx(cert, true)) {
+			tx.lock(Resource.locatorFor(TYPE_PLC_ADDRESS, addressId));
+			return tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
+		}
+	}
+
+	@Test
+	public void shouldSendVirtualBooleanGlobal() {
+
+		PlcHandler plcHandler = runtimeMock.getComponent(PlcHandler.class);
+
+		String addressId = plcHandler.getPlcAddressId("PLC", "Running");
+		AtomicBoolean value = new AtomicBoolean(getAddress(addressId).getBoolean(PARAM_VALUE));
+		assertFalse(value.get());
+
+		plcHandler.setGlobalListener(new GlobalPlcListener() {
+			@Override
+			public void sendMsg(LogMessage message) {
+				// ignore
+			}
+
+			@Override
+			public void disableMsg(Locator locator) {
+				// ignore
+			}
+
+			@Override
+			public void handleNotification(PlcAddress address, Object v) {
+				if (address.action.contains("Running"))
+					value.set((Boolean) v);
+			}
+		});
+
+		plcHandler.send("PLC", "Running");
+		assertTrue(value.get());
+
+		plcHandler.send("PLC", "NotRunning");
+		assertFalse(value.get());
 	}
 
 	@Test
@@ -110,6 +161,8 @@ public class PlcHandlerTest {
 		assertEquals("Disconnected", value.get());
 
 		plcHandler.register("Server", "Connected", (address, v) -> value.set((String) v));
+		plcHandler.register("Server", "Disconnected", (address, v) -> value.set((String) v));
+
 		plcHandler.send("Server", "Connected", "Connected");
 		assertEquals("Connected", value.get());
 		plcHandler.send("Server", "Connected", "Disconnected");
