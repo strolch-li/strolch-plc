@@ -40,8 +40,6 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	public static final String SERVER_CONNECTED = "ServerConnected";
 	public static final PlcAddressKey K_PLC_SERVER_CONNECTED = PlcAddressKey.keyFor(PLC, SERVER_CONNECTED);
 
-	private static final String THREAD_POOL = "PlcNotifications";
-
 	private static final long PING_DELAY = 90;
 	private static final long RETRY_DELAY = 30;
 	private static final int INITIAL_DELAY = 10;
@@ -602,7 +600,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		if (!this.authenticated && address.plcAddressKey.equals(K_PLC_SERVER_CONNECTED))
 			return;
 
-		getExecutorService(THREAD_POOL).submit(() -> notifyServer(address, value));
+		notifyServer(address, value);
 	}
 
 	@ClientEndpoint
