@@ -17,6 +17,7 @@ import java.util.stream.StreamSupport;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import li.strolch.agent.api.ComponentContainer;
+import li.strolch.execution.ExecutionHandler;
 import li.strolch.handler.operationslog.OperationsLog;
 import li.strolch.model.Locator;
 import li.strolch.model.ParameterBag;
@@ -119,6 +120,11 @@ public class PlcStateHandler {
 								.value("plc", plcSession.plcId));
 					}
 				}
+
+				// trigger execution handler that we are connected
+				if (connectionState == ConnectionState.Connected && this.container.hasComponent(ExecutionHandler.class))
+					this.container.getComponent(ExecutionHandler.class).triggerExecution(realm);
+
 			});
 		} catch (Exception e) {
 			logger.error("Failed to handle gateway connection state notification!", e);
