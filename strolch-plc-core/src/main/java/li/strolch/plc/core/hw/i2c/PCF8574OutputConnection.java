@@ -145,7 +145,7 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 	}
 
 	@Override
-	public void send(String address, Object value) {
+	public synchronized void send(String address, Object value) {
 		if (this.simulated) {
 			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
 			return;
