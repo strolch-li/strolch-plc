@@ -229,7 +229,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 			plc = PlcConfigurator.configurePlc(tx, plcClassName, plcAddresses, plcTelegrams, addressesToResourceId);
 			plc.setConnectionStateChangeListener(this);
-			plcAddresses.values().forEach(plcAddress -> plc.register(plcAddress, this::asyncUpdateState));
+			plcAddresses.values().forEach(plcAddress -> plc.register(plcAddress, this::updateState));
 
 			if (tx.needsCommit())
 				tx.commitOnClose();
@@ -238,7 +238,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		return plc;
 	}
 
-	private void asyncUpdateState(PlcAddress address, Object value) {
+	private void updateState(PlcAddress address, Object value) {
 		if (this.asyncAddressUpdate)
 			getExecutorService("PlcAddressUpdater").submit(() -> updatePlcAddress(address, value));
 		else
