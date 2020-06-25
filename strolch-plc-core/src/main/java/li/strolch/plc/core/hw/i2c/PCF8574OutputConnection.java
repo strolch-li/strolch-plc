@@ -145,7 +145,7 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 	}
 
 	@Override
-	public synchronized void send(String address, Object value) {
+	public void send(String address, Object value) {
 		if (this.simulated) {
 			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
 			return;
@@ -167,17 +167,21 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 			high = !high;
 
 		try {
-			byte newState;
-			if (high)
-				newState = clearBit(this.states[device], pin);
-			else
-				newState = setBit(this.states[device], pin);
 
-			if (this.verbose)
-				logger.info("Setting 0x" + toHexString((byte) device) + " to new state " + asBinary(newState));
+			synchronized (this) {
+				byte newState;
+				if (high)
+					newState = clearBit(this.states[device], pin);
+				else
+					newState = setBit(this.states[device], pin);
 
-			this.outputDevices[device].write(newState);
-			this.states[device] = newState;
+				if (this.verbose)
+					logger.info("Setting 0x" + toHexString((byte) device) + " to new state " + asBinary(newState));
+
+				this.outputDevices[device].write(newState);
+				this.states[device] = newState;
+			}
+
 		} catch (Exception e) {
 			handleBrokenConnection(
 					"Failed to write to I2C address: " + address + ": " + getExceptionMessageWithCauses(e), e);
