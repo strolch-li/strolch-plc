@@ -40,6 +40,10 @@ public class PlcResponse {
 		return this;
 	}
 
+	public boolean isDone() {
+		return this.state == PlcResponseState.Done;
+	}
+
 	public boolean isSent() {
 		return this.state == PlcResponseState.Sent;
 	}

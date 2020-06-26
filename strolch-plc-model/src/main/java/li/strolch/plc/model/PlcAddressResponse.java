@@ -2,7 +2,7 @@ package li.strolch.plc.model;
 
 public class PlcAddressResponse extends PlcResponse {
 
-	private PlcAddressKey plcAddressKey;
+	private final PlcAddressKey plcAddressKey;
 
 	public PlcAddressResponse(String plcId, PlcAddressKey plcAddressKey) {
 		super(plcId);
