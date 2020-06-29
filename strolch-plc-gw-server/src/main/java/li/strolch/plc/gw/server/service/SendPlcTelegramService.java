@@ -5,6 +5,7 @@ import static li.strolch.plc.model.PlcConstants.*;
 import com.google.gson.JsonPrimitive;
 import li.strolch.model.StrolchValueType;
 import li.strolch.plc.gw.server.PlcGwServerHandler;
+import li.strolch.plc.gw.server.PlcGwSrvI18n;
 import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcAddressResponse;
 import li.strolch.service.StringMapArgument;
@@ -36,6 +37,9 @@ public class SendPlcTelegramService extends AbstractService<StringMapArgument, S
 		DBC.PRE.assertNotEmpty(PARAM_ACTION + " must be set!", action);
 
 		PlcGwServerHandler plcHandler = getComponent(PlcGwServerHandler.class);
+		if (!plcHandler.isPlcConnected(plcId))
+			return ServiceResult.error("PLC " + plcId + " is not connected!")
+					.i18n(PlcGwSrvI18n.bundle, "execution.plc.notConnected", "plc", plcId);
 
 		PlcAddressResponse response;
 		if (!arg.map.containsKey(PARAM_VALUE)) {

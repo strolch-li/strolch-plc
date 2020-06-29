@@ -5,7 +5,6 @@ import static li.strolch.agent.api.ComponentVersion.COMPONENT_VERSION;
 import static li.strolch.model.Resource.locatorFor;
 import static li.strolch.model.Tags.Json.AGENT_VERSION;
 import static li.strolch.model.Tags.Json.APP_VERSION;
-import static li.strolch.plc.gw.server.PlcServerContants.BUNDLE_STROLCH_PLC_GW_SERVER;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.StringHelper.DASH;
 import static li.strolch.utils.helper.StringHelper.isEmpty;
@@ -112,11 +111,11 @@ public class PlcStateHandler {
 					operationsLog.updateState(realm, msgLocator, LogMessageState.Inactive);
 					if (connectionState == ConnectionState.Connected) {
 						operationsLog.addMessage(new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Info,
-								LogMessageState.Information, BUNDLE_STROLCH_PLC_GW_SERVER, "execution.plc.connected")
+								LogMessageState.Information, PlcGwSrvI18n.bundle, "execution.plc.connected")
 								.value("plc", plcSession.plcId));
 					} else {
 						operationsLog.addMessage(new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Error,
-								LogMessageState.Active, BUNDLE_STROLCH_PLC_GW_SERVER, "execution.plc.connectionLost")
+								LogMessageState.Active, PlcGwSrvI18n.bundle, "execution.plc.connectionLost")
 								.value("plc", plcSession.plcId));
 					}
 				}

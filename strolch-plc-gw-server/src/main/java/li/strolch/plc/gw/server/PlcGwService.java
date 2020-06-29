@@ -3,17 +3,16 @@ package li.strolch.plc.gw.server;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC;
 import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
 
-import java.util.ResourceBundle;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.execution.ExecutionHandler;
+import li.strolch.handler.operationslog.OperationsLog;
+import li.strolch.model.Resource;
 import li.strolch.model.log.LogMessage;
 import li.strolch.model.log.LogMessageState;
 import li.strolch.model.log.LogSeverity;
-import li.strolch.handler.operationslog.OperationsLog;
-import li.strolch.model.Resource;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcAddressResponse;
@@ -141,7 +140,7 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 				getOperationsLogs().addMessage(
 						new LogMessage(this.container.getRealmNames().iterator().next(), SYSTEM_USER_AGENT,
 								Resource.locatorFor(TYPE_PLC, this.plcId), LogSeverity.Exception,
-								LogMessageState.Information, ResourceBundle.getBundle("strolch-plc-gw-server"), "systemAction.failed")
+								LogMessageState.Information, PlcGwSrvI18n.bundle, "systemAction.failed")
 								.withException(e).value("action", runnable).value("reason", e));
 			}
 		}
