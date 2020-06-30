@@ -2,11 +2,7 @@ package li.strolch.plc.gw.server.service;
 
 import static li.strolch.plc.model.PlcConstants.*;
 
-import com.google.gson.JsonPrimitive;
-import li.strolch.model.StrolchValueType;
-import li.strolch.plc.gw.server.PlcGwServerHandler;
-import li.strolch.plc.gw.server.PlcGwSrvI18n;
-import li.strolch.plc.model.PlcAddressKey;
+import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.model.PlcAddressResponse;
 import li.strolch.service.StringMapArgument;
 import li.strolch.service.api.AbstractService;
@@ -36,40 +32,37 @@ public class SendPlcTelegramService extends AbstractService<StringMapArgument, S
 		DBC.PRE.assertNotEmpty(PARAM_RESOURCE + " must be set!", resource);
 		DBC.PRE.assertNotEmpty(PARAM_ACTION + " must be set!", action);
 
-		PlcGwServerHandler plcHandler = getComponent(PlcGwServerHandler.class);
-		if (!plcHandler.isPlcConnected(plcId))
-			return ServiceResult.error("PLC " + plcId + " is not connected!")
-					.i18n(PlcGwSrvI18n.bundle, "execution.plc.notConnected", "plc", plcId);
+		try (StrolchTransaction tx = openArgOrUserTx(arg, false)) {
 
-		PlcAddressResponse response;
-		if (!arg.map.containsKey(PARAM_VALUE)) {
-			response = plcHandler.sendMessageSync(PlcAddressKey.keyFor(resource, action), plcId);
-		} else {
+			SendPlcTelegramCommand cmd = new SendPlcTelegramCommand(tx);
+			cmd.setPlcId(plcId);
+			cmd.setResource(resource);
+			cmd.setAction(action);
 
-			String valueS = arg.map.get(PARAM_VALUE);
-			String valueTypeS = arg.map.get(PARAM_VALUE_TYPE);
+			if (!arg.map.containsKey(PARAM_VALUE)) {
+				String value = arg.map.get(PARAM_VALUE);
+				String valueType = arg.map.get(PARAM_VALUE_TYPE);
+				DBC.PRE.assertNotEmpty(PARAM_VALUE + " must either not be set, or a non-empty value", value);
+				DBC.PRE.assertNotEmpty(PARAM_VALUE_TYPE + " must be set when a value is given!", valueType);
 
-			DBC.PRE.assertNotEmpty(PARAM_VALUE + " must either not be set, or a non-empty value", valueS);
-			DBC.PRE.assertNotEmpty(PARAM_VALUE_TYPE + " must be set when a value is given!", valueTypeS);
+				cmd.setValue(value);
+				cmd.setValueType(valueType);
+			}
 
-			StrolchValueType valueType = StrolchValueType.parse(valueTypeS);
-			Object value = valueType.parseValue(valueS);
-			JsonPrimitive valueJ;
-			if (value instanceof String)
-				valueJ = new JsonPrimitive((String) value);
-			else if (value instanceof Number)
-				valueJ = new JsonPrimitive((Number) value);
-			else if (value instanceof Boolean)
-				valueJ = new JsonPrimitive((Boolean) value);
-			else
-				throw new IllegalArgumentException("Unhandled value type " + valueType);
+			cmd.validate();
+			cmd.doCommand();
 
-			response = plcHandler.sendMessageSync(PlcAddressKey.keyFor(resource, action), plcId, valueJ);
+			PlcAddressResponse response;
+			response = cmd.getResponse();
+			if (response.isFailed()) {
+				tx.rollbackOnClose();
+				return ServiceResult.error(response.getState() + ": " + response.getStateMsg());
+			}
+
+			if (tx.needsCommit())
+				tx.commitOnClose();
 		}
 
-		if (response.isDone())
-			return ServiceResult.success();
-
-		return ServiceResult.error(response.getState() + ": " + response.getStateMsg());
+		return ServiceResult.success();
 	}
 }
