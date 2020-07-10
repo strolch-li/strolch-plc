@@ -584,7 +584,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 			}
 		}
 
-		// then notify and remove any notification observers for disconnected PLCs
+		// then notify any notification observers for disconnected PLCs
 		MapOfLists<PlcAddressKey, PlcNotificationListener> plcAddressListeners = this.plcAddressListenersByPlcId
 				.get(plcId);
 		if (plcAddressListeners == null)
@@ -601,7 +601,6 @@ public class PlcGwServerHandler extends StrolchComponent {
 				logger.warn("Notifying PlcNotificationListener " + addressKey + " with " + listener
 						+ " of connection lost!");
 				listener.handleConnectionLost();
-				plcAddressListeners.removeElement(addressKey, listener);
 			}
 		}
 	}
