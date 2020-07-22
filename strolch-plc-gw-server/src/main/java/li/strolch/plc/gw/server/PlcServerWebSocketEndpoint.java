@@ -8,7 +8,7 @@ import li.strolch.rest.RestfulStrolchComponent;
 @ServerEndpoint("/websocket/strolch/plc")
 public class PlcServerWebSocketEndpoint {
 
-	private PlcGwServerHandler serverHandler;
+	private final PlcGwServerHandler serverHandler;
 
 	public PlcServerWebSocketEndpoint() {
 		this.serverHandler = RestfulStrolchComponent.getInstance().getComponent(PlcGwServerHandler.class);

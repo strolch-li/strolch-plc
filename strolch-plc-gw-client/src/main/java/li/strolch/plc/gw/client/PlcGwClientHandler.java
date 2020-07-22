@@ -267,7 +267,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			if (lastUpdate > TimeUnit.HOURS.toMillis(1)) {
 				logger.info("Sending system state to server...");
 				JsonObject stateJ = new JsonObject();
-				stateJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_AUTHENTICATION);
+				stateJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_STATE_NOTIFICATION);
 				stateJ.addProperty(PARAM_PLC_ID, this.plcId);
 				stateJ.add(PARAM_IP_ADDRESSES, getIpAddresses());
 				stateJ.add(PARAM_VERSIONS, getVersions());

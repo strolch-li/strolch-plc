@@ -20,10 +20,10 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
-import li.strolch.model.log.LogMessage;
-import li.strolch.model.log.LogMessageState;
 import li.strolch.handler.operationslog.OperationsLog;
 import li.strolch.model.Locator;
+import li.strolch.model.log.LogMessage;
+import li.strolch.model.log.LogMessageState;
 import li.strolch.plc.model.*;
 import li.strolch.privilege.base.NotAuthenticatedException;
 import li.strolch.privilege.model.Certificate;
@@ -296,6 +296,12 @@ public class PlcGwServerHandler extends StrolchComponent {
 			break;
 		}
 
+		case MSG_TYPE_STATE_NOTIFICATION: {
+			PlcSession plcSession = assertPlcAuthed(plcId, session.getId());
+			handleStateMsg(plcSession, jsonObject);
+			break;
+		}
+
 		case MSG_TYPE_MESSAGE: {
 			assertPlcAuthed(plcId, session.getId());
 			handleMessage(jsonObject);
@@ -351,6 +357,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		}
 
 		List<PlcNotificationListener> listeners;
+		//noinspection SynchronizationOnLocalVariableOrMethodParameter
 		synchronized (plcListeners) {
 			listeners = plcListeners.getList(addressKey);
 			if (listeners == null) {
@@ -431,6 +438,10 @@ public class PlcGwServerHandler extends StrolchComponent {
 		getExecutorService(THREAD_POOL).submit(() -> sendAuthResponse(plcSession, authResponseJ));
 
 		this.plcStateHandler.handlePlcState(plcSession, ConnectionState.Connected, "", authJ);
+	}
+
+	private void handleStateMsg(PlcSession plcSession, JsonObject stateMsgJ) {
+		this.plcStateHandler.handlePlcState(plcSession, ConnectionState.Connected, "", stateMsgJ);
 	}
 
 	private void sendAuthResponse(PlcSession plcSession, JsonObject jsonObject) {
