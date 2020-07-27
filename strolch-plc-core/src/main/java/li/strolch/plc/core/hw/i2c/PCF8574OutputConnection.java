@@ -21,6 +21,7 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 	private static final Logger logger = LoggerFactory.getLogger(PCF8574OutputConnection.class);
 
 	private boolean verbose;
+	private boolean resetOnConnect;
 	private int i2cBusNr;
 	private boolean inverted;
 
@@ -44,6 +45,7 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 			throw new IllegalArgumentException("Missing param addresses");
 
 		this.verbose = parameters.containsKey("verbose") && (Boolean) parameters.get("verbose");
+		this.resetOnConnect = parameters.containsKey("resetOnConnect") && (Boolean) parameters.get("resetOnConnect");
 		this.i2cBusNr = (int) parameters.get("i2cBus");
 		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
 
@@ -91,17 +93,22 @@ public class PCF8574OutputConnection extends SimplePlcConnection {
 
 				this.outputDevices[i] = i2cBus.getDevice(address);
 
-				// default is all outputs off, i.e. 1
-				this.states[i] = (byte) 0xff;
-				try {
-					this.outputDevices[i].write(this.states[i]);
+				if (this.resetOnConnect) {
+					// default is all outputs off, i.e. 1
+					this.states[i] = (byte) 0xff;
+					try {
+						this.outputDevices[i].write(this.states[i]);
+						logger.info("Set initial value to " + asBinary((byte) 0xff) + " for address 0x" + toHexString(
+								address));
+					} catch (Exception e) {
+						ok = false;
+						logger.error("Failed to set initial value to " + asBinary((byte) 0xff) + " on I2C Bus "
+								+ this.i2cBusNr + " and address 0x" + toHexString(address), e);
+					}
+				} else {
+					this.states[i] = (byte) this.outputDevices[i].read();
 					logger.info(
-							"Set initial value to " + asBinary((byte) 0xff) + " for address 0x" + toHexString(address));
-				} catch (Exception e) {
-					ok = false;
-					logger.error(
-							"Failed to set initial value to " + asBinary((byte) 0xff) + " on I2C Bus " + this.i2cBusNr
-									+ " and address 0x" + toHexString(address), e);
+							"Initial value is " + asBinary(this.states[i]) + " for address 0x" + toHexString(address));
 				}
 
 				logger.info("Connected to I2C Device at address 0x" + toHexString(address) + " on I2C Bus "
