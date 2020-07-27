@@ -127,6 +127,8 @@ public class DefaultPlc implements Plc {
 		} else {
 			for (PlcListener listener : listeners) {
 				try {
+					if (this.verbose)
+						logger.info("Notifying " + plcAddress.toKey() + ": " + value + " @ " + listener);
 					listener.handleNotification(plcAddress, value);
 				} catch (Exception e) {
 					if (catchExceptions) {
