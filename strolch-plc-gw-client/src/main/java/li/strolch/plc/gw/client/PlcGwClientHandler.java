@@ -227,6 +227,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	}
 
 	private void closeGwSession(String msg) {
+		logger.info("Closing GW session: " + msg);
 		this.authenticated = false;
 
 		if (this.serverConnectFuture != null)
