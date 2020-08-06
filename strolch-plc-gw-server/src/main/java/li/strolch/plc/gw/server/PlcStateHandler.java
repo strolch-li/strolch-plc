@@ -82,16 +82,24 @@ public class PlcStateHandler {
 		try {
 			runAsAgent(ctx -> {
 				String realm;
+				ConnectionState existingState;
 				try (StrolchTransaction tx = openTx(plcSession.certificate)) {
 					realm = tx.getRealmName();
 
 					// get the gateway and set the state
 					Resource plc = tx.getResourceBy(TYPE_PLC, plcSession.plcId, true);
 					StringParameter stateP = plc.getParameter(PARAM_CONNECTION_STATE, true);
-					stateP.setValue(connectionState.name());
-					StringParameter stateMsgP = plc.getParameter(PARAM_CONNECTION_STATE_MSG, true);
-					stateMsgP.setValue(connectionStateMsg);
-					tx.update(plc);
+					existingState = ConnectionState.valueOf(stateP.getValue());
+					if (existingState != connectionState) {
+						stateP.setValue(connectionState.name());
+						StringParameter stateMsgP = plc.getParameter(PARAM_CONNECTION_STATE_MSG, true);
+						stateMsgP.setValue(connectionStateMsg);
+						tx.update(plc);
+
+						logger.info(
+								"Updated connection state for PLC " + plc.getId() + " to " + connectionState + (isEmpty(
+										connectionStateMsg) ? "" : ": " + connectionStateMsg));
+					}
 
 					if (stateJ != null) {
 						saveGatewayIpAddresses(tx, plc, stateJ.getAsJsonArray(PARAM_IP_ADDRESSES));
@@ -99,12 +107,10 @@ public class PlcStateHandler {
 						setSystemState(stateJ.getAsJsonObject(PARAM_SYSTEM_STATE), plc);
 					}
 
-					logger.info("Updated connection state for PLC " + plc.getId() + " to " + connectionState + (isEmpty(
-							connectionStateMsg) ? "" : ": " + connectionStateMsg));
 					tx.commitOnClose();
 				}
 
-				if (this.container.hasComponent(OperationsLog.class)) {
+				if (existingState != connectionState && this.container.hasComponent(OperationsLog.class)) {
 					OperationsLog operationsLog = this.container.getComponent(OperationsLog.class);
 					Locator msgLocator = locatorFor(TYPE_PLC, plcSession.plcId)
 							.append(ConnectionState.class.getSimpleName());
@@ -121,7 +127,8 @@ public class PlcStateHandler {
 				}
 
 				// trigger execution handler that we are connected
-				if (connectionState == ConnectionState.Connected && this.container.hasComponent(ExecutionHandler.class))
+				if (existingState != connectionState && connectionState == ConnectionState.Connected && this.container
+						.hasComponent(ExecutionHandler.class))
 					this.container.getComponent(ExecutionHandler.class).triggerExecution(realm);
 
 			});
