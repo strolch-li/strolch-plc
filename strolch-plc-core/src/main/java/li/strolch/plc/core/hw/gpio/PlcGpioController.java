@@ -1,6 +1,5 @@
 package li.strolch.plc.core.hw.gpio;
 
-import com.pi4j.concurrent.SingleThreadGpioExecutorServiceFactory;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.RaspiGpioProvider;
@@ -14,7 +13,7 @@ public class PlcGpioController {
 		if (controller != null)
 			return controller;
 
-		GpioFactory.setExecutorServiceFactory(new SingleThreadGpioExecutorServiceFactory());
+		// GpioFactory.setExecutorServiceFactory(new SingleThreadGpioExecutorServiceFactory());
 		GpioFactory.setDefaultProvider(new RaspiGpioProvider(RaspiPinNumberingScheme.BROADCOM_PIN_NUMBERING));
 		controller = GpioFactory.getInstance();
 
