@@ -17,6 +17,7 @@ import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 
 public class RaspiBcmGpioInputConnection extends SimplePlcConnection {
 
+	private boolean verbose;
 	private List<Integer> inputBcmAddresses;
 	private Map<String, Pin> pinsByAddress;
 	private Map<GpioPin, String> addressesByPin;
@@ -52,6 +53,7 @@ public class RaspiBcmGpioInputConnection extends SimplePlcConnection {
 			this.pinPullResistance = PinPullResistance.OFF;
 		}
 
+		this.verbose = parameters.containsKey("verbose") && (Boolean) parameters.get("verbose");
 		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
 
 		logger.info("Configured Raspi BCM GPIO Input for Pins " + this.inputBcmAddresses.stream().map(Object::toString)
@@ -92,9 +94,13 @@ public class RaspiBcmGpioInputConnection extends SimplePlcConnection {
 	}
 
 	private void handleInterrupt(GpioPinDigitalStateChangeEvent event) {
+		if (this.verbose)
+			logger.info(event.getPin() + " " + event.getState() + " " + event.getEdge());
+
 		String address = this.addressesByPin.get(event.getPin());
 		PinState state = event.getState();
-		logger.info(address + " has new state " + state);
+		if (this.verbose)
+			logger.info(address + " has new state " + state);
 		notify(address, this.inverted ? state.isLow() : state.isHigh());
 	}
 

@@ -15,6 +15,7 @@ import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 
 public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 
+	private boolean verbose;
 	private List<Integer> outputBcmAddresses;
 	private Map<String, Pin> pinsByAddress;
 	private Map<String, GpioPinDigitalOutput> gpioPinsByAddress;
@@ -42,6 +43,7 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 			logger.info("Registered address " + key + " for RaspiBcmPin " + pin);
 		}
 
+		this.verbose = parameters.containsKey("verbose") && (Boolean) parameters.get("verbose");
 		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
 		logger.info(
 				"Configured Raspi BCM GPIO Output for Pins " + this.outputBcmAddresses.stream().map(Object::toString)
@@ -110,10 +112,10 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 		if (outputPin == null)
 			throw new IllegalArgumentException("Output pin with address " + address + " does not exist!");
 
-		if (high)
-			outputPin.setState(PinState.HIGH);
-		else
-			outputPin.setState(PinState.LOW);
+		PinState newState = high ? PinState.HIGH : PinState.LOW;
+		if (this.verbose)
+			logger.info("Setting pin " + outputPin + " to new state " + newState);
+		outputPin.setState(newState);
 	}
 
 	@Override
