@@ -21,9 +21,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import li.strolch.agent.api.*;
-import li.strolch.model.log.LogMessage;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
+import li.strolch.model.log.LogMessage;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.GlobalPlcListener;
@@ -158,6 +158,11 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			this.gwSession = this.gwClient.connectToServer(new PlcGwClientEndpoint(this), new URI(this.gwServerUrl));
 		} catch (Exception e) {
 			Throwable rootCause = getRootCause(e);
+			if (rootCause instanceof InterruptedException) {
+				logger.error("Interrupted while connecting. Stopping.");
+				return;
+			}
+
 			if (rootCause.getMessage() != null && rootCause.getMessage().contains("Connection refused")) {
 				logger.error(
 						"Connection refused to connect to server. Will try to connect again in " + RETRY_DELAY + "s: "
