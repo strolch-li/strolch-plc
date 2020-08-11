@@ -1,5 +1,7 @@
 package li.strolch.plc.core.hw.i2c;
 
+import static com.pi4j.wiringpi.Gpio.HIGH;
+import static com.pi4j.wiringpi.Gpio.LOW;
 import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
 import static li.strolch.utils.helper.ByteHelper.asBinary;
 import static li.strolch.utils.helper.ByteHelper.isBitSet;
@@ -9,6 +11,8 @@ import static li.strolch.utils.helper.StringHelper.toPrettyHexString;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
@@ -16,6 +20,7 @@ import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
+import com.pi4j.wiringpi.Gpio;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 import li.strolch.plc.core.hw.gpio.PlcGpioController;
@@ -40,6 +45,10 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 	private int interruptBcmPinAddress;
 	private PinState interruptChangeState;
 	private GpioPinDigitalInput interruptGpioPin;
+	private Future<?> interruptFixTask;
+	private long lastInterrupt;
+	private long interruptFixes;
+	private boolean enableInterruptFix;
 
 	public PCF8574InputConnection(Plc plc, String id) {
 		super(plc, id);
@@ -79,6 +88,8 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 		this.interruptResistance = PinPullResistance.valueOf((String) parameters.get("interruptPinPullResistance"));
 		this.interruptBcmPinAddress = (Integer) parameters.get("interruptBcmPinAddress");
 		this.interruptChangeState = PinState.valueOf((String) parameters.get("interruptChangeState"));
+		this.enableInterruptFix =
+				parameters.containsKey("enableInterruptFix") && (Boolean) parameters.get("enableInterruptFix");
 
 		logger.info("Configured PCF8574 Input on I2C addresses 0x " + toPrettyHexString(this.addresses)
 				+ " on BCM Pin interrupt trigger " + this.interruptBcmPinAddress);
@@ -143,6 +154,11 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 
 			logger.info("Registered GPIO interrupt handler for BCM " + interruptPin);
 
+			if (this.enableInterruptFix) {
+				this.interruptFixTask = this.plc.getExecutorPool().getScheduledExecutor(this.id + "_InterruptFix")
+						.scheduleWithFixedDelay(this::checkInterruptPin, 1, 1, TimeUnit.SECONDS);
+			}
+
 			return ok && super.connect();
 
 		} catch (Throwable e) {
@@ -161,14 +177,46 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 			return;
 		}
 
+		if (this.interruptFixTask != null)
+			this.interruptFixTask.cancel(true);
+
 		if (this.interruptGpioPin != null) {
-			this.interruptGpioPin.removeAllListeners();
-			PlcGpioController.getInstance().unprovisionPin(this.interruptGpioPin);
-			logger.info("Provisioned GPIO Input pin " + this.interruptGpioPin);
+			try {
+				this.interruptGpioPin.removeAllListeners();
+				PlcGpioController.getInstance().unprovisionPin(this.interruptGpioPin);
+				logger.info("Provisioned GPIO Input pin " + this.interruptGpioPin);
+			} catch (Exception e) {
+				logger.error("Failed to unprovision pin " + this.interruptGpioPin, e);
+			}
 		}
 
 		this.inputDevices = null;
 		super.disconnect();
+	}
+
+	private void checkInterruptPin() {
+
+		// only if we haven't had an interrupt in a while
+		if (this.lastInterrupt > System.currentTimeMillis() - 1000) {
+			return;
+		}
+
+		int currentState = Gpio.digitalRead(this.interruptGpioPin.getPin().getAddress());
+
+		if ((this.interruptChangeState == PinState.HIGH && currentState == HIGH) //
+				|| (this.interruptChangeState == PinState.LOW && currentState == LOW)) {
+			logger.error("Missed interrupt for pin " + this.interruptGpioPin + " as current state is " + currentState
+					+ " and expected change state is " + this.interruptChangeState + ", forcing update...");
+
+			try {
+				handleNewState();
+			} catch (Exception e) {
+				handleBrokenConnection("Failed to read new state: " + getExceptionMessageWithCauses(e), e);
+			}
+
+			this.interruptFixes++;
+			logger.error("Performed " + this.interruptFixes + " interrupt fixes.");
+		}
 	}
 
 	private void handleInterrupt(GpioPinDigitalStateChangeEvent event) {
@@ -209,6 +257,8 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 				}
 			}
 		}
+
+		this.lastInterrupt = System.currentTimeMillis();
 	}
 
 	private boolean readInitialState() {
@@ -241,6 +291,7 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 			}
 		}
 
+		this.lastInterrupt = System.currentTimeMillis();
 		return ok;
 	}
 
