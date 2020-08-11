@@ -10,6 +10,7 @@ import static li.strolch.utils.helper.StringHelper.formatNanoDuration;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -249,14 +250,18 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	}
 
 	private void updateState(PlcAddress address, Object value) {
-		if (this.asyncAddressUpdate)
-			getExecutorService("PlcAddressUpdater").submit(() -> updatePlcAddress(address, value));
-		else
+		if (this.asyncAddressUpdate) {
+			ExecutorService service = getExecutorService("PlcAddressUpdater");
+			if (!service.isShutdown())
+				service.submit(() -> updatePlcAddress(address, value));
+		} else
 			updatePlcAddress(address, value);
 	}
 
 	private void asyncUpdateState(PlcConnection connection) {
-		getExecutorService("PlcConnectionUpdater").submit(() -> updateConnectionState(connection));
+		ExecutorService service = getExecutorService("PlcConnectionUpdater");
+		if (!service.isShutdown())
+			service.submit(() -> updateConnectionState(connection));
 	}
 
 	private void updatePlcAddress(PlcAddress address, Object value) {
