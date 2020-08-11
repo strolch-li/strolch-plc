@@ -24,6 +24,7 @@ import li.strolch.model.parameter.StringParameter;
 import li.strolch.model.visitor.SetParameterValueVisitor;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.*;
+import li.strolch.plc.core.hw.gpio.PlcGpioController;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressType;
 import li.strolch.plc.model.PlcState;
@@ -148,9 +149,18 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			getContainer().getPrivilegeHandler().invalidate(this.ctx.getCertificate());
 
 		this.run = false;
-		this.messageSenderTask.cancel(false);
+		this.messageSenderTask.cancel(true);
 
 		super.stop();
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		if (PlcGpioController.isLoaded()) {
+			logger.info("Destroying GPIO Controller...");
+			PlcGpioController.getInstance().shutdown();
+		}
+		super.destroy();
 	}
 
 	@Override
@@ -371,6 +381,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 				}
 
 				this.messageQueue.takeFirst().accept(this.globalListener);
+			} catch (InterruptedException e) {
+				logger.warn("Interrupted");
 			} catch (Exception e) {
 				logger.error("Failed to send message", e);
 			}
