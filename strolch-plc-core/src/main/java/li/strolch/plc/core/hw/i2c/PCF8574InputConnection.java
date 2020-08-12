@@ -157,6 +157,7 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 			if (this.enableInterruptFix) {
 				this.interruptFixTask = this.plc.getExecutorPool().getScheduledExecutor("InterruptFix")
 						.scheduleWithFixedDelay(this::checkInterruptPin, 1, 1, TimeUnit.SECONDS);
+				logger.info("Enabled Interrupt Fix Task.");
 			}
 
 			return ok && super.connect();
