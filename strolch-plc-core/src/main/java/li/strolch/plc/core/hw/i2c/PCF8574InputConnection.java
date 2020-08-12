@@ -155,7 +155,7 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 			logger.info("Registered GPIO interrupt handler for BCM " + interruptPin);
 
 			if (this.enableInterruptFix) {
-				this.interruptFixTask = this.plc.getExecutorPool().getScheduledExecutor(this.id + "_InterruptFix")
+				this.interruptFixTask = this.plc.getExecutorPool().getScheduledExecutor("InterruptFix")
 						.scheduleWithFixedDelay(this::checkInterruptPin, 1, 1, TimeUnit.SECONDS);
 			}
 
