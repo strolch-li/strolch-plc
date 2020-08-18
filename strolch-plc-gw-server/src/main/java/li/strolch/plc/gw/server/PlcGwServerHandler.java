@@ -280,7 +280,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 	public void onWsMessage(String message, Session session) {
 
-		JsonObject jsonObject = new JsonParser().parse(message).getAsJsonObject();
+		JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
 		if (!jsonObject.has(PARAM_MESSAGE_TYPE))
 			throw new IllegalStateException("Message is missing " + PARAM_MESSAGE_TYPE);
 		if (!jsonObject.has(PARAM_PLC_ID))

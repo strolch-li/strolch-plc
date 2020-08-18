@@ -360,7 +360,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	}
 
 	public void onWsMessage(String message) {
-		JsonObject jsonObject = new JsonParser().parse(message).getAsJsonObject();
+		JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
 		if (!jsonObject.has(PARAM_MESSAGE_TYPE)) {
 			logger.error("Received data has no message type!");
 			return;

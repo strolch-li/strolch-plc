@@ -29,7 +29,7 @@ public class PlcAddresses {
 	public Response sendAddressAction(@Context HttpServletRequest request, String data) {
 
 		Certificate cert = (Certificate) request.getAttribute(StrolchRestfulConstants.STROLCH_CERTIFICATE);
-		JsonObject jsonObject = new JsonParser().parse(data).getAsJsonObject();
+		JsonObject jsonObject = JsonParser.parseString(data).getAsJsonObject();
 
 		SendPlcAddressActionService svc = new SendPlcAddressActionService();
 		JsonServiceArgument arg = svc.getArgumentInstance();
