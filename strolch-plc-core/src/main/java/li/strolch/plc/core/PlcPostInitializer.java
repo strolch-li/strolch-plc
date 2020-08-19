@@ -1,14 +1,9 @@
 package li.strolch.plc.core;
 
-import java.util.concurrent.TimeUnit;
-
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchAgent;
 import li.strolch.agent.impl.SimplePostInitializer;
-import li.strolch.execution.ArchiveExecutedActivitiesJob;
-import li.strolch.execution.ExecutionHandler;
 import li.strolch.handler.mail.MailHandler;
-import li.strolch.job.JobMode;
 import li.strolch.job.StrolchJobsHandler;
 import li.strolch.policy.ReloadPoliciesJob;
 import li.strolch.policy.ReloadPrivilegeHandlerJob;
@@ -50,13 +45,6 @@ public class PlcPostInitializer extends SimplePostInitializer {
 
 		// recurring jobs
 		// jobsHandler.registerAndScheduleJob(XXX.class);
-
-		if (getContainer().hasComponent(ExecutionHandler.class)) {
-			StrolchAgent agent = getContainer().getAgent();
-			ArchiveExecutedActivitiesJob archiveExecutedActivitiesJob = new ArchiveExecutedActivitiesJob(agent,
-					JobMode.Recurring, 5, TimeUnit.MINUTES, 6, TimeUnit.HOURS);
-			jobsHandler.register(archiveExecutedActivitiesJob).runNow();
-		}
 	}
 
 	protected void notifyStart() {
