@@ -6,7 +6,7 @@
     <parent>
         <artifactId>strolch-plc</artifactId>
         <groupId>li.strolch</groupId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>1.0.1</version>
     </parent>
 
     <artifactId>strolch-plc-model</artifactId>
