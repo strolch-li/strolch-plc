@@ -413,6 +413,10 @@ public class PlcGwServerHandler extends StrolchComponent {
 	}
 
 	private void handleAuth(String sessionId, JsonObject authJ) {
+		if (!authJ.has(PARAM_PLC_ID) || !authJ.has(PARAM_USERNAME) || !authJ.has(PARAM_PASSWORD))
+			throw new IllegalStateException(
+					sessionId + ": Auth Json is missing one of " + PARAM_PLC_ID + ", " + PARAM_USERNAME + ", "
+							+ PARAM_PASSWORD + ": " + authJ.toString());
 
 		String plcId = authJ.get(PARAM_PLC_ID).getAsString();
 		String username = authJ.get(PARAM_USERNAME).getAsString();
