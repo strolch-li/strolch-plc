@@ -2,7 +2,7 @@
 <StrolchModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://strolch.li/xsd/StrolchModel-1.6.xsd"
               xsi:schemaLocation="https://strolch.li/xsd/StrolchModel-1.6.xsd StrolchModel-1.6.xsd">
 
-    <IncludeFile file="Templates.xml"/>
+    <IncludeFile file="plc-templates.xml"/>
 
     <IncludeFile file="strolch-plc-example.xml"/>
     <IncludeFile file="strolch-plc-example-connections.xml"/>

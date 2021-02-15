@@ -18,6 +18,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor01"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Occupied"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
@@ -28,6 +29,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor02"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Occupied"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
@@ -38,6 +40,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Occupied"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
@@ -48,6 +51,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor04"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Occupied"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
@@ -78,6 +82,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor01"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="MotorOn"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="50"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
@@ -108,6 +113,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor02"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="MotorOn"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="60"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
@@ -138,6 +144,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="MotorOn"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="70"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
@@ -168,6 +175,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor04"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="MotorOn"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="80"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
@@ -178,6 +186,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Barcode"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="90"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="String" Index="100" Value=""/>
     </ParameterBag>
   </Resource>
@@ -188,6 +197,7 @@
       <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Conveyor03"/>
       <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="On"/>
       <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="100"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
       <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
     </ParameterBag>
   </Resource>
