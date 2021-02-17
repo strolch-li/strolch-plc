@@ -203,7 +203,10 @@ public class PlcGwServerHandler extends StrolchComponent {
 	private void send(PlcSession plcSession, PlcAddressKey plcAddressKey, JsonPrimitive valueJ,
 			PlcAddressResponseListener listener) {
 
-		logger.info("Sending " + plcAddressKey + " with value " + valueJ + " to " + plcSession.plcId + "...");
+		if (valueJ == null)
+			logger.info("Sending " + plcAddressKey + " to " + plcSession.plcId + "...");
+		else
+			logger.info("Sending " + plcAddressKey + " with value " + valueJ + " to " + plcSession.plcId + "...");
 
 		PlcAddressResponse plcResponse = new PlcAddressResponse(plcSession.plcId, plcAddressKey);
 		plcResponse.setListener(() -> handleResponse(listener, plcResponse));
