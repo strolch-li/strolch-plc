@@ -5,6 +5,7 @@ import static li.strolch.agent.api.ComponentVersion.COMPONENT_VERSION;
 import static li.strolch.model.Resource.locatorFor;
 import static li.strolch.model.Tags.Json.AGENT_VERSION;
 import static li.strolch.model.Tags.Json.APP_VERSION;
+import static li.strolch.model.builder.BuilderHelper.buildParamName;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.StringHelper.DASH;
 import static li.strolch.utils.helper.StringHelper.isEmpty;
@@ -22,6 +23,7 @@ import li.strolch.model.Locator;
 import li.strolch.model.ParameterBag;
 import li.strolch.model.Resource;
 import li.strolch.model.Tags;
+import li.strolch.model.builder.ResourceBuilder;
 import li.strolch.model.json.ResourceSystemStateFromJson;
 import li.strolch.model.log.LogMessage;
 import li.strolch.model.log.LogMessageState;
@@ -60,7 +62,10 @@ public class PlcStateHandler {
 				try (StrolchTransaction tx = openTx(ctx.getCertificate())) {
 
 					// get the gateway and set the state
-					Resource plc = tx.getResourceBy(TYPE_PLC, plcSession.plcId, true);
+					Resource plc = tx.getResourceBy(TYPE_PLC, plcSession.plcId, false);
+					if (plc == null)
+						plc = buildNewPlc(plcSession, tx);
+
 					StringParameter stateP = plc.getParameter(PARAM_CONNECTION_STATE, true);
 
 					if (!stateP.getValue().equals(ConnectionState.Connected.name())) {
@@ -87,7 +92,10 @@ public class PlcStateHandler {
 					realm = tx.getRealmName();
 
 					// get the gateway and set the state
-					Resource plc = tx.getResourceBy(TYPE_PLC, plcSession.plcId, true);
+					Resource plc = tx.getResourceBy(TYPE_PLC, plcSession.plcId, false);
+					if (plc == null)
+						plc = buildNewPlc(plcSession, tx);
+
 					StringParameter stateP = plc.getParameter(PARAM_CONNECTION_STATE, true);
 					existingState = ConnectionState.valueOf(stateP.getValue());
 					if (existingState != connectionState) {
@@ -185,11 +193,11 @@ public class PlcStateHandler {
 		}
 	}
 
-	private ParameterBag updateVersionParams(Resource gateway, String bagKey, String bagName, JsonObject version) {
-		ParameterBag bag = gateway.getParameterBag(bagKey);
+	private ParameterBag updateVersionParams(Resource plc, String bagKey, String bagName, JsonObject version) {
+		ParameterBag bag = plc.getParameterBag(bagKey);
 		if (bag == null) {
 			bag = new ParameterBag(bagKey, bagName, Tags.VERSION);
-			gateway.addParameterBag(bag);
+			plc.addParameterBag(bag);
 		}
 
 		setOrAdd(bag, version, BUILD_TIMESTAMP, "Build timestamp");
@@ -215,6 +223,19 @@ public class PlcStateHandler {
 		}
 
 		return param;
+	}
+
+	private Resource buildNewPlc(PlcGwServerHandler.PlcSession plcSession, StrolchTransaction tx) {
+		Resource plc = new ResourceBuilder(plcSession.plcId, plcSession.plcId, TYPE_PLC) //
+				.defaultBag() //
+				.string(PARAM_CONNECTION_STATE, buildParamName(PARAM_CONNECTION_STATE))
+				.enumeration(ConnectionState.Disconnected).end() //
+				.string(PARAM_CONNECTION_STATE_MSG, buildParamName(PARAM_CONNECTION_STATE_MSG)).end() //
+				.string(PARAM_LOCAL_IP, buildParamName(PARAM_LOCAL_IP)).end() //
+				.endBag() //
+				.build();
+		tx.add(plc);
+		return plc;
 	}
 
 	private void setSystemState(JsonObject systemState, Resource gateway) {
