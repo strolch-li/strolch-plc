@@ -25,7 +25,7 @@ public class PlcWebSocketObserverHandler extends WebSocketObserverHandler {
 	@Override
 	protected JsonObject toJson(StrolchRootElement e) {
 		if (e.isResource() && e.getType().equals(TYPE_PLC_ADDRESS))
-			return e.accept(plcAddressToJson());
+			return e.accept(plcAddressToJson(false));
 		return super.toJson(e);
 	}
 }

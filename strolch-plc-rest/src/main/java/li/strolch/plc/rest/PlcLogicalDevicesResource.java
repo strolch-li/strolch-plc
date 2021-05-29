@@ -70,7 +70,8 @@ public class PlcLogicalDevicesResource {
 	@GET
 	@Path("{id}/addresses")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAddresses(@Context HttpServletRequest request, @PathParam("id") String id) {
+	public Response getAddresses(@Context HttpServletRequest request, @PathParam("id") String id,
+			@QueryParam("simple") boolean simple) {
 
 		Certificate cert = (Certificate) request.getAttribute(StrolchRestfulConstants.STROLCH_CERTIFICATE);
 
@@ -80,7 +81,8 @@ public class PlcLogicalDevicesResource {
 			tx.assertHasPrivilege(Operation.GET, plcLogicalDevice);
 
 			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true).stream()
-					.map(e -> e.accept(plcAddressToJson())).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+					.map(e -> e.accept(plcAddressToJson(simple)))
+					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 		}
 
 		return ResponseUtil.toResponse(DATA, dataJ);
@@ -89,7 +91,8 @@ public class PlcLogicalDevicesResource {
 	@GET
 	@Path("{id}/notifications")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getNotifications(@Context HttpServletRequest request, @PathParam("id") String id) {
+	public Response getNotifications(@Context HttpServletRequest request, @PathParam("id") String id,
+			@QueryParam("simple") boolean simple) {
 
 		Certificate cert = (Certificate) request.getAttribute(StrolchRestfulConstants.STROLCH_CERTIFICATE);
 
@@ -99,7 +102,8 @@ public class PlcLogicalDevicesResource {
 			tx.assertHasPrivilege(Operation.GET, plcLogicalDevice);
 
 			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true).stream()
-					.map(e -> e.accept(plcAddressToJson())).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+					.map(e -> e.accept(plcAddressToJson(simple)))
+					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 		}
 
 		return ResponseUtil.toResponse(DATA, dataJ);
@@ -108,7 +112,8 @@ public class PlcLogicalDevicesResource {
 	@GET
 	@Path("{id}/telegrams")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTelegrams(@Context HttpServletRequest request, @PathParam("id") String id) {
+	public Response getTelegrams(@Context HttpServletRequest request, @PathParam("id") String id,
+			@QueryParam("simple") boolean simple) {
 
 		Certificate cert = (Certificate) request.getAttribute(StrolchRestfulConstants.STROLCH_CERTIFICATE);
 
@@ -118,7 +123,8 @@ public class PlcLogicalDevicesResource {
 			tx.assertHasPrivilege(Operation.GET, plcLogicalDevice);
 
 			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_TELEGRAMS, true).stream()
-					.map(e -> e.accept(plcTelegramToJson())).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+					.map(e -> e.accept(plcTelegramToJson(simple)))
+					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 		}
 
 		return ResponseUtil.toResponse(DATA, dataJ);
