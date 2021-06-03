@@ -48,6 +48,11 @@
                 <artifactId>strolch-plc-gw-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>li.strolch</groupId>
+                <artifactId>strolch-plc-util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>

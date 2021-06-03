@@ -28,19 +28,30 @@ public class SendPlcAddressActionService extends AbstractService<JsonServiceArgu
 		PlcAddressType addressType = PlcAddressType.valueOf(jsonObject.get(PARAM_TYPE).getAsString());
 		String resource = jsonObject.get(PARAM_RESOURCE).getAsString();
 		String action = jsonObject.get(PARAM_ACTION).getAsString();
-		String valueS = jsonObject.get(PARAM_VALUE).getAsString();
 
 		PlcHandler plcHandler = getComponent(PlcHandler.class);
 		PlcAddress plcAddress = plcHandler.getPlcAddress(resource, action);
 
-		Object value = plcAddress.valueType.parseValue(valueS);
-
 		if (addressType == PlcAddressType.Telegram) {
-			logger.info("PLC Send " + resource + "-" + action + " with " + valueS);
-			plcHandler.send(resource, action, value);
+			if (jsonObject.has(PARAM_VALUE)) {
+				String valueS = jsonObject.get(PARAM_VALUE).getAsString();
+				Object value = plcAddress.valueType.parseValue(valueS);
+				logger.info("PLC Send " + resource + "-" + action + " with " + valueS);
+				plcHandler.send(resource, action, value);
+			} else {
+				logger.info("PLC Send " + resource + "-" + action + " with default value " + plcAddress.defaultValue);
+				plcHandler.send(resource, action);
+			}
 		} else if (addressType == PlcAddressType.Notification) {
+			if (!jsonObject.has(PARAM_VALUE))
+				throw new IllegalArgumentException("For notification a value must be set!");
+
+			String valueS = jsonObject.get(PARAM_VALUE).getAsString();
+			Object value = plcAddress.valueType.parseValue(valueS);
+
 			logger.info("PLC Notification " + resource + "-" + action + " with " + valueS);
 			plcHandler.notify(resource, action, value);
+
 		} else {
 			throw new UnsupportedOperationException("Unhandled address type " + addressType);
 		}
