@@ -359,10 +359,9 @@
                     <version>${maven-source-plugin.version}</version>
                     <executions>
                         <execution>
-                            <id>attach-sources-no-fork</id>
-                            <phase>generate-sources</phase>
+                            <id>attach-sources</id>
                             <goals>
-                                <goal>jar-no-fork</goal>
+                                <goal>jar</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -408,7 +407,6 @@
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
-                            <phase>deploy</phase>
                             <goals>
                                 <goal>jar</goal>
                             </goals>
