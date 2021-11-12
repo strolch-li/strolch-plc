@@ -1,10 +1,7 @@
 package li.strolch.plc.gw.server;
 
-import static li.strolch.agent.api.AgentVersion.*;
-import static li.strolch.agent.api.ComponentVersion.COMPONENT_VERSION;
 import static li.strolch.model.Resource.locatorFor;
-import static li.strolch.model.Tags.Json.AGENT_VERSION;
-import static li.strolch.model.Tags.Json.APP_VERSION;
+import static li.strolch.model.Tags.Json.*;
 import static li.strolch.model.builder.BuilderHelper.buildParamName;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.StringHelper.DASH;
@@ -120,23 +117,23 @@ public class PlcStateHandler {
 
 				if (existingState != connectionState && this.container.hasComponent(OperationsLog.class)) {
 					OperationsLog operationsLog = this.container.getComponent(OperationsLog.class);
-					Locator msgLocator = locatorFor(TYPE_PLC, plcSession.plcId)
-							.append(ConnectionState.class.getSimpleName());
+					Locator msgLocator = locatorFor(TYPE_PLC, plcSession.plcId).append(
+							ConnectionState.class.getSimpleName());
 					operationsLog.updateState(realm, msgLocator, LogMessageState.Inactive);
 					if (connectionState == ConnectionState.Connected) {
 						operationsLog.addMessage(new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Info,
-								LogMessageState.Information, PlcGwSrvI18n.bundle, "execution.plc.connected")
-								.value("plc", plcSession.plcId));
+								LogMessageState.Information, PlcGwSrvI18n.bundle, "execution.plc.connected").value(
+								"plc", plcSession.plcId));
 					} else {
 						operationsLog.addMessage(new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Error,
-								LogMessageState.Active, PlcGwSrvI18n.bundle, "execution.plc.connectionLost")
-								.value("plc", plcSession.plcId));
+								LogMessageState.Active, PlcGwSrvI18n.bundle, "execution.plc.connectionLost").value(
+								"plc", plcSession.plcId));
 					}
 				}
 
 				// trigger execution handler that we are connected
-				if (existingState != connectionState && connectionState == ConnectionState.Connected && this.container
-						.hasComponent(ExecutionHandler.class))
+				if (existingState != connectionState && connectionState == ConnectionState.Connected
+						&& this.container.hasComponent(ExecutionHandler.class))
 					this.container.getComponent(ExecutionHandler.class).triggerExecution(realm);
 
 			});
@@ -182,11 +179,11 @@ public class PlcStateHandler {
 			tx.update(plc);
 		}
 
-		if (versions.has(Tags.Json.COMPONENT_VERSIONS)) {
-			JsonArray componentVersions = versions.get(Tags.Json.COMPONENT_VERSIONS).getAsJsonArray();
+		if (versions.has(COMPONENT_VERSIONS)) {
+			JsonArray componentVersions = versions.get(COMPONENT_VERSIONS).getAsJsonArray();
 			componentVersions.forEach(e -> {
 				JsonObject componentVersion = e.getAsJsonObject();
-				String componentName = componentVersion.get(COMPONENT_VERSION).getAsString();
+				String componentName = componentVersion.get(COMPONENT_NAME).getAsString();
 				updateVersionParams(plc, componentName, "Component " + componentName, componentVersion);
 				tx.update(plc);
 			});
