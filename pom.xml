@@ -121,6 +121,9 @@
 
         <gpg.keyname>NOT_SET</gpg.keyname>
 
+        <!--suppress UnresolvedMavenProperty -->
+        <dependency-check-suppressions-file>${maven.multiModuleProjectDirectory}/src/dependency-check/suppressions.xml</dependency-check-suppressions-file>
+
     </properties>
 
     <modules>
@@ -393,6 +396,7 @@
                     <configuration>
                         <failBuildOnCVSS>8</failBuildOnCVSS>
                         <yarnAuditAnalyzerEnabled>false</yarnAuditAnalyzerEnabled>
+                        <suppressionFiles>${dependency-check-suppressions-file}</suppressionFiles>
                     </configuration>
                     <executions>
                         <execution>
