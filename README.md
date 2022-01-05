@@ -1,4 +1,8 @@
 # Strolch as a software PLC
+
+[![Contributors](https://img.shields.io/github/contributors/strolch-li/strolch-plc)](https://github.com/strolch-li/strolch-plc/graphs/contributors)
+[![License](https://img.shields.io/github/license/strolch-li/strolch-plc)](https://github.com/strolch-li/strolch-plc/blob/master/LICENSE)
+
 A soft real time PLC written in Strolch running on Strolch
 
 Checkout the documentation at https://strolch.li/plc.html
