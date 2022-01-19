@@ -1,10 +1,13 @@
 package li.strolch.plc.gw.server.policy.execution;
 
+import static li.strolch.model.log.LogMessageState.*;
+import static li.strolch.plc.gw.server.PlcGwSrvI18n.*;
 import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import li.strolch.execution.ExecutionHandler;
 import li.strolch.execution.policy.SimpleExecution;
 import li.strolch.model.activity.Action;
 import li.strolch.model.log.LogMessage;
@@ -54,12 +57,6 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 	protected void handleStopped() {
 		unregisterAll();
 		super.handleStopped();
-	}
-
-	@Override
-	protected void toExecuted() throws Exception {
-		stop();
-		getController().toExecuted(this.actionLoc);
 	}
 
 	protected boolean isPlcConnected() {
@@ -117,9 +114,8 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 	}
 
 	protected LogMessage msgPlcNotConnected() {
-		return new LogMessage(this.realm, getLogMessageUsername(), this.actionLoc, LogSeverity.Error,
-				LogMessageState.Information, PlcGwSrvI18n.bundle, "execution.plc.notConnected")
-				.value("plc", getPlcId());
+		return new LogMessage(this.realm, getLogMessageUsername(), this.actionLoc, LogSeverity.Error, Information,
+				bundle, "execution.plc.notConnected").value("plc", getPlcId());
 	}
 
 	protected String getLogMessageUsername() {
@@ -128,16 +124,15 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 
 	protected LogMessage msgFailedToSendMessage(PlcAddressResponse response) {
 		PlcAddressKey key = response.getPlcAddressKey();
-		return new LogMessage(this.realm, getLogMessageUsername(), this.actionLoc, LogSeverity.Error,
-				LogMessageState.Information, PlcGwSrvI18n.bundle, "execution.plc.sendMessage.failed") //
+		return new LogMessage(this.realm, getLogMessageUsername(), this.actionLoc, LogSeverity.Error, Information,
+				bundle, "execution.plc.sendMessage.failed") //
 				.value("plc", getPlcId()) //
 				.value("key", key) //
 				.value("msg", response.getStateMsg());
 	}
 
 	protected LogMessage msgConnectionLostToPlc() {
-		return new LogMessage(this.realm, getLogMessageUsername(), this.actionLoc, LogSeverity.Error,
-				LogMessageState.Information, PlcGwSrvI18n.bundle, "execution.plc.connectionLost")
-				.value("plc", getPlcId());
+		return new LogMessage(this.realm, getLogMessageUsername(), this.actionLoc, LogSeverity.Error, Information,
+				bundle, "execution.plc.connectionLost").value("plc", getPlcId());
 	}
 }
