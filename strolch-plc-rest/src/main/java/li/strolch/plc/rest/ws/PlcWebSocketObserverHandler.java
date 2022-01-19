@@ -7,14 +7,16 @@ import java.util.Set;
 
 import com.google.gson.JsonObject;
 import li.strolch.agent.api.ObserverHandler;
+import li.strolch.agent.api.StrolchAgent;
 import li.strolch.model.StrolchRootElement;
 import li.strolch.websocket.WebSocketClient;
 import li.strolch.websocket.WebSocketObserverHandler;
 
 public class PlcWebSocketObserverHandler extends WebSocketObserverHandler {
 
-	public PlcWebSocketObserverHandler(ObserverHandler observerHandler, WebSocketClient client) {
-		super(observerHandler, client);
+	public PlcWebSocketObserverHandler(StrolchAgent agent, String realmName, ObserverHandler observerHandler,
+			WebSocketClient client) {
+		super(agent, realmName, observerHandler, client);
 	}
 
 	@Override

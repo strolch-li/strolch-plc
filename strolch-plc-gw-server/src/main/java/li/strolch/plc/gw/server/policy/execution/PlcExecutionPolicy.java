@@ -56,6 +56,7 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 		super.handleStopped();
 	}
 
+	@Override
 	protected void toExecuted() throws Exception {
 		stop();
 		getController().toExecuted(this.actionLoc);
