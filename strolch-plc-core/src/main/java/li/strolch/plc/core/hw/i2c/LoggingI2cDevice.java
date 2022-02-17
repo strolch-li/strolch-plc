@@ -180,7 +180,6 @@ public class LoggingI2cDevice {
 		this.ioWait = ioWait;
 		this.ioWaitNanos = ioWaitNanos;
 
-		if (ioWait == 0L)
-			logger.info("Using " + ioWaitNanos + " ns for write sleep");
+		logger.info("Using " + ioWait + " ms and " + ioWaitNanos + " ns for write sleep");
 	}
 }

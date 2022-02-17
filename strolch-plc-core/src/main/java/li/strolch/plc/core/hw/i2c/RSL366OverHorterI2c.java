@@ -284,29 +284,18 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 	}
 
 	private static String parseStatus(byte status) {
-		switch (status) {
-		case STATUS_OK:
-			return "OK";
-		case STATUS_SYS_TOO_MUCH_DATA:
-			return "Too much SystemCode data";
-		case STATUS_SYS_MISSING_DATA:
-			return "SystemCode missing data";
-		case STATUS_SYS_INVALID_DATA:
-			return "Invalid SystemCode";
-		case STATUS_SYS_MISSING:
-			return "SystemCode Missing";
-		case STATUS_DEV_TOO_MUCH_DATA:
-			return "Too much device data";
-		case STATUS_DEV_INVALID_DATA:
-			return "DeviceCode invalid";
-		case STATUS_PROTO_UNKNOWN:
-			return "Invalid protocol";
-		case STATUS_BAD_PTR:
-			return "Bad pointer";
-		case STATUS_CONF_TOO_MUCH_DATA:
-			return "Too much config data";
-		default:
-			return "Unknown status " + toHexString(status);
-		}
+		return switch (status) {
+			case STATUS_OK -> "OK";
+			case STATUS_SYS_TOO_MUCH_DATA -> "Too much SystemCode data";
+			case STATUS_SYS_MISSING_DATA -> "SystemCode missing data";
+			case STATUS_SYS_INVALID_DATA -> "Invalid SystemCode";
+			case STATUS_SYS_MISSING -> "SystemCode Missing";
+			case STATUS_DEV_TOO_MUCH_DATA -> "Too much device data";
+			case STATUS_DEV_INVALID_DATA -> "DeviceCode invalid";
+			case STATUS_PROTO_UNKNOWN -> "Invalid protocol";
+			case STATUS_BAD_PTR -> "Bad pointer";
+			case STATUS_CONF_TOO_MUCH_DATA -> "Too much config data";
+			default -> "Unknown status " + toHexString(status);
+		};
 	}
 }
