@@ -134,6 +134,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	private void sendStartTrigger() throws IOException {
 		this.triggered = true;
 		this.socket.getOutputStream().write('T');
+		this.socket.getOutputStream().flush();
 		logger.info("Triggered DataLogicScanner");
 	}
 
