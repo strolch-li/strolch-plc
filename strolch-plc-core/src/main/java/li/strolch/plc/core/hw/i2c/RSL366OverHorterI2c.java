@@ -6,9 +6,10 @@ import static li.strolch.utils.helper.StringHelper.toHexString;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Callable;
 
-import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CFactory;
+import com.pi4j.io.i2c.impl.I2CBusImpl;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 import org.slf4j.Logger;
@@ -56,7 +57,8 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 	private boolean verbose;
 	private int i2cBusNr;
 
-	private LoggingI2cDevice device;
+	private I2CBusImpl i2cBus;
+	private LoggingI2cDevice dev;
 	private byte repeats;
 	private Map<String, byte[]> positionsByAddress;
 	private byte address;
@@ -80,17 +82,21 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 		this.repeats = ((Integer) parameters.getOrDefault("repeats", 1)).byteValue();
 
 		Map<String, byte[]> positionsByAddress = new HashMap<>();
-		for (int i = 1; i < 5; i++) {
-			for (int j = 1; j < 5; j++)
-				positionsByAddress.put(this.id + "." + i + "." + j, new byte[] { (byte) i, (byte) j });
+		for (byte i = 1; i < 5; i++) {
+			for (byte j = 1; j < 5; j++)
+				positionsByAddress.put(this.id + "." + i + "." + j, new byte[] { i, j });
 		}
 		this.positionsByAddress = Collections.unmodifiableMap(positionsByAddress);
 
 		logger.info("Configured RSL366 over Horter I2c on address 0x" + toHexString(this.address));
 	}
 
+	public <T> T runBusLockedDeviceAction(final Callable<T> action) throws IOException {
+		return this.i2cBus.runBusLockedDeviceAction(this.dev.getI2cDevice(), action);
+	}
+
 	@Override
-	public boolean connect() {
+	public synchronized boolean connect() {
 		if (this.simulated) {
 			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
 			return super.connect();
@@ -104,12 +110,13 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 		logger.info(this.id + ": Connecting...");
 
 		try {
-			I2CBus i2cBus = I2CFactory.getInstance(this.i2cBusNr);
+			if (this.i2cBus == null) {
+				this.i2cBus = (I2CBusImpl) I2CFactory.getInstance(this.i2cBusNr);
+				this.dev = new LoggingI2cDevice(i2cBus.getDevice(this.address), null);
+				this.dev.setIoWait(0L, 0);
+			}
 
-			this.device = new LoggingI2cDevice(i2cBus.getDevice(this.address), null);
-			this.device.setIoWait(0L, 0);
-
-			byte[] status = configure();
+			byte[] status = runBusLockedDeviceAction(this::configure);
 
 			String version = status[ADDR_INFO_VER_MAJOR] + "." + status[ADDR_INFO_VER_MINOR];
 			logger.info("Connected to 433MHz RSL366 over HorterI2C version " + version + " supporting "
@@ -130,31 +137,16 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 	}
 
 	@Override
-	public void disconnect() {
-		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
-			super.disconnect();
-			return;
-		}
-
-		this.device = null;
-
-		super.disconnect();
-	}
-
-	@Override
 	public Set<String> getAddresses() {
 		return new TreeSet<>(this.positionsByAddress.keySet());
 	}
 
 	@Override
-	public void send(String address, Object value) {
+	public synchronized void send(String address, Object value) {
 		if (this.simulated) {
 			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
 			return;
 		}
-
-		assertConnected();
 
 		byte[] pos = this.positionsByAddress.get(address);
 		if (pos == null)
@@ -165,10 +157,14 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 		boolean on = (boolean) value;
 
 		try {
-			setState(system, device, on);
-		} catch (InterruptedException e) {
-			logger.error("Interrupted!");
+			runBusLockedDeviceAction(() -> {
+				assertConnected();
+				setState(system, device, on);
+				return null;
+			});
 		} catch (Exception e) {
+			if (e instanceof IllegalStateException)
+				throw (IllegalStateException) e;
 			String msg = "Failed to send " + (on ? "on" : "off") + " to system " + system + " device " + device
 					+ " at address 0x" + toHexString(this.address) + " on I2C Bus " + this.i2cBusNr;
 			handleBrokenConnection(msg + ": " + getExceptionMessageWithCauses(e), e);
@@ -180,16 +176,22 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 
 		logger.info("Configuring...");
 		byte[] data = { CONF_PROTOCOL, repeats };
-		this.device.write(this.verbose, ADDR_REG_CONF_CODE, data);
-		Thread.sleep(50L);
+		this.dev.write(this.verbose, ADDR_REG_CONF_CODE, data);
+		Thread.sleep(20L);
 
 		// validate configuration
 		byte[] status = readInfo(true);
+		byte errorStatus = status[ADDR_INFO_STATUS];
+		if (errorStatus != STATUS_OK)
+			throw new IllegalStateException(
+					"Device error after configure: " + errorStatus + " " + parseStatus(errorStatus));
+
 		if (status[ADDR_INFO_PROTOCOL] != CONF_PROTOCOL)
 			throw new IllegalStateException("Protocol could not be set to " + CONF_PROTOCOL);
 		if (status[ADDR_INFO_REPEATS] != repeats)
 			throw new IllegalStateException("Repeats could not bet set to " + repeats);
 
+		logger.info("Configured with protocol " + CONF_PROTOCOL + " and " + repeats + " repeats.");
 		return status;
 	}
 
@@ -200,7 +202,7 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 
 		byte[] status = readInfo(false);
 		if (isDeviceTransmitting(status)) {
-			Thread.sleep(100L);
+			Thread.sleep(50L);
 			waitForDeviceIdle();
 		}
 
@@ -208,8 +210,8 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 
 		// write system code
 		logger.info("Writing system code...");
-		this.device.write(this.verbose, ADDR_REG_SYS_CODE, system);
-		Thread.sleep(5L);
+		this.dev.write(this.verbose, ADDR_REG_SYS_CODE, system);
+		Thread.sleep(20L);
 		status = readInfo(false);
 		if (isSystemCodeInvalid(status))
 			throw new IllegalStateException(
@@ -218,16 +220,17 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 		// write value code
 		logger.info("Writing value code...");
 		byte value = state ? (byte) (device + 128) : device;
-		this.device.write(this.verbose, ADDR_REG_DEV_CODE, value);
-		Thread.sleep(5L);
+		this.dev.write(this.verbose, ADDR_REG_DEV_CODE, value);
+		Thread.sleep(50L);
 		status = readInfo(false);
 		if (isDeviceCodeInvalid(status))
 			throw new IllegalStateException(
 					"DeviceCode is invalid after sending deviceCode: " + parseStatus(status[ADDR_INFO_STATUS]));
-		if (!isDeviceTransmitting(status))
-			throw new IllegalStateException(
-					"Device is not transmitting after sending " + toHexString(system) + "." + toHexString(value)
-							+ "...");
+
+		if (isDeviceTransmitting(status)) {
+			Thread.sleep(50L);
+			waitForDeviceIdle();
+		}
 
 		showInfoRegister(status);
 		logger.info("Successfully sent state change to " + (state ? "on" : "off") + " for device " + system + ", "
@@ -236,21 +239,16 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 
 	private void waitForDeviceIdle() throws Exception {
 		byte[] status = readInfo(this.verbose);
-
 		while (isDeviceTransmitting(status)) {
 			logger.info("Device is transmitting, waiting...");
-			Thread.sleep(100L);
-			this.device.read(false, ADDR_REG_CONF_CODE, status);
+			Thread.sleep(50L);
+			this.dev.read(false, ADDR_REG_CONF_CODE, status);
 		}
-
-		byte errorStatus = status[ADDR_INFO_STATUS];
-		if (errorStatus != STATUS_OK)
-			throw new IllegalStateException("Device error: " + errorStatus + " " + parseStatus(errorStatus));
 	}
 
 	private byte[] readInfo(boolean showInfoRegister) throws IOException {
 		byte[] status = new byte[LEN_CONF];
-		this.device.read(this.verbose, ADDR_REG_CONF_CODE, status);
+		this.dev.read(this.verbose, ADDR_REG_CONF_CODE, status);
 		if (showInfoRegister)
 			showInfoRegister(status);
 		return status;
