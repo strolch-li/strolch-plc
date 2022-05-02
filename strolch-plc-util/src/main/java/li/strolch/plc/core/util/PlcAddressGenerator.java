@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import li.strolch.model.Resource;
 import li.strolch.model.StrolchRootElement;
@@ -63,9 +62,10 @@ public class PlcAddressGenerator {
 	private void add(Map<String, Resource> exportList, Resource element) {
 		Resource replaced = exportList.put(element.getId(), element);
 		if (replaced != null) {
-			throw new IllegalStateException("A " + element.getType() + " " + element.getId() + ". Addresses: " + element
-					.getParameter(PARAM_ADDRESS, true).getValue() + " and replaced with " + replaced
-					.getParameter(PARAM_ADDRESS, true).getValue());
+			throw new IllegalStateException(
+					"A " + element.getType() + " " + element.getId() + ". Addresses: " + element.getParameter(
+							PARAM_ADDRESS, true).getValue() + " and replaced with " + replaced.getParameter(
+							PARAM_ADDRESS, true).getValue());
 		}
 	}
 
@@ -109,29 +109,26 @@ public class PlcAddressGenerator {
 				String key = resource + "-" + action1;
 				String keyName = resource + " - " + action1;
 
-				if (type.equals("Group")) {
+				switch (type) {
+				case "Group" -> {
 					groupNr++;
 					addressIndex = 10;
 					telegramIndex = 10;
-
 					String deviceId = record.get("DeviceId").trim();
 					if (isEmpty(deviceId))
 						throw new IllegalStateException("No device for new group: " + record);
-
 					logicalDevice = logicalDeviceT.getClone();
 					logicalDevice.setId("D_" + deviceId);
 					logicalDevice.setName(deviceId);
-
 					String groupNrS = StringHelper.normalizeLength(Integer.toString(groupNr), 2, true, '0');
 					logicalDevice.getParameter(PARAM_DESCRIPTION, true).setValue(description);
 					logicalDevice.getParameter(PARAM_GROUP, true).setValue(groupNrS + " " + description);
 					logicalDevice.getParameter(PARAM_INDEX, true).setValue(groupIndex);
-
 					add(exportList, logicalDevice);
 					groupIndex += 10;
 					logger.info("Added PlcLogicalDevice " + logicalDevice.getId());
-
-				} else if (type.equals("Input")) {
+				}
+				case "Input" -> {
 
 					if (isEmpty(resource))
 						throw new IllegalStateException("resource missing for: " + record);
@@ -173,8 +170,8 @@ public class PlcAddressGenerator {
 					logger.info(
 							"Added Boolean PlcAddress " + addressR.getId() + " " + addressR.getName() + " for address "
 									+ address);
-
-				} else if (type.equals("Output")) {
+				}
+				case "Output" -> {
 
 					if (isEmpty(resource))
 						throw new IllegalStateException("resource missing for: " + record);
@@ -268,8 +265,8 @@ public class PlcAddressGenerator {
 						logger.info("Added missing Boolean PlcAddress " + addressR.getId() + " " + addressR.getName()
 								+ " for address " + address);
 					}
-
-				} else if (type.equals("Virtual")) {
+				}
+				case "Virtual" -> {
 
 					if (isEmpty(resource))
 						throw new IllegalStateException("resource missing for: " + record);
@@ -289,7 +286,8 @@ public class PlcAddressGenerator {
 
 					String value = record.isSet("Value") ? record.get("Value") : null;
 
-					if (subType.equals("Boolean")) {
+					switch (subType) {
+					case "Boolean" -> {
 
 						// address for virtual boolean
 						Resource addressR = addressT.getClone();
@@ -363,8 +361,8 @@ public class PlcAddressGenerator {
 									"Added Virtual Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 											+ " for connection " + connection);
 						}
-
-					} else if (subType.equals("String")) {
+					}
+					case "String" -> {
 
 						// address for virtual string
 						Resource addressR = addressT.getClone();
@@ -409,8 +407,8 @@ public class PlcAddressGenerator {
 						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
 						logger.info("Added Virtual String PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for connection " + connection);
-
-					} else if (subType.equals("Integer")) {
+					}
+					case "Integer" -> {
 
 						// address for virtual integer
 						Resource addressR = addressT.getClone();
@@ -457,13 +455,12 @@ public class PlcAddressGenerator {
 						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
 						logger.info("Added Virtual Integer PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for connection " + connection);
-
-					} else {
-						throw new IllegalArgumentException(
-								"Unhandled virtual connection " + connection + " for " + resource + "-" + action1);
 					}
-
-				} else if (type.equals("DataLogicScanner")) {
+					default -> throw new IllegalArgumentException(
+							"Unhandled virtual connection " + connection + " for " + resource + "-" + action1);
+					}
+				}
+				case "DataLogicScanner" -> {
 
 					if (isEmpty(resource))
 						throw new IllegalStateException("resource missing for: " + record);
@@ -567,9 +564,8 @@ public class PlcAddressGenerator {
 					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
 					logger.info("Added DataLogicScanner PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 							+ " for connection " + connection);
-
-				} else {
-					throw new IllegalStateException("Unhandled type " + type + " for " + record);
+				}
+				default -> throw new IllegalStateException("Unhandled type " + type + " for " + record);
 				}
 			}
 		}
@@ -585,8 +581,7 @@ public class PlcAddressGenerator {
 			if (elements.size() <= 1)
 				continue;
 
-			List<Resource> addresses = elements.stream().filter(e -> e.getType().equals(TYPE_PLC_ADDRESS))
-					.collect(Collectors.toList());
+			List<Resource> addresses = elements.stream().filter(e -> e.getType().equals(TYPE_PLC_ADDRESS)).toList();
 			if (addresses.size() > 1) {
 				logger.warn("Multiple elements with address " + address);
 				for (Resource o : elements) {
@@ -595,8 +590,7 @@ public class PlcAddressGenerator {
 				valid = false;
 			}
 
-			List<Resource> telegrams = elements.stream().filter(e -> e.getType().equals(TYPE_PLC_TELEGRAM))
-					.collect(Collectors.toList());
+			List<Resource> telegrams = elements.stream().filter(e -> e.getType().equals(TYPE_PLC_TELEGRAM)).toList();
 			StrolchValueType valueType = addresses.get(0).getParameter(PARAM_VALUE, true).getValueType();
 			if (valueType == StrolchValueType.BOOLEAN) {
 				if (telegrams.size() != 2) {
