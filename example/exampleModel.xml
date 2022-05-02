@@ -35,7 +35,7 @@
     </Resource>
     <Resource Id="addrPlcConnected" Name="PLC - Connected" Type="PlcAddress">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="virtualString.plcServerConnected"/>
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="VirtualString.plcServerConnected"/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="ServerConnected"/>
             <Parameter Id="valueType" Name="Value Type" Type="String" Interpretation="Interpretation" Uom="PlcValueType" Value="String"/>
