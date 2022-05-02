@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
 public class DefaultPlc implements Plc {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPlc.class);
+	public static final String VIRTUAL_BOOLEAN = "VirtualBoolean";
+	public static final String VIRTUAL_STRING = "VirtualString";
+	public static final String VIRTUAL_INTEGER = "VirtualInteger";
 
 	private final Map<String, PlcAddress> notificationMappings;
 	private final Map<String, PlcConnection> connections;
@@ -205,9 +208,8 @@ public class DefaultPlc implements Plc {
 	public void addConnection(PlcConnection connection) {
 		this.connections.put(connection.getId(), connection);
 		Set<String> addresses = connection.getAddresses();
-		logger.info(
-				"Adding connection " + connection.getId() + " " + connection.getClass().getName() + " with " + addresses
-						.size() + " addresses...");
+		logger.info("Adding connection " + connection.getId() + " " + connection.getClass().getName() + " with "
+				+ addresses.size() + " addresses...");
 		for (String address : addresses) {
 			logger.info("  Adding " + address + "...");
 			this.connectionsByAddress.put(address, connection);
@@ -270,21 +272,26 @@ public class DefaultPlc implements Plc {
 
 	private void validateVirtualAddress(PlcAddress address) {
 
-		if (address.address.equals("virtualBoolean") || address.address.equals("virtualBoolean.")) {
+		if (address.address.equals(VIRTUAL_BOOLEAN) || address.address.equals(VIRTUAL_BOOLEAN + ".")) {
 			throw new IllegalStateException(
 					"Virtual address " + address.address + " is missing sub component for " + address);
 		}
 
-		if (address.address.equals("virtualString") || address.address.equals("virtualString.")) {
+		if (address.address.equals(VIRTUAL_STRING) || address.address.equals(VIRTUAL_STRING + ".")) {
+			throw new IllegalStateException(
+					"Virtual address " + address.address + " is missing sub component for " + address);
+		}
+
+		if (address.address.equals(VIRTUAL_INTEGER) || address.address.equals(VIRTUAL_INTEGER + ".")) {
 			throw new IllegalStateException(
 					"Virtual address " + address.address + " is missing sub component for " + address);
 		}
 	}
 
 	private boolean isVirtual(PlcAddress address) {
-		return address.address.startsWith("virtualBoolean") //
-				|| address.address.startsWith("virtualString") //
-				|| address.address.startsWith("virtualInteger");
+		return address.address.startsWith(VIRTUAL_BOOLEAN) //
+				|| address.address.startsWith(VIRTUAL_STRING) //
+				|| address.address.startsWith(VIRTUAL_INTEGER);
 	}
 
 	@Override
