@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
+import static li.strolch.websocket.WebSocketRemoteIp.*;
 
 import javax.websocket.CloseReason;
 import javax.websocket.PongMessage;
@@ -26,6 +27,7 @@ import li.strolch.model.log.LogMessage;
 import li.strolch.model.log.LogMessageState;
 import li.strolch.plc.model.*;
 import li.strolch.privilege.base.NotAuthenticatedException;
+import li.strolch.privilege.base.PrivilegeException;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.privilege.model.Usage;
 import li.strolch.privilege.model.UserRep;
@@ -93,6 +95,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 			this.plcAddressListenersByPlcId.put(plcId, plcListeners);
 		}
 
+		//noinspection SynchronizationOnLocalVariableOrMethodParameter
 		synchronized (plcListeners) {
 			plcListeners.addElement(addressKey, listener);
 		}
@@ -107,6 +110,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		if (plcListeners == null)
 			return;
 
+		//noinspection SynchronizationOnLocalVariableOrMethodParameter
 		synchronized (plcListeners) {
 			plcListeners.removeElement(addressKey, listener);
 		}
@@ -263,9 +267,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 			StrolchSessionHandler sessionHandler = getContainer().getComponent(StrolchSessionHandler.class);
 			sessionHandler.validate(plcSession.certificate);
 		} catch (RuntimeException e) {
-			this.plcStateHandler
-					.handlePlcState(plcSession, ConnectionState.Failed, "Message received although not yet authed!",
-							null);
+			this.plcStateHandler.handlePlcState(plcSession, ConnectionState.Failed,
+					"Message received although not yet authed!", null);
 			throw new NotAuthenticatedException(sessionId + ": Certificate not valid!", e);
 		}
 
@@ -281,7 +284,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		basic.sendText(data.substring(pos), true);
 	}
 
-	public void onWsMessage(String message, Session session) {
+	public void onWsMessage(String message, Session session) throws IOException {
 
 		JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
 		if (!jsonObject.has(PARAM_MESSAGE_TYPE))
@@ -293,44 +296,19 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 		String messageType = jsonObject.get(PARAM_MESSAGE_TYPE).getAsString();
 		switch (messageType) {
-
-		case MSG_TYPE_AUTHENTICATION: {
-			handleAuth(session.getId(), jsonObject);
-			break;
-		}
-
-		case MSG_TYPE_STATE_NOTIFICATION: {
-			PlcSession plcSession = assertPlcAuthed(plcId, session.getId());
-			handleStateMsg(plcSession, jsonObject);
-			break;
-		}
-
-		case MSG_TYPE_MESSAGE: {
+		case MSG_TYPE_AUTHENTICATION -> handleAuth(session, jsonObject);
+		case MSG_TYPE_PLC_NOTIFICATION -> handleNotification(assertPlcAuthed(plcId, session.getId()), jsonObject);
+		case MSG_TYPE_PLC_TELEGRAM -> handleTelegramResponse(assertPlcAuthed(plcId, session.getId()), jsonObject);
+		case MSG_TYPE_STATE_NOTIFICATION -> handleStateMsg(assertPlcAuthed(plcId, session.getId()), jsonObject);
+		case MSG_TYPE_MESSAGE -> {
 			assertPlcAuthed(plcId, session.getId());
 			handleMessage(jsonObject);
-			break;
 		}
-
-		case MSG_TYPE_DISABLE_MESSAGE: {
+		case MSG_TYPE_DISABLE_MESSAGE -> {
 			assertPlcAuthed(plcId, session.getId());
 			handleDisableMessage(jsonObject);
-			break;
 		}
-
-		case MSG_TYPE_PLC_NOTIFICATION: {
-			PlcSession plcSession = assertPlcAuthed(plcId, session.getId());
-			handleNotification(plcSession, jsonObject);
-			break;
-		}
-
-		case MSG_TYPE_PLC_TELEGRAM: {
-			PlcSession plcSession = assertPlcAuthed(plcId, session.getId());
-			handleTelegramResponse(plcSession, jsonObject);
-			break;
-		}
-
-		default:
-			logger.error(plcId + ": Unhandled message type " + messageType);
+		default -> logger.error(plcId + ": Unhandled message type " + messageType);
 		}
 	}
 
@@ -352,8 +330,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 		logger.info(plcSession.plcId + ": Received notification for " + addressKey.toKey() + ": " + value);
 
-		MapOfLists<PlcAddressKey, PlcNotificationListener> plcListeners = this.plcAddressListenersByPlcId
-				.get(plcSession.plcId);
+		MapOfLists<PlcAddressKey, PlcNotificationListener> plcListeners = this.plcAddressListenersByPlcId.get(
+				plcSession.plcId);
 		if (plcListeners == null) {
 			logger.warn(plcSession.plcId + ": No listeners for PLC " + plcSession.plcId);
 			return;
@@ -415,11 +393,12 @@ public class PlcGwServerHandler extends StrolchComponent {
 		operationsLog.updateState(realm, locator, LogMessageState.Inactive);
 	}
 
-	private void handleAuth(String sessionId, JsonObject authJ) {
+	private void handleAuth(Session session, JsonObject authJ) throws IOException {
+		String sessionId = session.getId();
 		if (!authJ.has(PARAM_PLC_ID) || !authJ.has(PARAM_USERNAME) || !authJ.has(PARAM_PASSWORD))
 			throw new IllegalStateException(
 					sessionId + ": Auth Json is missing one of " + PARAM_PLC_ID + ", " + PARAM_USERNAME + ", "
-							+ PARAM_PASSWORD + ": " + authJ.toString());
+							+ PARAM_PASSWORD + ": " + authJ);
 
 		String plcId = authJ.get(PARAM_PLC_ID).getAsString();
 		String username = authJ.get(PARAM_USERNAME).getAsString();
@@ -433,8 +412,16 @@ public class PlcGwServerHandler extends StrolchComponent {
 					sessionId + ": Auth PlcId " + plcId + " not same as Session's PlcID " + plcSession.plcId);
 
 		StrolchSessionHandler sessionHandler = getContainer().getComponent(StrolchSessionHandler.class);
-		Certificate certificate = sessionHandler
-				.authenticate(username, password.toCharArray(), WebSocketRemoteIp.get(), Usage.ANY, false);
+		Certificate certificate;
+		try {
+			char[] passwordChars = password.toCharArray();
+			certificate = sessionHandler.authenticate(username, passwordChars, get(), Usage.ANY, false);
+		} catch (PrivilegeException e) {
+			session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR,
+					"Authentication failed for given credentials!"));
+			throw e;
+		}
+
 		plcSession.certificate = certificate;
 
 		JsonObject authResponseJ = new JsonObject();
@@ -462,8 +449,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 		} catch (Exception e) {
 			logger.error(plcSession.plcId + ": Failed to send data to PLC", e);
 			try {
-				plcSession.session.close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY,
-						"Failed to send auth response"));
+				plcSession.session.close(
+						new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Failed to send auth response"));
 			} catch (IOException ex) {
 				logger.error(plcSession.plcId + ": Faild to close session to PLC");
 			}
@@ -489,14 +476,14 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 			PlcSession existingPlcSession = this.plcSessionsByPlcId.put(plcId, plcSession);
 			if (existingPlcSession != null) {
-				logger.error("Old PLC session found for plc " + plcId + " under SessionId " + existingPlcSession.session
-						.getId() + ". Closing that session.");
+				logger.error("Old PLC session found for plc " + plcId + " under SessionId "
+						+ existingPlcSession.session.getId() + ". Closing that session.");
 
 				this.plcSessionsBySessionId.remove(existingPlcSession.session.getId());
 				try {
 					synchronized (existingPlcSession.session) {
-						existingPlcSession.session
-								.close(new CloseReason(CloseReason.CloseCodes.NOT_CONSISTENT, "Stale session"));
+						existingPlcSession.session.close(
+								new CloseReason(CloseReason.CloseCodes.NOT_CONSISTENT, "Stale session"));
 					}
 				} catch (Exception e) {
 					logger.error("Failed to close session " + existingPlcSession.session.getId(), e);
@@ -519,7 +506,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 		// find all sessions which are timed out
 		List<PlcSession> expiredSessions = this.plcSessionsBySessionId.values().stream().filter(this::hasExpired)
-				.collect(toList());
+				.toList();
 
 		for (PlcSession plcSession : expiredSessions) {
 			logger.warn("Session " + plcSession.session.getId() + " has expired for PLC " + plcSession.plcId
@@ -528,8 +515,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 			// close the session
 			try {
 				synchronized (plcSession.session) {
-					plcSession.session
-							.close(new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Session expired!"));
+					plcSession.session.close(
+							new CloseReason(CloseReason.CloseCodes.CLOSED_ABNORMALLY, "Session expired!"));
 				}
 			} catch (IOException e) {
 				logger.error("Closing session lead to exception: " + getExceptionMessageWithCauses(e));
@@ -552,9 +539,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 
 		PlcSession plcSession = this.plcSessionsBySessionId.remove(session.getId());
 		if (plcSession == null) {
-			logger.warn(
-					session.getId() + ": Connection to session " + session.getId() + " is lost due to " + closeReason
-							.getCloseCode() + " " + closeReason.getReasonPhrase());
+			logger.warn(session.getId() + ": Connection to session " + session.getId() + " is lost due to "
+					+ closeReason.getCloseCode() + " " + closeReason.getReasonPhrase());
 			return;
 		}
 
@@ -603,8 +589,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 		}
 
 		// then notify any notification observers for disconnected PLCs
-		MapOfLists<PlcAddressKey, PlcNotificationListener> plcAddressListeners = this.plcAddressListenersByPlcId
-				.get(plcId);
+		MapOfLists<PlcAddressKey, PlcNotificationListener> plcAddressListeners = this.plcAddressListenersByPlcId.get(
+				plcId);
 		if (plcAddressListeners == null)
 			return;
 

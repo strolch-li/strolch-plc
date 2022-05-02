@@ -3,6 +3,8 @@ package li.strolch.plc.gw.server;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 
+import java.io.IOException;
+
 import li.strolch.rest.RestfulStrolchComponent;
 
 @ServerEndpoint("/websocket/strolch/plc")
@@ -15,7 +17,7 @@ public class PlcServerWebSocketEndpoint {
 	}
 
 	@OnMessage
-	public void onMessage(String message, Session session) {
+	public void onMessage(String message, Session session) throws IOException {
 		this.serverHandler.onWsMessage(message, session);
 	}
 
