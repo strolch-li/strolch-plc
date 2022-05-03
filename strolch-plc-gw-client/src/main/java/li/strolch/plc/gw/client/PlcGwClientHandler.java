@@ -120,7 +120,8 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 		this.run = false;
 		this.authenticated = false;
-		this.messageSenderTask.cancel(false);
+		if (this.messageSenderTask != null)
+			this.messageSenderTask.cancel(false);
 
 		notifyPlcConnectionState(ConnectionState.Disconnected);
 
@@ -212,8 +213,8 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		// schedule the heart beat timer
 		if (this.serverConnectFuture != null)
 			this.serverConnectFuture.cancel(true);
-		this.serverConnectFuture = getScheduledExecutor("Server")
-				.scheduleWithFixedDelay(this::pingServer, PING_DELAY, PING_DELAY, TimeUnit.SECONDS);
+		this.serverConnectFuture = getScheduledExecutor("Server").scheduleWithFixedDelay(this::pingServer, PING_DELAY,
+				PING_DELAY, TimeUnit.SECONDS);
 	}
 
 	private void closeBrokenGwSessionUpdateState(String closeReason, String connectionStateMsg) {

@@ -150,7 +150,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			getContainer().getPrivilegeHandler().invalidate(this.ctx.getCertificate());
 
 		this.run = false;
-		this.messageSenderTask.cancel(true);
+		if (this.messageSenderTask != null)
+			this.messageSenderTask.cancel(true);
 
 		super.stop();
 	}
@@ -275,8 +276,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			return;
 		}
 
-		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false)
-				.silentThreshold(SILENT_THRESHOLD, MILLISECONDS)) {
+		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false).silentThreshold(
+				SILENT_THRESHOLD, MILLISECONDS)) {
 			tx.lock(Resource.locatorFor(TYPE_PLC_ADDRESS, addressId));
 			Resource addressRes = tx.getResourceBy(TYPE_PLC_ADDRESS, addressId, true);
 
@@ -305,8 +306,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 		if (this.verbose)
 			s = nanoTime();
 
-		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false)
-				.silentThreshold(SILENT_THRESHOLD, MILLISECONDS)) {
+		try (StrolchTransaction tx = openTx(validateCtx().getCertificate(), getCallerMethod(), false).silentThreshold(
+				SILENT_THRESHOLD, MILLISECONDS)) {
 			tx.lock(Resource.locatorFor(TYPE_PLC_CONNECTION, plcConnection.getId()));
 			Resource connection = tx.getResourceBy(TYPE_PLC_CONNECTION, plcConnection.getId());
 			updateConnectionState(tx, connection, plcConnection);
