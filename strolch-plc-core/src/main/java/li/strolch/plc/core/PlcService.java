@@ -11,11 +11,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import li.strolch.agent.api.ComponentContainer;
+import li.strolch.model.Locator;
+import li.strolch.model.Resource;
 import li.strolch.model.log.LogMessage;
 import li.strolch.model.log.LogMessageState;
 import li.strolch.model.log.LogSeverity;
-import li.strolch.model.Locator;
-import li.strolch.model.Resource;
 import li.strolch.model.parameter.Parameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.PlcListener;
@@ -128,10 +128,16 @@ public abstract class PlcService implements PlcListener {
 	}
 
 	protected void sendMsg(LogMessage logMessage) {
+		switch (logMessage.getSeverity()) {
+		case Info, Notification -> logger.info(logMessage.toString());
+		case Warning -> logger.warn(logMessage.toString());
+		case Error, Exception -> logger.error(logMessage.toString());
+		}
 		this.plcHandler.sendMsg(logMessage);
 	}
 
 	protected void disableMsg(Locator locator) {
+		logger.info("Disabling message for locator " + locator);
 		this.plcHandler.disableMsg(locator);
 	}
 
