@@ -11,6 +11,7 @@ public class PlcAddress {
 	public final String resource;
 	public final String action;
 	public final PlcAddressKey plcAddressKey;
+	public final boolean remote;
 
 	/**
 	 * Format: <code>resource</code>-<code>action</code>
@@ -31,7 +32,7 @@ public class PlcAddress {
 	public final boolean inverted;
 
 	public PlcAddress(PlcAddressType type, String resource, String action, String address, StrolchValueType valueType,
-			Object defaultValue, boolean inverted) {
+			Object defaultValue, boolean inverted, boolean remote) {
 		this.type = type;
 		this.resource = resource.intern();
 		this.action = action.intern();
@@ -44,6 +45,8 @@ public class PlcAddress {
 		this.valueType = valueType;
 		this.defaultValue = defaultValue;
 		this.inverted = inverted;
+
+		this.remote = remote;
 	}
 
 	@Override

@@ -23,7 +23,7 @@ public class DataLogicScannerConnectionTest {
 		plc.addConnection(scanner);
 
 		PlcAddress address = new PlcAddress(PlcAddressType.Notification, "resource", "action", "address",
-				StrolchValueType.BOOLEAN, "-", false);
+				StrolchValueType.BOOLEAN, "-", false, false);
 		plc.register(address, (a, value) -> System.out.print(a + ": " + value));
 
 		plc.start();

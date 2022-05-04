@@ -334,6 +334,9 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	}
 
 	private void notifyServer(PlcAddress plcAddress, Object value) {
+		if (!plcAddress.remote)
+			return;
+
 		addMsg(() -> {
 
 			JsonObject notificationJ = new JsonObject();

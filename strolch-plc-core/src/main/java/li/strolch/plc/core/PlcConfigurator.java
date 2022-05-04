@@ -75,9 +75,8 @@ class PlcConfigurator {
 	private static void configureConnection(Plc plc, Resource connection) throws Exception {
 		String className = connection.getParameter(BAG_PARAMETERS, PARAM_CLASS_NAME, true).getValue();
 		logger.info("Configuring PLC Connection " + className + "...");
-		PlcConnection plcConnection = ClassHelper
-				.instantiateClass(className, new Class<?>[] { Plc.class, String.class },
-						new Object[] { plc, connection.getId() });
+		PlcConnection plcConnection = ClassHelper.instantiateClass(className,
+				new Class<?>[] { Plc.class, String.class }, new Object[] { plc, connection.getId() });
 		plcConnection.initialize(connection.getParameterBag(BAG_PARAMETERS, true).toObjectMap());
 		plc.addConnection(plcConnection);
 	}
@@ -86,16 +85,15 @@ class PlcConfigurator {
 			Map<PlcAddress, String> addressesToResourceId, Map<String, PlcAddress> plcAddressesByHwAddress,
 			Resource addressRes) {
 
-		String address = addressRes.getParameter(PARAM_ADDRESS, true).getValue();
-		String resource = addressRes.getParameter(PARAM_RESOURCE, true).getValue();
-		String action = addressRes.getParameter(PARAM_ACTION, true).getValue();
+		String address = addressRes.getString(PARAM_ADDRESS);
+		String resource = addressRes.getString(PARAM_RESOURCE);
+		String action = addressRes.getString(PARAM_ACTION);
 		Parameter<?> valueP = addressRes.getParameter(PARAM_VALUE, true);
-		boolean inverted =
-				addressRes.hasParameter(PARAM_INVERTED) && ((boolean) addressRes.getParameter(PARAM_INVERTED, true)
-						.getValue());
+		boolean inverted = addressRes.getBoolean(PARAM_INVERTED);
+		boolean remote = addressRes.getBoolean(PARAM_REMOTE);
 
 		PlcAddress plcAddress = new PlcAddress(PlcAddressType.Notification, resource, action, address,
-				valueP.getValueType(), valueP.getValue(), inverted);
+				valueP.getValueType(), valueP.getValue(), inverted, remote);
 		plc.registerNotificationMapping(plcAddress);
 
 		PlcAddress replaced = plcAddresses.addElement(resource, action, plcAddress);
@@ -111,10 +109,11 @@ class PlcConfigurator {
 			MapOfMaps<String, String, PlcAddress> plcTelegrams, Map<PlcAddress, String> addressesToResourceId,
 			Map<String, PlcAddress> plcAddressesByHwAddress, Resource telegramRes) {
 
-		String address = telegramRes.getParameter(PARAM_ADDRESS, true).getValue();
-		String resource = telegramRes.getParameter(PARAM_RESOURCE, true).getValue();
-		String action = telegramRes.getParameter(PARAM_ACTION, true).getValue();
+		String address = telegramRes.getString(PARAM_ADDRESS);
+		String resource = telegramRes.getString(PARAM_RESOURCE);
+		String action = telegramRes.getString(PARAM_ACTION);
 		Parameter<?> valueP = telegramRes.getParameter(PARAM_VALUE, true);
+		boolean remote = telegramRes.getBoolean(PARAM_REMOTE);
 
 		PlcAddress existingAddress = plcAddressesByHwAddress.get(address);
 		if (existingAddress == null)
@@ -128,7 +127,7 @@ class PlcConfigurator {
 		}
 
 		PlcAddress telegramAddress = new PlcAddress(PlcAddressType.Telegram, resource, action, address,
-				valueP.getValueType(), valueP.getValue(), false);
+				valueP.getValueType(), valueP.getValue(), false, remote);
 		logger.info("Adding " + telegramAddress + "...");
 
 		PlcAddress replaced = plcTelegrams.addElement(resource, action, telegramAddress);

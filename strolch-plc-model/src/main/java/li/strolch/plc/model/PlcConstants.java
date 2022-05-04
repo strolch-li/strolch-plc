@@ -27,6 +27,7 @@ public class PlcConstants {
 	public static final String PARAM_INDEX = "index";
 	public static final String PARAM_INTERRUPT_PIN_NAME = "interruptPinName";
 	public static final String PARAM_INVERTED = "inverted";
+	public static final String PARAM_REMOTE = "remote";
 	public static final String PARAM_IP_ADDRESS = "ipAddress";
 	public static final String PARAM_IP_ADDRESSES = "ipAddresses";
 	public static final String PARAM_MAC_ADDRESS = "macAddress";

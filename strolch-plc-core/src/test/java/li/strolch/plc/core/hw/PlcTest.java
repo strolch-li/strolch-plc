@@ -46,11 +46,11 @@ public class PlcTest {
 		conveyorCon.initialize(Collections.emptyMap());
 		plc.addConnection(conveyorCon);
 		positionOn = new PlcAddress(PlcAddressType.Telegram, "Conveyor", "On", "Conveyor.OnOff",
-				StrolchValueType.BOOLEAN, true, false);
+				StrolchValueType.BOOLEAN, true, false, false);
 		positionOff = new PlcAddress(PlcAddressType.Telegram, "Conveyor", "Off", "Conveyor.OnOff",
-				StrolchValueType.BOOLEAN, false, false);
+				StrolchValueType.BOOLEAN, false, false, false);
 		positionOccupied = new PlcAddress(PlcAddressType.Notification, "Conveyor", "Occupied", "Conveyor.Occupied",
-				StrolchValueType.BOOLEAN, null, false);
+				StrolchValueType.BOOLEAN, null, false, false);
 		plc.registerNotificationMapping(positionOccupied);
 	}
 

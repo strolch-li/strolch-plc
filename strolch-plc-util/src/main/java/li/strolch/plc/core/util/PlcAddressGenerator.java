@@ -4,8 +4,7 @@ import static java.lang.Integer.parseInt;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static li.strolch.model.xml.StrolchXmlHelper.parseToMap;
 import static li.strolch.plc.model.PlcConstants.*;
-import static li.strolch.utils.helper.StringHelper.isEmpty;
-import static li.strolch.utils.helper.StringHelper.isNotEmpty;
+import static li.strolch.utils.helper.StringHelper.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +23,6 @@ import li.strolch.model.parameter.Parameter;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.model.xml.StrolchXmlHelper;
 import li.strolch.utils.collections.MapOfLists;
-import li.strolch.utils.helper.StringHelper;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -63,9 +61,8 @@ public class PlcAddressGenerator {
 		Resource replaced = exportList.put(element.getId(), element);
 		if (replaced != null) {
 			throw new IllegalStateException(
-					"A " + element.getType() + " " + element.getId() + ". Addresses: " + element.getParameter(
-							PARAM_ADDRESS, true).getValue() + " and replaced with " + replaced.getParameter(
-							PARAM_ADDRESS, true).getValue());
+					"A " + element.getType() + " " + element.getId() + ". Addresses: " + element.getString(
+							PARAM_ADDRESS) + " and replaced with " + replaced.getString(PARAM_ADDRESS));
 		}
 	}
 
@@ -120,10 +117,10 @@ public class PlcAddressGenerator {
 					logicalDevice = logicalDeviceT.getClone();
 					logicalDevice.setId("D_" + deviceId);
 					logicalDevice.setName(deviceId);
-					String groupNrS = StringHelper.normalizeLength(Integer.toString(groupNr), 2, true, '0');
-					logicalDevice.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					logicalDevice.getParameter(PARAM_GROUP, true).setValue(groupNrS + " " + description);
-					logicalDevice.getParameter(PARAM_INDEX, true).setValue(groupIndex);
+					String groupNrS = normalizeLength(Integer.toString(groupNr), 2, true, '0');
+					logicalDevice.setString(PARAM_DESCRIPTION, description);
+					logicalDevice.setString(PARAM_GROUP, groupNrS + " " + description);
+					logicalDevice.setInteger(PARAM_INDEX, groupIndex);
 					add(exportList, logicalDevice);
 					groupIndex += 10;
 					logger.info("Added PlcLogicalDevice " + logicalDevice.getId());
@@ -150,15 +147,17 @@ public class PlcAddressGenerator {
 					addressR.setId("A_" + key);
 					addressR.setName(keyName);
 
-					addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					addressR.getParameter(PARAM_ADDRESS, true).setValue(address);
-					addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					addressR.getParameter(PARAM_ACTION, true).setValue(action1);
+					addressR.setString(PARAM_DESCRIPTION, description);
+					addressR.setString(PARAM_ADDRESS, address);
+					addressR.setString(PARAM_RESOURCE, resource);
+					addressR.setString(PARAM_ACTION, action1);
 
-					if (record.isSet("Inverted") && record.get("Inverted").equalsIgnoreCase("true"))
-						addressR.getParameter(PARAM_INVERTED, true).setValue(true);
+					if (record.isSet("Inverted"))
+						addressR.setBoolean(PARAM_INVERTED, Boolean.parseBoolean(record.get("Inverted").trim()));
+					if (record.isSet("Remote"))
+						addressR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
-					addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+					addressR.setInteger(PARAM_INDEX, addressIndex);
 					addressIndex += 10;
 
 					BooleanParameter valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
@@ -166,7 +165,7 @@ public class PlcAddressGenerator {
 					addressR.addParameter(valueP);
 
 					add(exportList, addressR);
-					logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+					logicalDevice.addRelation(PARAM_ADDRESSES, addressR);
 					logger.info(
 							"Added Boolean PlcAddress " + addressR.getId() + " " + addressR.getName() + " for address "
 									+ address);
@@ -197,12 +196,12 @@ public class PlcAddressGenerator {
 					telegramR.setId("T_" + key);
 					telegramR.setName(keyName);
 
-					telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					telegramR.getParameter(PARAM_ADDRESS, true).setValue(address);
-					telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					telegramR.getParameter(PARAM_ACTION, true).setValue(action1);
+					telegramR.setString(PARAM_DESCRIPTION, description);
+					telegramR.setString(PARAM_ADDRESS, address);
+					telegramR.setString(PARAM_RESOURCE, resource);
+					telegramR.setString(PARAM_ACTION, action1);
 
-					telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+					telegramR.setInteger(PARAM_INDEX, telegramIndex);
 					telegramIndex += 10;
 
 					valueP = new BooleanParameter(PARAM_VALUE, "Value", true);
@@ -210,7 +209,7 @@ public class PlcAddressGenerator {
 					telegramR.addParameter(valueP);
 
 					add(exportList, telegramR);
-					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+					logicalDevice.addRelation(PARAM_TELEGRAMS, telegramR);
 					logger.info("Added Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 							+ " for address " + address);
 
@@ -222,12 +221,12 @@ public class PlcAddressGenerator {
 						telegramR.setId("T_" + resource + "-" + action2);
 						telegramR.setName(resource + " - " + action2);
 
-						telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-						telegramR.getParameter(PARAM_ADDRESS, true).setValue(address);
-						telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-						telegramR.getParameter(PARAM_ACTION, true).setValue(action2);
+						telegramR.setString(PARAM_DESCRIPTION, description);
+						telegramR.setString(PARAM_ADDRESS, address);
+						telegramR.setString(PARAM_RESOURCE, resource);
+						telegramR.setString(PARAM_ACTION, action2);
 
-						telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+						telegramR.setInteger(PARAM_INDEX, telegramIndex);
 						telegramIndex += 10;
 
 						valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
@@ -235,25 +234,25 @@ public class PlcAddressGenerator {
 						telegramR.addParameter(valueP);
 
 						add(exportList, telegramR);
-						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+						logicalDevice.addRelation(PARAM_TELEGRAMS, telegramR);
 						logger.info("Added Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for address " + address);
 					}
 
 					// validate address exists for this address
 					if (exportList.values().stream().filter(e -> e.getType().equals(TYPE_PLC_ADDRESS))
-							.noneMatch(e -> e.getParameter(PARAM_ADDRESS).getValue().equals(address))) {
+							.noneMatch(e -> e.getString(PARAM_ADDRESS).equals(address))) {
 
 						Resource addressR = addressT.getClone();
 						addressR.setId("A_" + key);
 						addressR.setName(keyName);
 
-						addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-						addressR.getParameter(PARAM_ADDRESS, true).setValue(address);
-						addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-						addressR.getParameter(PARAM_ACTION, true).setValue(action1);
+						addressR.setString(PARAM_DESCRIPTION, description);
+						addressR.setString(PARAM_ADDRESS, address);
+						addressR.setString(PARAM_RESOURCE, resource);
+						addressR.setString(PARAM_ACTION, action1);
 
-						addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+						addressR.setInteger(PARAM_INDEX, addressIndex);
 						addressIndex += 10;
 
 						valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
@@ -261,7 +260,7 @@ public class PlcAddressGenerator {
 						addressR.addParameter(valueP);
 
 						add(exportList, addressR);
-						logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+						logicalDevice.addRelation(PARAM_ADDRESSES, addressR);
 						logger.info("Added missing Boolean PlcAddress " + addressR.getId() + " " + addressR.getName()
 								+ " for address " + address);
 					}
@@ -294,12 +293,12 @@ public class PlcAddressGenerator {
 						addressR.setId("A_" + key);
 						addressR.setName(keyName);
 
-						addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-						addressR.getParameter(PARAM_ADDRESS, true).setValue(connection);
-						addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-						addressR.getParameter(PARAM_ACTION, true).setValue(action1);
+						addressR.setString(PARAM_DESCRIPTION, description);
+						addressR.setString(PARAM_ADDRESS, connection);
+						addressR.setString(PARAM_RESOURCE, resource);
+						addressR.setString(PARAM_ACTION, action1);
 
-						addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+						addressR.setInteger(PARAM_INDEX, addressIndex);
 						addressIndex += 10;
 
 						Parameter<?> valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
@@ -307,7 +306,7 @@ public class PlcAddressGenerator {
 						addressR.addParameter(valueP);
 
 						add(exportList, addressR);
-						logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+						logicalDevice.addRelation(PARAM_ADDRESSES, addressR);
 						logger.info("Added Virtual Boolean PlcAddress " + addressR.getId() + " " + addressR.getName()
 								+ " for connection " + connection);
 
@@ -316,12 +315,12 @@ public class PlcAddressGenerator {
 						telegramR.setId("T_" + key);
 						telegramR.setName(keyName);
 
-						telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-						telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection);
-						telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-						telegramR.getParameter(PARAM_ACTION, true).setValue(action1);
+						telegramR.setString(PARAM_DESCRIPTION, description);
+						telegramR.setString(PARAM_ADDRESS, connection);
+						telegramR.setString(PARAM_RESOURCE, resource);
+						telegramR.setString(PARAM_ACTION, action1);
 
-						telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+						telegramR.setInteger(PARAM_INDEX, telegramIndex);
 						telegramIndex += 10;
 
 						valueP = new BooleanParameter(PARAM_VALUE, "Value", true);
@@ -329,7 +328,7 @@ public class PlcAddressGenerator {
 						telegramR.addParameter(valueP);
 
 						add(exportList, telegramR);
-						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+						logicalDevice.addRelation(PARAM_TELEGRAMS, telegramR);
 						logger.info("Added Virtual Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for connection " + connection);
 
@@ -342,12 +341,12 @@ public class PlcAddressGenerator {
 							telegramR.setId("T_" + key);
 							telegramR.setName(keyName);
 
-							telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-							telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection);
-							telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-							telegramR.getParameter(PARAM_ACTION, true).setValue(action2);
+							telegramR.setString(PARAM_DESCRIPTION, description);
+							telegramR.setString(PARAM_ADDRESS, connection);
+							telegramR.setString(PARAM_RESOURCE, resource);
+							telegramR.setString(PARAM_ACTION, action2);
 
-							telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+							telegramR.setInteger(PARAM_INDEX, telegramIndex);
 							telegramIndex += 10;
 
 							valueP = new BooleanParameter(PARAM_VALUE, "Value", false);
@@ -355,8 +354,7 @@ public class PlcAddressGenerator {
 							telegramR.addParameter(valueP);
 
 							add(exportList, telegramR);
-							logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true)
-									.addValueIfNotContains(telegramR.getId());
+							logicalDevice.addRelation(PARAM_TELEGRAMS, telegramR);
 							logger.info(
 									"Added Virtual Boolean PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 											+ " for connection " + connection);
@@ -369,12 +367,12 @@ public class PlcAddressGenerator {
 						addressR.setId("A_" + key);
 						addressR.setName(keyName);
 
-						addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-						addressR.getParameter(PARAM_ADDRESS, true).setValue(connection);
-						addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-						addressR.getParameter(PARAM_ACTION, true).setValue(action1);
+						addressR.setString(PARAM_DESCRIPTION, description);
+						addressR.setString(PARAM_ADDRESS, connection);
+						addressR.setString(PARAM_RESOURCE, resource);
+						addressR.setString(PARAM_ACTION, action1);
 
-						addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+						addressR.setInteger(PARAM_INDEX, addressIndex);
 						addressIndex += 10;
 
 						Parameter<?> valueP = new StringParameter(PARAM_VALUE, "Value", value == null ? "" : value);
@@ -382,7 +380,7 @@ public class PlcAddressGenerator {
 						addressR.addParameter(valueP);
 
 						add(exportList, addressR);
-						logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+						logicalDevice.addRelation(PARAM_ADDRESSES, addressR);
 						logger.info("Added Virtual String PlcAddress " + addressR.getId() + " " + addressR.getName()
 								+ " for connection " + connection);
 
@@ -391,12 +389,12 @@ public class PlcAddressGenerator {
 						telegramR.setId("T_" + key);
 						telegramR.setName(keyName);
 
-						telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-						telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection);
-						telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-						telegramR.getParameter(PARAM_ACTION, true).setValue(action1);
+						telegramR.setString(PARAM_DESCRIPTION, description);
+						telegramR.setString(PARAM_ADDRESS, connection);
+						telegramR.setString(PARAM_RESOURCE, resource);
+						telegramR.setString(PARAM_ACTION, action1);
 
-						telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+						telegramR.setInteger(PARAM_INDEX, telegramIndex);
 						telegramIndex += 10;
 
 						valueP = new StringParameter(PARAM_VALUE, "Value", "");
@@ -404,7 +402,7 @@ public class PlcAddressGenerator {
 						telegramR.addParameter(valueP);
 
 						add(exportList, telegramR);
-						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+						logicalDevice.addRelation(PARAM_TELEGRAMS, telegramR);
 						logger.info("Added Virtual String PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for connection " + connection);
 					}
@@ -415,12 +413,12 @@ public class PlcAddressGenerator {
 						addressR.setId("A_" + key);
 						addressR.setName(keyName);
 
-						addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-						addressR.getParameter(PARAM_ADDRESS, true).setValue(connection);
-						addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-						addressR.getParameter(PARAM_ACTION, true).setValue(action1);
+						addressR.setString(PARAM_DESCRIPTION, description);
+						addressR.setString(PARAM_ADDRESS, connection);
+						addressR.setString(PARAM_RESOURCE, resource);
+						addressR.setString(PARAM_ACTION, action1);
 
-						addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+						addressR.setInteger(PARAM_INDEX, addressIndex);
 						addressIndex += 10;
 
 						Parameter<?> valueP = new IntegerParameter(PARAM_VALUE, "Value",
@@ -429,7 +427,7 @@ public class PlcAddressGenerator {
 						addressR.addParameter(valueP);
 
 						add(exportList, addressR);
-						logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+						logicalDevice.addRelation(PARAM_ADDRESSES, addressR);
 						logger.info("Added Virtual Integer PlcAddress " + addressR.getId() + " " + addressR.getName()
 								+ " for connection " + connection);
 
@@ -438,12 +436,12 @@ public class PlcAddressGenerator {
 						telegramR.setId("T_" + key);
 						telegramR.setName(keyName);
 
-						telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-						telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection);
-						telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-						telegramR.getParameter(PARAM_ACTION, true).setValue(action1);
+						telegramR.setString(PARAM_DESCRIPTION, description);
+						telegramR.setString(PARAM_ADDRESS, connection);
+						telegramR.setString(PARAM_RESOURCE, resource);
+						telegramR.setString(PARAM_ACTION, action1);
 
-						telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+						telegramR.setInteger(PARAM_INDEX, telegramIndex);
 						telegramIndex += 10;
 
 						valueP = new IntegerParameter(PARAM_VALUE, "Value",
@@ -452,7 +450,7 @@ public class PlcAddressGenerator {
 						telegramR.addParameter(valueP);
 
 						add(exportList, telegramR);
-						logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+						logicalDevice.addRelation(PARAM_TELEGRAMS, telegramR);
 						logger.info("Added Virtual Integer PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 								+ " for connection " + connection);
 					}
@@ -478,12 +476,12 @@ public class PlcAddressGenerator {
 					addressR.setId("A_" + key);
 					addressR.setName(keyName);
 
-					addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					addressR.getParameter(PARAM_ADDRESS, true).setValue(connection + ".barcode");
-					addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					addressR.getParameter(PARAM_ACTION, true).setValue("Barcode");
+					addressR.setString(PARAM_DESCRIPTION, description);
+					addressR.setString(PARAM_ADDRESS, connection + ".barcode");
+					addressR.setString(PARAM_RESOURCE, resource);
+					addressR.setString(PARAM_ACTION, "Barcode");
 
-					addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+					addressR.setInteger(PARAM_INDEX, addressIndex);
 					addressIndex += 10;
 
 					StringParameter valueP = new StringParameter(PARAM_VALUE, "Value", "");
@@ -491,7 +489,7 @@ public class PlcAddressGenerator {
 					addressR.addParameter(valueP);
 
 					add(exportList, addressR);
-					logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+					logicalDevice.addRelation(PARAM_ADDRESSES, addressR);
 					logger.info("Added DataLogicScanner PlcAddress " + addressR.getId() + " " + addressR.getName()
 							+ " for connection " + connection);
 
@@ -502,12 +500,12 @@ public class PlcAddressGenerator {
 					addressR.setId("A_" + key);
 					addressR.setName(keyName);
 
-					addressR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					addressR.getParameter(PARAM_ADDRESS, true).setValue(connection + ".trigger");
-					addressR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					addressR.getParameter(PARAM_ACTION, true).setValue("On");
+					addressR.setString(PARAM_DESCRIPTION, description);
+					addressR.setString(PARAM_ADDRESS, connection + ".trigger");
+					addressR.setString(PARAM_RESOURCE, resource);
+					addressR.setString(PARAM_ACTION, "On");
 
-					addressR.getParameter(PARAM_INDEX, true).setValue(addressIndex);
+					addressR.setInteger(PARAM_INDEX, addressIndex);
 					addressIndex += 10;
 
 					BooleanParameter booleanValueP = new BooleanParameter(PARAM_VALUE, "Value", false);
@@ -515,7 +513,7 @@ public class PlcAddressGenerator {
 					addressR.addParameter(booleanValueP);
 
 					add(exportList, addressR);
-					logicalDevice.getRelationsParam(PARAM_ADDRESSES, true).addValueIfNotContains(addressR.getId());
+					logicalDevice.addRelation(PARAM_ADDRESSES, addressR);
 					logger.info("Added DataLogicScanner PlcAddress " + addressR.getId() + " " + addressR.getName()
 							+ " for connection " + connection);
 
@@ -524,12 +522,12 @@ public class PlcAddressGenerator {
 					telegramR.setId("T_" + key);
 					telegramR.setName(keyName);
 
-					telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection + ".trigger");
-					telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					telegramR.getParameter(PARAM_ACTION, true).setValue("On");
+					telegramR.setString(PARAM_DESCRIPTION, description);
+					telegramR.setString(PARAM_ADDRESS, connection + ".trigger");
+					telegramR.setString(PARAM_RESOURCE, resource);
+					telegramR.setString(PARAM_ACTION, "On");
 
-					telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+					telegramR.setInteger(PARAM_INDEX, telegramIndex);
 					telegramIndex += 10;
 
 					booleanValueP = new BooleanParameter(PARAM_VALUE, "Value", true);
@@ -537,7 +535,7 @@ public class PlcAddressGenerator {
 					telegramR.addParameter(booleanValueP);
 
 					add(exportList, telegramR);
-					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+					logicalDevice.addRelation(PARAM_TELEGRAMS, telegramR);
 					logger.info("Added DataLogicScanner PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 							+ " for connection " + connection);
 
@@ -548,12 +546,12 @@ public class PlcAddressGenerator {
 					telegramR.setId("T_" + key);
 					telegramR.setName(keyName);
 
-					telegramR.getParameter(PARAM_DESCRIPTION, true).setValue(description);
-					telegramR.getParameter(PARAM_ADDRESS, true).setValue(connection + ".trigger");
-					telegramR.getParameter(PARAM_RESOURCE, true).setValue(resource);
-					telegramR.getParameter(PARAM_ACTION, true).setValue("Off");
+					telegramR.setString(PARAM_DESCRIPTION, description);
+					telegramR.setString(PARAM_ADDRESS, connection + ".trigger");
+					telegramR.setString(PARAM_RESOURCE, resource);
+					telegramR.setString(PARAM_ACTION, "Off");
 
-					telegramR.getParameter(PARAM_INDEX, true).setValue(telegramIndex);
+					telegramR.setInteger(PARAM_INDEX, telegramIndex);
 					telegramIndex += 10;
 
 					booleanValueP = new BooleanParameter(PARAM_VALUE, "Value", false);
@@ -561,7 +559,7 @@ public class PlcAddressGenerator {
 					telegramR.addParameter(booleanValueP);
 
 					add(exportList, telegramR);
-					logicalDevice.getRelationsParam(PARAM_TELEGRAMS, true).addValueIfNotContains(telegramR.getId());
+					logicalDevice.addRelation(PARAM_TELEGRAMS, telegramR);
 					logger.info("Added DataLogicScanner PlcTelegram " + telegramR.getId() + " " + telegramR.getName()
 							+ " for connection " + connection);
 				}
@@ -573,9 +571,8 @@ public class PlcAddressGenerator {
 		// validate
 		boolean valid = true;
 		MapOfLists<String, Resource> elementsByAddress = exportList.values().stream()
-				.filter(e -> !e.getType().equals(TYPE_PLC_LOGICAL_DEVICE)).collect(MapOfLists::new,
-						(m, e) -> m.addElement(e.getParameter(PARAM_ADDRESS, true).getValueAsString(), e),
-						MapOfLists::addAll);
+				.filter(e -> !e.getType().equals(TYPE_PLC_LOGICAL_DEVICE))
+				.collect(MapOfLists::new, (m, e) -> m.addElement(e.getString(PARAM_ADDRESS), e), MapOfLists::addAll);
 		for (String address : elementsByAddress.keySet()) {
 			List<Resource> elements = elementsByAddress.getList(address);
 			if (elements.size() <= 1)
@@ -603,8 +600,8 @@ public class PlcAddressGenerator {
 				} else {
 					Resource telegram1 = telegrams.get(0);
 					Resource telegram2 = telegrams.get(1);
-					Boolean value1 = telegram1.getParameter(PARAM_VALUE, true).getValue();
-					Boolean value2 = telegram2.getParameter(PARAM_VALUE, true).getValue();
+					boolean value1 = telegram1.getBoolean(PARAM_VALUE);
+					boolean value2 = telegram2.getBoolean(PARAM_VALUE);
 					if (!value1 || value2) {
 						logger.error("Unexpected values for telegrams: ");
 						logger.error("\t" + value1 + " for " + telegram1.getId() + " " + telegram1.getName());
