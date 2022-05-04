@@ -54,4 +54,11 @@ public class PlcAddressKey {
 	public static PlcAddressKey keyFor(String resource, String action) {
 		return new PlcAddressKey(resource, action);
 	}
+
+	public static PlcAddressKey parseKey(String key) {
+		String[] parts = key.split("-");
+		if (parts.length != 2)
+			throw new IllegalStateException("Invalid key: " + key);
+		return PlcAddressKey.keyFor(parts[0], parts[1]);
+	}
 }
