@@ -177,7 +177,7 @@ public abstract class Multi8BitI2cOutputConnection extends SimplePlcConnection {
 
 		int[] pos = this.positionsByAddress.get(address);
 		if (pos == null)
-			throw new IllegalStateException("Address is illegal " + address);
+			throw new IllegalStateException("Address " + address + " does not exist");
 
 		int device = pos[0];
 		int pin = pos[1];
