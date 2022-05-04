@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.*;
 
 import com.google.gson.JsonArray;
@@ -59,6 +62,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 	private ScheduledFuture<?> serverConnectFuture;
 
+	private Map<PlcAddress, Object> notConnectedQueue;
 	private LinkedBlockingDeque<Callable<?>> messageQueue;
 	private int maxMessageQueue;
 	private boolean run;
@@ -84,6 +88,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 		this.maxMessageQueue = configuration.getInt("maxMessageQueue", 100);
 		this.messageQueue = new LinkedBlockingDeque<>();
+		this.notConnectedQueue = Collections.synchronizedMap(new LinkedHashMap<>());
 
 		super.initialize(configuration);
 	}
@@ -468,6 +473,13 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		saveServerConnectionState(ctx, ConnectionState.Connected, "");
 		notifyPlcConnectionState(ConnectionState.Connected);
 		this.authenticated = true;
+
+		// we are connected, so flush messages
+		//noinspection SynchronizeOnNonFinalField
+		synchronized (this.notConnectedQueue) {
+			this.notConnectedQueue.forEach(this::notifyServer);
+			this.notConnectedQueue.clear();
+		}
 	}
 
 	public void onWsPong(PongMessage message, Session session) {
@@ -606,9 +618,13 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	@Override
 	public void handleNotification(PlcAddress address, Object value) {
 
-		// ignore updates for connection state, if not connected
-		if (!this.authenticated && address.plcAddressKey.equals(K_PLC_SERVER_CONNECTED))
+		// if not connected, then queue notifications, storing last value per address
+		if (!this.authenticated && address.plcAddressKey.equals(K_PLC_SERVER_CONNECTED)) {
+			// keep this notification after other notifications
+			this.notConnectedQueue.remove(address);
+			this.notConnectedQueue.put(address, value);
 			return;
+		}
 
 		notifyServer(address, value);
 	}
