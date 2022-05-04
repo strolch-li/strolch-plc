@@ -61,6 +61,7 @@ public class DefaultPlc implements Plc {
 			this.connectionStateChangeListener.notifyStateChange(connection);
 	}
 
+	@Override
 	public void setConnectionStateChangeListener(PlcConnectionStateChangeListener listener) {
 		this.connectionStateChangeListener = listener;
 	}
