@@ -2,10 +2,7 @@ package li.strolch.plc.core.hw;
 
 import static java.util.stream.Collectors.toSet;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Stream;
@@ -128,6 +125,7 @@ public class DefaultPlc implements Plc {
 		if (listeners == null || listeners.isEmpty()) {
 			logger.warn("No listeners for key " + plcAddress);
 		} else {
+			listeners = new ArrayList<>(listeners);
 			for (PlcListener listener : listeners) {
 				try {
 					if (this.verbose)
