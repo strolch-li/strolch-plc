@@ -200,6 +200,8 @@ public class PlcAddressGenerator {
 					telegramR.setString(PARAM_ADDRESS, address);
 					telegramR.setString(PARAM_RESOURCE, resource);
 					telegramR.setString(PARAM_ACTION, action1);
+					if (record.isSet("Remote"))
+						telegramR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 					telegramR.setInteger(PARAM_INDEX, telegramIndex);
 					telegramIndex += 10;
@@ -225,6 +227,8 @@ public class PlcAddressGenerator {
 						telegramR.setString(PARAM_ADDRESS, address);
 						telegramR.setString(PARAM_RESOURCE, resource);
 						telegramR.setString(PARAM_ACTION, action2);
+						if (record.isSet("Remote"))
+							telegramR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 						telegramR.setInteger(PARAM_INDEX, telegramIndex);
 						telegramIndex += 10;
@@ -251,6 +255,8 @@ public class PlcAddressGenerator {
 						addressR.setString(PARAM_ADDRESS, address);
 						addressR.setString(PARAM_RESOURCE, resource);
 						addressR.setString(PARAM_ACTION, action1);
+						if (record.isSet("Remote"))
+							addressR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 						addressR.setInteger(PARAM_INDEX, addressIndex);
 						addressIndex += 10;
@@ -297,6 +303,8 @@ public class PlcAddressGenerator {
 						addressR.setString(PARAM_ADDRESS, connection);
 						addressR.setString(PARAM_RESOURCE, resource);
 						addressR.setString(PARAM_ACTION, action1);
+						if (record.isSet("Remote"))
+							addressR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 						addressR.setInteger(PARAM_INDEX, addressIndex);
 						addressIndex += 10;
@@ -319,6 +327,8 @@ public class PlcAddressGenerator {
 						telegramR.setString(PARAM_ADDRESS, connection);
 						telegramR.setString(PARAM_RESOURCE, resource);
 						telegramR.setString(PARAM_ACTION, action1);
+						if (record.isSet("Remote"))
+							telegramR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 						telegramR.setInteger(PARAM_INDEX, telegramIndex);
 						telegramIndex += 10;
@@ -345,6 +355,8 @@ public class PlcAddressGenerator {
 							telegramR.setString(PARAM_ADDRESS, connection);
 							telegramR.setString(PARAM_RESOURCE, resource);
 							telegramR.setString(PARAM_ACTION, action2);
+							if (record.isSet("Remote"))
+								telegramR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 							telegramR.setInteger(PARAM_INDEX, telegramIndex);
 							telegramIndex += 10;
@@ -371,6 +383,8 @@ public class PlcAddressGenerator {
 						addressR.setString(PARAM_ADDRESS, connection);
 						addressR.setString(PARAM_RESOURCE, resource);
 						addressR.setString(PARAM_ACTION, action1);
+						if (record.isSet("Remote"))
+							addressR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 						addressR.setInteger(PARAM_INDEX, addressIndex);
 						addressIndex += 10;
@@ -393,6 +407,8 @@ public class PlcAddressGenerator {
 						telegramR.setString(PARAM_ADDRESS, connection);
 						telegramR.setString(PARAM_RESOURCE, resource);
 						telegramR.setString(PARAM_ACTION, action1);
+						if (record.isSet("Remote"))
+							telegramR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 						telegramR.setInteger(PARAM_INDEX, telegramIndex);
 						telegramIndex += 10;
@@ -417,6 +433,8 @@ public class PlcAddressGenerator {
 						addressR.setString(PARAM_ADDRESS, connection);
 						addressR.setString(PARAM_RESOURCE, resource);
 						addressR.setString(PARAM_ACTION, action1);
+						if (record.isSet("Remote"))
+							addressR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 						addressR.setInteger(PARAM_INDEX, addressIndex);
 						addressIndex += 10;
@@ -440,6 +458,8 @@ public class PlcAddressGenerator {
 						telegramR.setString(PARAM_ADDRESS, connection);
 						telegramR.setString(PARAM_RESOURCE, resource);
 						telegramR.setString(PARAM_ACTION, action1);
+						if (record.isSet("Remote"))
+							telegramR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 						telegramR.setInteger(PARAM_INDEX, telegramIndex);
 						telegramIndex += 10;
@@ -480,6 +500,8 @@ public class PlcAddressGenerator {
 					addressR.setString(PARAM_ADDRESS, connection + ".barcode");
 					addressR.setString(PARAM_RESOURCE, resource);
 					addressR.setString(PARAM_ACTION, "Barcode");
+					if (record.isSet("Remote"))
+						addressR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 					addressR.setInteger(PARAM_INDEX, addressIndex);
 					addressIndex += 10;
@@ -504,6 +526,8 @@ public class PlcAddressGenerator {
 					addressR.setString(PARAM_ADDRESS, connection + ".trigger");
 					addressR.setString(PARAM_RESOURCE, resource);
 					addressR.setString(PARAM_ACTION, "On");
+					if (record.isSet("Remote"))
+						addressR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 					addressR.setInteger(PARAM_INDEX, addressIndex);
 					addressIndex += 10;
@@ -526,6 +550,8 @@ public class PlcAddressGenerator {
 					telegramR.setString(PARAM_ADDRESS, connection + ".trigger");
 					telegramR.setString(PARAM_RESOURCE, resource);
 					telegramR.setString(PARAM_ACTION, "On");
+					if (record.isSet("Remote"))
+						telegramR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 					telegramR.setInteger(PARAM_INDEX, telegramIndex);
 					telegramIndex += 10;
@@ -550,6 +576,8 @@ public class PlcAddressGenerator {
 					telegramR.setString(PARAM_ADDRESS, connection + ".trigger");
 					telegramR.setString(PARAM_RESOURCE, resource);
 					telegramR.setString(PARAM_ACTION, "Off");
+					if (record.isSet("Remote"))
+						telegramR.setBoolean(PARAM_REMOTE, Boolean.parseBoolean(record.get("Remote").trim()));
 
 					telegramR.setInteger(PARAM_INDEX, telegramIndex);
 					telegramIndex += 10;
