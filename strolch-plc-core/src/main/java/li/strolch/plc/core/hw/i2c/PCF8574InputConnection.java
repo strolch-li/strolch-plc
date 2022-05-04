@@ -255,10 +255,8 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 				if (this.states[i][j] != newState) {
 					this.states[i][j] = newState;
 					String address = this.id + "." + i + "." + j;
-					if (this.verbose)
-						logger.info("Detected " + address + " = " + (newState ? 1 : 0) + (this.inverted ?
-								" (inverted)" :
-								""));
+					logger.info(
+							"Detected " + address + " = " + (newState ? 1 : 0) + (this.inverted ? " (inverted)" : ""));
 					this.plc.queueNotify(address, newState);
 				}
 			}

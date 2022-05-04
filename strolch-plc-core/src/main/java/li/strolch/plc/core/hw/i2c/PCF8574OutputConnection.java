@@ -63,11 +63,8 @@ public class PCF8574OutputConnection extends Multi8BitI2cOutputConnection {
 		else
 			newState = setBit(this.states[device], pin);
 
-		if (this.verbose) {
-			logger.info(
-					"Setting " + getId() + "." + device + "." + pin + " = " + (high ? 0 : 1) + " (" + asBinary(newState)
-							+ ")");
-		}
+		logger.info("Setting " + getId() + "." + device + "." + pin + " = " + (high ? 0 : 1) + " (" + asBinary(newState)
+				+ ")");
 
 		outputDevice.write(newState);
 		this.states[device] = newState;
