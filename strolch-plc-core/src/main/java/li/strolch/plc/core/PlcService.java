@@ -6,9 +6,7 @@ import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
 import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
 import java.util.ResourceBundle;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.model.Locator;
@@ -169,8 +167,22 @@ public abstract class PlcService implements PlcListener {
 		return this.container.getRealm(ctx.getCertificate()).openTx(ctx.getCertificate(), getCallerMethod(2), readOnly);
 	}
 
+	private ExecutorService getExecutor() {
+		return this.container.getAgent().getExecutor(getClass().getSimpleName());
+	}
+
 	private ScheduledExecutorService getScheduledExecutor() {
-		return this.container.getAgent().getScheduledExecutor(PlcService.class.getSimpleName());
+		return this.container.getAgent().getScheduledExecutor(getClass().getSimpleName());
+	}
+
+	protected void async(Runnable runnable) {
+		getExecutor().submit(() -> {
+			try {
+				runnable.run();
+			} catch (Exception e) {
+				handleFailedSchedule(e);
+			}
+		});
 	}
 
 	protected ScheduledFuture<?> schedule(Runnable runnable, long delay, TimeUnit delayUnit) {
