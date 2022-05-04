@@ -491,7 +491,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 			}
 
 			this.plcSessionsBySessionId.put(session.getId(), plcSession);
-			logger.info("New PLC connected with ID " + plcId + " and SessionId " + plcSession.session.getId());
+			logger.info("PLC connected with ID " + plcId + " and SessionId " + plcSession.session.getId());
 		}
 
 		if (plcSession.certificate != null) {
