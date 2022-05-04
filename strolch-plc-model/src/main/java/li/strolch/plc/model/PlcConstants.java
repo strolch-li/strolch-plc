@@ -28,12 +28,12 @@ public class PlcConstants {
 	public static final String PARAM_INTERRUPT_PIN_NAME = "interruptPinName";
 	public static final String PARAM_INVERTED = "inverted";
 	public static final String PARAM_REMOTE = "remote";
+	public static final String PARAM_PLC_ID = "plcId";
 	public static final String PARAM_IP_ADDRESS = "ipAddress";
 	public static final String PARAM_IP_ADDRESSES = "ipAddresses";
 	public static final String PARAM_MAC_ADDRESS = "macAddress";
 	public static final String PARAM_MESSAGE_TYPE = "messageType";
 	public static final String PARAM_PASSWORD = "password";
-	public static final String PARAM_PLC_ID = "plcId";
 	public static final String PARAM_SEQUENCE_ID = "sequenceId";
 	public static final String PARAM_ENABLED = "enabled";
 	public static final String PARAM_WARNING = "warning";

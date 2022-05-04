@@ -1,7 +1,9 @@
 package li.strolch.plc.gw.server.policy.execution;
 
+import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
 import static li.strolch.model.log.LogMessageState.*;
 import static li.strolch.plc.gw.server.PlcGwSrvI18n.*;
+import static li.strolch.plc.model.PlcConstants.PARAM_PLC_ID;
 import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
 
 import java.util.HashSet;
@@ -13,6 +15,7 @@ import li.strolch.model.activity.Action;
 import li.strolch.model.log.LogMessage;
 import li.strolch.model.log.LogMessageState;
 import li.strolch.model.log.LogSeverity;
+import li.strolch.model.parameter.StringParameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.gw.server.PlcAddressResponseListener;
 import li.strolch.plc.gw.server.PlcGwServerHandler;
@@ -26,17 +29,22 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 
 	protected PlcGwServerHandler plcHandler;
 	protected Set<PlcAddressKey> registeredKeys;
+	private String plcId;
 
 	public PlcExecutionPolicy(StrolchTransaction tx) {
 		super(tx);
 		this.registeredKeys = new HashSet<>();
 	}
 
-	protected abstract String getPlcId();
+	protected String getPlcId() {
+		return this.plcId;
+	}
 
 	@Override
 	public void initialize(Action action) {
 		super.initialize(action);
+		StringParameter plcIdP = action.findParameter(BAG_PARAMETERS, PARAM_PLC_ID, true);
+		this.plcId = plcIdP.getValue();
 		this.plcHandler = getComponent(PlcGwServerHandler.class);
 	}
 
