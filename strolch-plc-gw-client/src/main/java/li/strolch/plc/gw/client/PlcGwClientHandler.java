@@ -58,7 +58,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 	private ClientManager gwClient;
 	private volatile Session gwSession;
-	private boolean authenticated;
+	private volatile boolean authenticated;
 
 	private ScheduledFuture<?> serverConnectFuture;
 
