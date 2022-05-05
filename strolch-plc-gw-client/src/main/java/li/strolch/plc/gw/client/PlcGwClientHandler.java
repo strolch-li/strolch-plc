@@ -546,9 +546,12 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			} catch (Exception e) {
 				closeBrokenGwSessionUpdateState("Failed to send message",
 						"Failed to send message, reconnecting in " + RETRY_DELAY + "s.");
-				this.messageQueue.addFirst(callable);
-				logger.error("Failed to send message, reconnecting in " + RETRY_DELAY + "s. And then retrying message.",
-						e);
+				if (callable != null) {
+					this.messageQueue.addFirst(callable);
+					logger.error(
+							"Failed to send message, reconnecting in " + RETRY_DELAY + "s. And then retrying message.",
+							e);
+				}
 
 				delayConnect(RETRY_DELAY, TimeUnit.SECONDS);
 			}
