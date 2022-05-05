@@ -211,7 +211,7 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 					+ " and expected change state is " + this.interruptChangeState + ", forcing update...");
 
 			try {
-				handleNewState();
+				handleNewState("interruptFix");
 			} catch (Exception e) {
 				handleBrokenConnection("Failed to read new state: " + getExceptionMessageWithCauses(e), e);
 			}
@@ -227,18 +227,18 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 
 		try {
 			if (event.getState() == this.interruptChangeState)
-				handleNewState();
+				handleNewState("interrupt");
 		} catch (Exception e) {
 			handleBrokenConnection("Failed to read new state: " + getExceptionMessageWithCauses(e), e);
 		}
 	}
 
-	private void handleNewState() throws IOException {
+	private void handleNewState(String ctx) throws IOException {
 
 		for (int i = 0; i < this.inputDevices.length; i++) {
 			I2CDevice i2CDevice = this.inputDevices[i];
 			if (i2CDevice == null) {
-				logger.warn("Ignoring invalid I2C Device 0x" + toHexString(this.addresses[i]));
+				logger.warn("Ignoring invalid I2C Device 0x" + toHexString(this.addresses[i]) + " " + ctx);
 				continue;
 			}
 
@@ -247,7 +247,7 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 			if (this.verbose)
 				logger.info(
 						this.id + " at 0x" + toHexString((byte) i2CDevice.getAddress()) + " has new state " + asBinary(
-								data));
+								data) + " " + ctx);
 
 			for (int j = 0; j < 8; j++) {
 				boolean newState = isBitSet(data, j);
@@ -257,8 +257,9 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 				if (this.states[i][j] != newState) {
 					this.states[i][j] = newState;
 					String address = this.id + "." + i + "." + j;
-					logger.info(
-							"Detected " + address + " = " + (newState ? 1 : 0) + (this.inverted ? " (inverted)" : ""));
+					logger.info("Detected " + address + " = " + (newState ? 1 : 0) + (this.inverted ?
+							" (inverted) " :
+							" (normal) ") + asBinary(data) + " " + ctx);
 					this.plc.queueNotify(address, newState);
 				}
 			}
