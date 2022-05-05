@@ -91,8 +91,9 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 		this.enableInterruptFix =
 				parameters.containsKey("enableInterruptFix") && (Boolean) parameters.get("enableInterruptFix");
 
-		logger.info("Configured PCF8574 Input on I2C addresses 0x " + toPrettyHexString(this.addresses)
-				+ " on BCM Pin interrupt trigger " + this.interruptBcmPinAddress);
+		logger.info(
+				"Configured " + this.id + " as PCF8574 Input on I2C addresses 0x " + toPrettyHexString(this.addresses)
+						+ " on BCM Pin interrupt trigger " + this.interruptBcmPinAddress);
 		if (this.verbose)
 			logger.info("Verbose enabled for connection " + this.id);
 	}
@@ -118,8 +119,8 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 			this.inputDevices = new I2CDevice[this.addresses.length];
 			for (int i = 0; i < this.addresses.length; i++) {
 				this.inputDevices[i] = i2cBus.getDevice(this.addresses[i]);
-				logger.info("Connected to I2C Device at address 0x" + toHexString(this.addresses[i]) + " on I2C Bus "
-						+ this.i2cBusNr);
+				logger.info("Connected to I2C Device " + this.id + " at 0x" + toHexString(this.addresses[i])
+						+ " on I2C Bus " + this.i2cBusNr);
 			}
 
 		} catch (Throwable e) {
@@ -245,7 +246,8 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 
 			if (this.verbose)
 				logger.info(
-						"Address 0x" + toHexString((byte) i2CDevice.getAddress()) + " has new state " + asBinary(data));
+						this.id + " at 0x" + toHexString((byte) i2CDevice.getAddress()) + " has new state " + asBinary(
+								data));
 
 			for (int j = 0; j < 8; j++) {
 				boolean newState = isBitSet(data, j);
@@ -275,7 +277,9 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 			I2CDevice i2CDevice = this.inputDevices[i];
 			try {
 				byte data = (byte) i2CDevice.read();
-				logger.info("Initial Value for address 0x" + toHexString(this.addresses[i]) + " is " + asBinary(data));
+				logger.info(
+						"Initial Value for " + this.id + " at 0x" + toHexString(this.addresses[i]) + " is " + asBinary(
+								data));
 
 				this.states[i] = new boolean[8];
 				for (int j = 0; j < 8; j++) {
@@ -290,8 +294,8 @@ public class PCF8574InputConnection extends SimplePlcConnection {
 			} catch (Exception e) {
 				ok = false;
 				this.inputDevices[i] = null;
-				logger.error("Failed to read initial state for address 0x" + toHexString((byte) i2CDevice.getAddress()),
-						e);
+				logger.error("Failed to read initial state for " + this.id + " at 0x" + toHexString(
+						(byte) i2CDevice.getAddress()), e);
 			}
 		}
 
