@@ -94,37 +94,38 @@ public class DefaultPlc implements Plc {
 
 	@Override
 	public void syncNotify(String address, Object value) {
-		doNotify(address, value, true, true, true);
+		doNotify(address, value, true);
 	}
 
 	@Override
 	public void queueNotify(String address, Object value) {
-		this.notificationTasks.add(new NotificationTask(address, value, this.verbose));
+		this.notificationTasks.add(new NotificationTask(address, value));
 	}
 
-	private void doNotify(String address, Object value, boolean verbose, boolean catchExceptions,
-			boolean notifyGlobalListener) {
+	private void doNotify(String address, Object value, boolean verbose) {
 		PlcAddress plcAddress = this.notificationMappings.get(address);
 		if (plcAddress == null) {
-			if (catchExceptions)
-				logger.warn("No mapping to PlcAddress for hwAddress " + address);
-			else
-				throw new IllegalArgumentException("No mapping to PlcAddress for hwAddress " + address);
+			logger.warn("No mapping to PlcAddress for hwAddress " + address);
 			return;
 		}
 
-		doNotify(plcAddress, value, verbose, catchExceptions, notifyGlobalListener);
+		if (plcAddress.inverted) {
+			if (value instanceof Boolean)
+				value = !((boolean) value);
+			else
+				logger.error(plcAddress + " is marked as inverted, but the value is not a boolean, but a "
+						+ value.getClass());
+		}
+
+		doNotify(plcAddress, value, verbose, true, true);
 	}
 
 	private void doNotify(PlcAddress plcAddress, Object value, boolean verbose, boolean catchExceptions,
 			boolean notifyGlobalListener) {
 
-		if (verbose)
-			logger.info("Update for {}: {}", plcAddress.toKey(), value);
-
 		List<PlcListener> listeners = this.listeners.getList(plcAddress);
 		if (listeners == null || listeners.isEmpty()) {
-			logger.warn("No listeners for key " + plcAddress);
+			logger.warn("No listener for update {}: {}", plcAddress.toKey(), value);
 		} else {
 			listeners = new ArrayList<>(listeners);
 			for (PlcListener listener : listeners) {
@@ -152,7 +153,7 @@ public class DefaultPlc implements Plc {
 			NotificationTask task = null;
 			try {
 				task = this.notificationTasks.take();
-				doNotify(task.address, task.value, task.verbose, true, true);
+				doNotify(task.address, task.value, this.verbose);
 			} catch (InterruptedException e) {
 				logger.error("Interrupted!");
 			} catch (Exception e) {
@@ -175,6 +176,7 @@ public class DefaultPlc implements Plc {
 		send(plcAddress, value, true, true);
 	}
 
+	@Override
 	public void send(PlcAddress plcAddress, boolean catchExceptions, boolean notifyGlobalListener) {
 		logger.info("Sending {}: {} (default)", plcAddress.toKey(), plcAddress.defaultValue);
 		if (!isVirtual(plcAddress))
@@ -182,6 +184,7 @@ public class DefaultPlc implements Plc {
 		doNotify(plcAddress, plcAddress.defaultValue, false, catchExceptions, notifyGlobalListener);
 	}
 
+	@Override
 	public void send(PlcAddress plcAddress, Object value, boolean catchExceptions, boolean notifyGlobalListener) {
 		logger.info("Sending {}: {}", plcAddress.toKey(), value);
 		if (!isVirtual(plcAddress))
@@ -298,16 +301,6 @@ public class DefaultPlc implements Plc {
 		return this.executorPool;
 	}
 
-	private static class NotificationTask {
-		private final String address;
-		private final Object value;
-		private final boolean verbose;
-
-		public NotificationTask(String address, Object value, boolean verbose) {
-
-			this.address = address;
-			this.value = value;
-			this.verbose = verbose;
-		}
+	private record NotificationTask(String address, Object value) {
 	}
 }
