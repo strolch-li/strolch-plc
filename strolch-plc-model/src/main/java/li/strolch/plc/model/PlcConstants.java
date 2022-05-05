@@ -47,6 +47,7 @@ public class PlcConstants {
 	public static final String PARAM_VALUE = "value";
 	public static final String PARAM_VALUE_TYPE = "valueType";
 	public static final String PARAM_VERSIONS = "versions";
+	public static final String PARAM_VERBOSE = "verbose";
 	public static final String PARAM_LOCAL_IP = "localIp";
 	public static final String PARAM_MESSAGE = "message";
 	public static final String PARAM_LOCATOR = "locator";
