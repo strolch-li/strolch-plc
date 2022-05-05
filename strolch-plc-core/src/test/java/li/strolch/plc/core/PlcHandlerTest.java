@@ -99,10 +99,12 @@ public class PlcHandlerTest {
 		});
 
 		plcHandler.send("PLC", "Running");
+		Thread.sleep(50L);
 		assertTrue(value.get());
 		assertTrue(getAddress(addressId).getBoolean(PARAM_VALUE));
 
 		plcHandler.send("PLC", "NotRunning");
+		Thread.sleep(50L);
 		assertFalse(value.get());
 		assertFalse(getAddress(addressId).getBoolean(PARAM_VALUE));
 	}
