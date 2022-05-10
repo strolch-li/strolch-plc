@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StrolchModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://strolch.li/xsd/StrolchModel-1.6.xsd"
+              xsi:schemaLocation="https://strolch.li/xsd/StrolchModel-1.6.xsd StrolchModel-1.6.xsd">
+
+    <!--
+        Barcode reader connection, currently place holder with RandomString
+    -->
+    <Resource Id="dataLogicScanner" Name="DataLogic Scanner Connection" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.connections.DataLogicScannerConnection"/>
+            <Parameter Id="address" Name="Scanner IP Address" Type="String" Value="192.168.1.249:51236"/>
+            <Parameter Id="readTimeout" Name="Read Timeout (s)" Type="Integer" Value="60"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+        </ParameterBag>
+    </Resource>
+
+    <!--
+        Raspberry GPIO BCM Address connection
+    -->
+    <Resource Id="raspiBcmGpioOutput" Name="Raspi BCM GPIO Output" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.gpio.RaspiBcmGpioOutputConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="true"/>
+            <Parameter Id="bcmOutputPins" Name="BCM Output Pins" Type="IntegerList" Value="4"/>
+            <Parameter Id="simulated" Name="Simulated" Type="Boolean" Value="true"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="raspiBcmGpioInput" Name="Raspi BCM GPIO Input" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.gpio.RaspiBcmGpioInputConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="true"/>
+            <Parameter Id="bcmInputPins" Name="BCM Input Pins" Type="IntegerList" Value="17"/>
+            <Parameter Id="simulated" Name="Simulated" Type="Boolean" Value="true"/>
+        </ParameterBag>
+    </Resource>
+
+    <!--
+        I2C input connections
+    -->
+    <Resource Id="i2cInput.dev01" Name="PCF8574 Input 0x38" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.i2c.PCF8574InputConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+            <Parameter Id="i2cBus" Name="I2C Bus" Type="Integer" Value="1"/>
+            <Parameter Id="addresses" Name="Addresses" Type="IntegerList" Value="0x38"/>
+            <Parameter Id="verbose" Name="Verbose" Type="Boolean" Value="false"/>
+            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
+            <Parameter Id="interruptPinPullResistance" Name="Raspi Interrupt PinPullResistance" Type="String" Value="PULL_UP"/>
+            <Parameter Id="interruptChangeState" Name="Raspi Interrupt Change State" Type="String" Value="LOW"/>
+            <Parameter Id="interruptBcmPinAddress" Name="Raspi BCM Interrupt Pin" Type="Integer" Value="9"/>
+            <Parameter Id="enableInterruptFix" Name="Enable Interrupt Fix" Type="Boolean" Value="true"/>
+            <Parameter Id="simulated" Name="Simulated" Type="Boolean" Value="true"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="i2cInput.dev02" Name="PCF8574 Input 0x39" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.i2c.PCF8574InputConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+            <Parameter Id="i2cBus" Name="I2C Bus" Type="Integer" Value="1"/>
+            <Parameter Id="addresses" Name="Addresses" Type="IntegerList" Value="0x39"/>
+            <Parameter Id="verbose" Name="Verbose" Type="Boolean" Value="false"/>
+            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
+            <Parameter Id="interruptPinPullResistance" Name="Raspi Interrupt PinPullResistance" Type="String" Value="PULL_UP"/>
+            <Parameter Id="interruptChangeState" Name="Raspi Interrupt Change State" Type="String" Value="LOW"/>
+            <Parameter Id="interruptBcmPinAddress" Name="Raspi BCM Interrupt Pin" Type="Integer" Value="10"/>
+            <Parameter Id="enableInterruptFix" Name="Enable Interrupt Fix" Type="Boolean" Value="true"/>
+            <Parameter Id="simulated" Name="Simulated" Type="Boolean" Value="true"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="i2cInput.dev03" Name="PCF8574 Input 0x3a" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.i2c.PCF8574InputConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+            <Parameter Id="i2cBus" Name="I2C Bus" Type="Integer" Value="1"/>
+            <Parameter Id="addresses" Name="Addresses" Type="IntegerList" Value="0x3a"/>
+            <Parameter Id="verbose" Name="Verbose" Type="Boolean" Value="false"/>
+            <!-- we don't invert dev03 -->
+            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
+            <Parameter Id="interruptPinPullResistance" Name="Raspi Interrupt PinPullResistance" Type="String" Value="PULL_UP"/>
+            <Parameter Id="interruptChangeState" Name="Raspi Interrupt Change State" Type="String" Value="LOW"/>
+            <Parameter Id="interruptBcmPinAddress" Name="Raspi BCM Interrupt Pin" Type="Integer" Value="24"/>
+            <Parameter Id="enableInterruptFix" Name="Enable Interrupt Fix" Type="Boolean" Value="true"/>
+            <Parameter Id="simulated" Name="Simulated" Type="Boolean" Value="true"/>
+        </ParameterBag>
+    </Resource>
+
+    <!--
+        I2C output connections
+    -->
+    <Resource Id="i2cOutput.dev01" Name="PCF8574 Output 0x20" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.i2c.PCF8574OutputConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+            <Parameter Id="i2cBus" Name="I2C Bus" Type="Integer" Value="1"/>
+            <Parameter Id="addresses" Name="Addresses" Type="IntegerList" Value="0x20"/>
+            <Parameter Id="verbose" Name="Verbose" Type="Boolean" Value="false"/>
+            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
+            <Parameter Id="simulated" Name="Simulated" Type="Boolean" Value="true"/>
+        </ParameterBag>
+    </Resource>
+    <Resource Id="i2cOutput.dev02" Name="PCF8574 Output 0x21" Type="PlcConnection">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="className" Name="Connection Class" Type="String" Value="li.strolch.plc.core.hw.i2c.PCF8574OutputConnection"/>
+            <Parameter Id="state" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="stateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+            <Parameter Id="i2cBus" Name="I2C Bus" Type="Integer" Value="1"/>
+            <Parameter Id="addresses" Name="Addresses" Type="IntegerList" Value="0x21"/>
+            <Parameter Id="verbose" Name="Verbose" Type="Boolean" Value="false"/>
+            <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
+            <Parameter Id="simulated" Name="Simulated" Type="Boolean" Value="true"/>
+        </ParameterBag>
+    </Resource>
+
+</StrolchModel>

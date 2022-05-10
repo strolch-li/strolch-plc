@@ -1,0 +1,59 @@
+Description,Type,SubType,Device,Pin,Resource,Action1,Action2,Connection,DeviceId,Inverted,Value,Remote
+Mode,Group,,,,,,,,Mode,,,
+Automatic Mode,Virtual,Boolean,,,AutomaticMode,On,Off,VirtualBoolean.AutomaticMode,,,,TRUE
+Stop All Actors,Virtual,Boolean,,,StopAllActors,Now,,VirtualBoolean.StopAllActors,,,,TRUE
+Sector 1,Group,,,,,,,,Conveyor01,,,
+Motor Conveyor B1.1,Output,DevPin0,1,1,Sector01,Motor1On,Motor1Off,i2cOutput.dev01,,,,
+Signal Motor Fault Conveyor B1.1 ,Input,DevPin0,1,1,Sector01,Motor1Fault,,i2cInput.dev01,,,,
+Motor Conveyor B1.2,Output,DevPin0,1,2,Sector01,Motor2On,Motor2Off,i2cOutput.dev01,,,,
+Signal Motor Fault Conveyor B1.2,Input,DevPin0,1,2,Sector01,Motor2Fault,,i2cInput.dev01,,,,
+Start Button Conveyor 1,Input,DevPin0,1,8,Sector01,StartButton,,i2cInput.dev01,,TRUE,,
+Light Barrier Conveyor 1,Input,DevPin0,2,1,Sector01,BoxDetected,,i2cInput.dev02,,,,
+Emergency Stop Sector 1,Input,DevPin0,3,2,Sector01,EmergencyStop,,i2cInput.dev03,,,,TRUE
+Sector 2,,,,,,,,,Conveyor03,,,
+Motor Conveyor B2.1,Output,DevPin0,1,3,Sector02,Motor1On,Motor1Off,i2cOutput.dev01,,,,
+Signal Motor Fault Conveyor B2.1 ,Input,DevPin0,1,3,Sector02,Motor1Fault,,i2cInput.dev01,,,,
+Motor Conveyor B2.2,Output,DevPin0,1,4,Sector02,Motor2On,Motor2Off,i2cOutput.dev01,,,,
+Signal Motor Fault Conveyor B2.2,Input,DevPin0,1,4,Sector02,Motor2Fault,,i2cInput.dev01,,,,
+Light Barrier Conveyor 2,Input,DevPin0,2,2,Sector02,BoxDetectedStart,,i2cInput.dev02,,,,
+Light Barrier Conveyor End 2,Input,DevPin0,2,3,Sector02,BoxDetectedEnd,,i2cInput.dev02,,,,
+Sector 3 Fill Station,Group,,,,,,,,BoxFillStation,,,
+Request Next Container,Virtual,Boolean,-,,FillStation,NextContainer,NextContainerDone,VirtualBoolean.NextContainer,,,,TRUE
+Release Current Container,Virtual,Boolean,-,,FillStation,ReleaseContainer,ReleaseContainerDone,VirtualBoolean.ReleaseContainer,,,,TRUE
+Current Container,Virtual,String,-,,FillStation,CurrentContainer,,VirtualString.CurrentContainer,,,,TRUE
+Motor Conveyor B3,Output,DevPin0,1,5,FillStation,MotorOn,MotorOff,i2cOutput.dev01,,,,
+Signal Motor Fault Conveyor B3,Input,DevPin0,1,5,FillStation,MotorFault,,i2cInput.dev01,,,,
+Entry Stopper Open Valve,Output,DevPin0,2,1,FillStation,EntryOpen,EntryClose,i2cOutput.dev02,,,,
+Entry Stopper Opened,Input,DevPin0,3,4,FillStation,EntryClosed,,i2cInput.dev03,,TRUE,,TRUE
+Entry Stopper Closed,Input,DevPin0,3,5,FillStation,EntryOpened,,i2cInput.dev03,,TRUE,,TRUE
+Light Barrier Fill Station Occupied,Input,DevPin0,2,4,FillStation,Occupied,,i2cInput.dev02,,,,TRUE
+Fill Station Barcode Reader,DataLogicScanner,,-,,DataLogicScanner,,,dataLogicScanner,,,,
+Exit Stopper Open Valve,Output,DevPin0,2,2,FillStation,ExitOpen,ExitClose,i2cOutput.dev02,,,,
+Exit Stopper Opened,Input,DevPin0,3,6,FillStation,ExitClosed,,i2cInput.dev03,,TRUE,,TRUE
+Exit Stopper Closed,Input,DevPin0,3,7,FillStation,ExitOpened,,i2cInput.dev03,,TRUE,,TRUE
+Emergency Stop Sector 3,Input,DevPin0,3,3,FillStation,EmergencyStop,,i2cInput.dev03,,,,TRUE
+Signallampe,Group,,,,,,,,Alarm,,,
+Signal Horn,Output,DevPin0,2,3,Alarm,Horn,,i2cOutput.dev02,,,,
+Signal Warning,Output,DevPin0,2,4,Alarm,Warning,,i2cOutput.dev02,,,,
+Signal Operation,Output,DevPin0,2,5,Alarm,Operational,,i2cOutput.dev02,,,,
+Sector 4,Group,,,,,,,,Conveyor05,,,
+Motor Conveyor B4.1,Output,DevPin0,1,6,Sector04,Motor1On,Motor1Off,i2cOutput.dev01,,,,
+Signal Motor Fault Conveyor B4.1 ,Input,DevPin0,1,6,Sector04,Motor1Fault,,i2cInput.dev01,,,,
+Motor Conveyor B4.2,Output,DevPin0,1,7,Sector04,Motor2On,Motor2Off,i2cOutput.dev01,,,,
+Signal Motor Fault Conveyor B4.2,Input,DevPin0,1,7,Sector04,Motor2Fault,,i2cInput.dev01,,,,
+Light Barrier Conveyor 4,Input,DevPin0,2,5,Sector04,BoxDetected,,i2cInput.dev02,,,,
+Control Cabinet,Group,,,,,,,,Cabinet,,,
+Power Supply Control 5V,Input,DevPin0,2,6,Cabinet,Power5V,,i2cInput.dev02,,TRUE,,
+Power Supply Drives 24V,Input,DevPin0,2,7,Cabinet,Power24VMotors,,i2cInput.dev02,,TRUE,,
+Power Supply Sensor / Actors 24V,Input,DevPin0,2,8,Cabinet,Power24VSensors,,i2cInput.dev02,,TRUE,,
+Security Relay Operational,Input,DevPin0,3,1,SecurityRelay,Operational,,i2cInput.dev03,,TRUE,,TRUE
+Security Relay Acknowledge,Output,DevPin0,1,8,SecurityRelay,Reset,,i2cOutput.dev01,,,,
+Configuration,Group,,,,,,,,Configuration,,,
+Transfer time Sector 1.1,Virtual,Integer,-,,Sector01,TransferDuration1,,VirtualInteger.Sector01TransferDuration1,,,30,
+Transfer time Sector 1.2,Virtual,Integer,-,,Sector01,TransferDuration2,,VirtualInteger.Sector01TransferDuration2,,,30,
+Transfer time Sector 2.1,Virtual,Integer,-,,Sector02,TransferDuration1,,VirtualInteger.Sector02TransferDuration1,,,30,
+Transfer time Sector 2.2,Virtual,Integer,-,,Sector02,TransferDuration2,,VirtualInteger.Sector02TransferDuration2,,,30,
+Transfer time Fill Station,Virtual,Integer,-,,FillStation,TransferDuration,,VirtualInteger.FillStationTransferDuration,,,10,
+Barcode scan duration,Virtual,Integer,-,,DataLogicScanner,ScanDuration,,VirtualInteger.DataLogicScannerScanDuration,,,4,
+Transfer time Sector 4.1,Virtual,Integer,-,,Sector04,TransferDuration1,,VirtualInteger.Sector04TransferDuration1,,,30,
+Transfer time Sector 4.2,Virtual,Integer,-,,Sector04,TransferDuration2,,VirtualInteger.Sector04TransferDuration2,,,30,

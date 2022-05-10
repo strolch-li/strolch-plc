@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Users>
+  <!-- password: admin -->
+  <User password="$PBKDF2WithHmacSHA512,10000,256$83c5d3697a69497ed4d999cde98a6a2c586114435cab5a80327734b3a032766b$c9185893044f5421f28c2a6def129e072186c7d73b78ec4ec60c1044c97546fe" userId="U10" username="admin">
+    <Firstname>Admin</Firstname>
+    <Lastname>Admin</Lastname>
+    <State>ENABLED</State>
+    <Locale>en-GB</Locale>
+    <Roles>
+      <Role>ModelAccessor</Role>
+      <Role>PrivilegeAdmin</Role>
+      <Role>StrolchAdmin</Role>
+      <Role>UserPrivileges</Role>
+    </Roles>
+  </User>
+  <User userId="S01" username="agent">
+    <State>SYSTEM</State>
+    <Locale>en</Locale>
+    <Roles>
+      <Role>ModelAccessor</Role>
+      <Role>PrivilegeAdmin</Role>
+      <Role>agent</Role>
+    </Roles>
+  </User>
+</Users>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StrolchModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://strolch.li/xsd/StrolchModel-1.6.xsd"
+              xsi:schemaLocation="https://strolch.li/xsd/StrolchModel-1.6.xsd StrolchModel-1.6.xsd">
+
+    <IncludeFile file="plc-templates.xml"/>
+    <IncludeFile file="plc-state.xml"/>
+
+    <IncludeFile file="strolch-plc-example.xml"/>
+    <IncludeFile file="strolch-plc-example-connections.xml"/>
+
+    <!--
+        PLC to store connection state to server
+    -->
+    <Resource Id="strolch-plc-01" Name="PLC" Type="Plc">
+        <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+            <Parameter Id="connectionState" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
+            <Parameter Id="connectionStateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
+                       Value=""/>
+        </ParameterBag>
+    </Resource>
+
+</StrolchModel>

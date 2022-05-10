@@ -1,5 +1,0 @@
-Description,Type,SubType,Device,Pin,Resource,Action1,Action2,Connection,DeviceId
-Material Flow,Group,,,,,,,,MaterialFlow
-Conveyor 1,Input,Pin,,4,Conveyor,Occupied,,raspiBcmGpioInput
-Conveyor 1,Input,Pin,,17,Conveyor,BoxDetected,,raspiBcmGpioInput
-Conveyor 1,Output,Pin,,18,Conveyor,MotorOn,MotorOff,raspiBcmGpioOutput

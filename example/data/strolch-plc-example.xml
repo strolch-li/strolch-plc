@@ -1,0 +1,1132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StrolchModel>
+  <Resource Id="D_Mode" Name="Mode" Type="PlcLogicalDevice">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Mode"/>
+      <Parameter Id="group" Name="Group" Type="String" Index="20" Value="01 Mode"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="30" Value="10"/>
+    </ParameterBag>
+    <ParameterBag Id="relations" Name="Relations" Type="Relations">
+      <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Index="10" Value="A_AutomaticMode-On, A_StopAllActors-Now"/>
+      <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Index="20" Value="T_AutomaticMode-On, T_AutomaticMode-Off, T_StopAllActors-Now"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_AutomaticMode-On" Name="AutomaticMode - On" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Automatic Mode"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.AutomaticMode"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="AutomaticMode"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_AutomaticMode-On" Name="AutomaticMode - On" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Automatic Mode"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.AutomaticMode"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="AutomaticMode"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_AutomaticMode-Off" Name="AutomaticMode - Off" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Automatic Mode"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.AutomaticMode"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="AutomaticMode"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Off"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_StopAllActors-Now" Name="StopAllActors - Now" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Stop All Actors"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.StopAllActors"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="StopAllActors"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Now"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_StopAllActors-Now" Name="StopAllActors - Now" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Stop All Actors"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.StopAllActors"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="StopAllActors"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Now"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="D_Conveyor01" Name="Conveyor01" Type="PlcLogicalDevice">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Sector 1"/>
+      <Parameter Id="group" Name="Group" Type="String" Index="20" Value="02 Sector 1"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="30" Value="20"/>
+    </ParameterBag>
+    <ParameterBag Id="relations" Name="Relations" Type="Relations">
+      <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Index="10" Value="A_Sector01-Motor1On, A_Sector01-Motor1Fault, A_Sector01-Motor2On, A_Sector01-Motor2Fault, A_Sector01-StartButton, A_Sector01-BoxDetected, A_Sector01-EmergencyStop, A_Sector02-Motor1On, A_Sector02-Motor1Fault, A_Sector02-Motor2On, A_Sector02-Motor2Fault, A_Sector02-BoxDetectedStart, A_Sector02-BoxDetectedEnd"/>
+      <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Index="20" Value="T_Sector01-Motor1On, T_Sector01-Motor1Off, T_Sector01-Motor2On, T_Sector01-Motor2Off, T_Sector02-Motor1On, T_Sector02-Motor1Off, T_Sector02-Motor2On, T_Sector02-Motor2Off"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector01-Motor1On" Name="Sector01 - Motor1On" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B1.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.0"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector01-Motor1Off" Name="Sector01 - Motor1Off" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B1.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.0"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1Off"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector01-Motor1On" Name="Sector01 - Motor1On" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B1.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.0"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector01-Motor1Fault" Name="Sector01 - Motor1Fault" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Motor Fault Conveyor B1.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev01.0.0"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1Fault"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector01-Motor2On" Name="Sector01 - Motor2On" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B1.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector01-Motor2Off" Name="Sector01 - Motor2Off" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B1.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2Off"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector01-Motor2On" Name="Sector01 - Motor2On" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B1.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector01-Motor2Fault" Name="Sector01 - Motor2Fault" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Motor Fault Conveyor B1.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev01.0.1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2Fault"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector01-StartButton" Name="Sector01 - StartButton" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Start Button Conveyor 1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev01.0.7"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="StartButton"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="50"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="true"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector01-BoxDetected" Name="Sector01 - BoxDetected" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Light Barrier Conveyor 1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev02.0.0"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="BoxDetected"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="60"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector01-EmergencyStop" Name="Sector01 - EmergencyStop" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Emergency Stop Sector 1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev03.0.1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="EmergencyStop"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="70"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector02-Motor1On" Name="Sector02 - Motor1On" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B2.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="50"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector02-Motor1Off" Name="Sector02 - Motor1Off" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B2.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1Off"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="60"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector02-Motor1On" Name="Sector02 - Motor1On" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B2.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="80"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector02-Motor1Fault" Name="Sector02 - Motor1Fault" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Motor Fault Conveyor B2.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev01.0.2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1Fault"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="90"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector02-Motor2On" Name="Sector02 - Motor2On" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B2.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.3"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="70"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector02-Motor2Off" Name="Sector02 - Motor2Off" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B2.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.3"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2Off"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="80"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector02-Motor2On" Name="Sector02 - Motor2On" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B2.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.3"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="100"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector02-Motor2Fault" Name="Sector02 - Motor2Fault" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Motor Fault Conveyor B2.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev01.0.3"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2Fault"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="110"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector02-BoxDetectedStart" Name="Sector02 - BoxDetectedStart" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Light Barrier Conveyor 2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev02.0.1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="BoxDetectedStart"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="120"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector02-BoxDetectedEnd" Name="Sector02 - BoxDetectedEnd" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Light Barrier Conveyor End 2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev02.0.2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="BoxDetectedEnd"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="130"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="D_BoxFillStation" Name="BoxFillStation" Type="PlcLogicalDevice">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Sector 3 Fill Station"/>
+      <Parameter Id="group" Name="Group" Type="String" Index="20" Value="03 Sector 3 Fill Station"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="30" Value="30"/>
+    </ParameterBag>
+    <ParameterBag Id="relations" Name="Relations" Type="Relations">
+      <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Index="10" Value="A_FillStation-NextContainer, A_FillStation-ReleaseContainer, A_FillStation-CurrentContainer, A_FillStation-MotorOn, A_FillStation-MotorFault, A_FillStation-EntryOpen, A_FillStation-EntryClosed, A_FillStation-EntryOpened, A_FillStation-Occupied, A_DataLogicScanner-Barcode, A_DataLogicScanner-On, A_FillStation-ExitOpen, A_FillStation-ExitClosed, A_FillStation-ExitOpened, A_FillStation-EmergencyStop"/>
+      <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Index="20" Value="T_FillStation-NextContainer, T_FillStation-NextContainerDone, T_FillStation-ReleaseContainer, T_FillStation-ReleaseContainerDone, T_FillStation-CurrentContainer, T_FillStation-MotorOn, T_FillStation-MotorOff, T_FillStation-EntryOpen, T_FillStation-EntryClose, T_DataLogicScanner-On, T_DataLogicScanner-Off, T_FillStation-ExitOpen, T_FillStation-ExitClose"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-NextContainer" Name="FillStation - NextContainer" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Request Next Container"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.NextContainer"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="NextContainer"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-NextContainer" Name="FillStation - NextContainer" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Request Next Container"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.NextContainer"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="NextContainer"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-NextContainerDone" Name="FillStation - NextContainerDone" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Request Next Container"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.NextContainer"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="NextContainerDone"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-ReleaseContainer" Name="FillStation - ReleaseContainer" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Release Current Container"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.ReleaseContainer"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ReleaseContainer"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-ReleaseContainer" Name="FillStation - ReleaseContainer" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Release Current Container"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.ReleaseContainer"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ReleaseContainer"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-ReleaseContainerDone" Name="FillStation - ReleaseContainerDone" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Release Current Container"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualBoolean.ReleaseContainer"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ReleaseContainerDone"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-CurrentContainer" Name="FillStation - CurrentContainer" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Current Container"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualString.CurrentContainer"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="CurrentContainer"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="String" Index="100" Value=""/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-CurrentContainer" Name="FillStation - CurrentContainer" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Current Container"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualString.CurrentContainer"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="CurrentContainer"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="50"/>
+      <Parameter Id="value" Name="Value" Type="String" Index="100" Value=""/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-MotorOn" Name="FillStation - MotorOn" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B3"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.4"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="MotorOn"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="60"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-MotorOff" Name="FillStation - MotorOff" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B3"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.4"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="MotorOff"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="70"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-MotorOn" Name="FillStation - MotorOn" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B3"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.4"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="MotorOn"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-MotorFault" Name="FillStation - MotorFault" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Motor Fault Conveyor B3"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev01.0.4"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="MotorFault"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="50"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-EntryOpen" Name="FillStation - EntryOpen" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Entry Stopper Open Valve"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.0"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="EntryOpen"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="80"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-EntryClose" Name="FillStation - EntryClose" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Entry Stopper Open Valve"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.0"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="EntryClose"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="90"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-EntryOpen" Name="FillStation - EntryOpen" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Entry Stopper Open Valve"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.0"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="EntryOpen"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="60"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-EntryClosed" Name="FillStation - EntryClosed" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Entry Stopper Opened"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev03.0.3"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="EntryClosed"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="70"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="true"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-EntryOpened" Name="FillStation - EntryOpened" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Entry Stopper Closed"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev03.0.4"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="EntryOpened"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="80"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="true"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-Occupied" Name="FillStation - Occupied" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Light Barrier Fill Station Occupied"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev02.0.3"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Occupied"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="90"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_DataLogicScanner-Barcode" Name="DataLogicScanner - Barcode" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Fill Station Barcode Reader"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="dataLogicScanner.barcode"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="DataLogicScanner"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Barcode"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="100"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="String" Index="100" Value=""/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_DataLogicScanner-On" Name="DataLogicScanner - On" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Fill Station Barcode Reader"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="dataLogicScanner.trigger"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="DataLogicScanner"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="110"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_DataLogicScanner-On" Name="DataLogicScanner - On" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Fill Station Barcode Reader"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="dataLogicScanner.trigger"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="DataLogicScanner"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="100"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_DataLogicScanner-Off" Name="DataLogicScanner - Off" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Fill Station Barcode Reader"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="dataLogicScanner.trigger"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="DataLogicScanner"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Off"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="110"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-ExitOpen" Name="FillStation - ExitOpen" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Exit Stopper Open Valve"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ExitOpen"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="120"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-ExitClose" Name="FillStation - ExitClose" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Exit Stopper Open Valve"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ExitClose"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="130"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-ExitOpen" Name="FillStation - ExitOpen" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Exit Stopper Open Valve"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ExitOpen"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="120"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-ExitClosed" Name="FillStation - ExitClosed" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Exit Stopper Opened"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev03.0.5"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ExitClosed"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="130"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="true"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-ExitOpened" Name="FillStation - ExitOpened" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Exit Stopper Closed"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev03.0.6"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ExitOpened"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="140"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="true"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-EmergencyStop" Name="FillStation - EmergencyStop" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Emergency Stop Sector 3"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev03.0.2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="EmergencyStop"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="150"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="D_Alarm" Name="Alarm" Type="PlcLogicalDevice">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signallampe"/>
+      <Parameter Id="group" Name="Group" Type="String" Index="20" Value="04 Signallampe"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="30" Value="40"/>
+    </ParameterBag>
+    <ParameterBag Id="relations" Name="Relations" Type="Relations">
+      <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Index="10" Value="A_Alarm-Horn, A_Alarm-Warning, A_Alarm-Operational"/>
+      <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Index="20" Value="T_Alarm-Horn, T_Alarm-Warning, T_Alarm-Operational"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Alarm-Horn" Name="Alarm - Horn" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Horn"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Alarm"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Horn"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Alarm-Horn" Name="Alarm - Horn" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Horn"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Alarm"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Horn"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Alarm-Warning" Name="Alarm - Warning" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Warning"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.3"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Alarm"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Warning"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Alarm-Warning" Name="Alarm - Warning" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Warning"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.3"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Alarm"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Warning"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Alarm-Operational" Name="Alarm - Operational" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Operation"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.4"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Alarm"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Operational"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Alarm-Operational" Name="Alarm - Operational" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Operation"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev02.0.4"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Alarm"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Operational"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="D_Conveyor05" Name="Conveyor05" Type="PlcLogicalDevice">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Sector 4"/>
+      <Parameter Id="group" Name="Group" Type="String" Index="20" Value="05 Sector 4"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="30" Value="50"/>
+    </ParameterBag>
+    <ParameterBag Id="relations" Name="Relations" Type="Relations">
+      <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Index="10" Value="A_Sector04-Motor1On, A_Sector04-Motor1Fault, A_Sector04-Motor2On, A_Sector04-Motor2Fault, A_Sector04-BoxDetected"/>
+      <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Index="20" Value="T_Sector04-Motor1On, T_Sector04-Motor1Off, T_Sector04-Motor2On, T_Sector04-Motor2Off"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector04-Motor1On" Name="Sector04 - Motor1On" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B4.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.5"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector04-Motor1Off" Name="Sector04 - Motor1Off" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B4.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.5"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1Off"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector04-Motor1On" Name="Sector04 - Motor1On" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B4.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.5"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector04-Motor1Fault" Name="Sector04 - Motor1Fault" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Motor Fault Conveyor B4.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev01.0.5"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor1Fault"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector04-Motor2On" Name="Sector04 - Motor2On" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B4.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.6"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector04-Motor2Off" Name="Sector04 - Motor2Off" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B4.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.6"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2Off"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector04-Motor2On" Name="Sector04 - Motor2On" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Motor Conveyor B4.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.6"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2On"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector04-Motor2Fault" Name="Sector04 - Motor2Fault" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Signal Motor Fault Conveyor B4.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev01.0.6"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Motor2Fault"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector04-BoxDetected" Name="Sector04 - BoxDetected" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Light Barrier Conveyor 4"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev02.0.4"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="BoxDetected"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="50"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="D_Cabinet" Name="Cabinet" Type="PlcLogicalDevice">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Control Cabinet"/>
+      <Parameter Id="group" Name="Group" Type="String" Index="20" Value="06 Control Cabinet"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="30" Value="60"/>
+    </ParameterBag>
+    <ParameterBag Id="relations" Name="Relations" Type="Relations">
+      <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Index="10" Value="A_Cabinet-Power5V, A_Cabinet-Power24VMotors, A_Cabinet-Power24VSensors, A_SecurityRelay-Operational, A_SecurityRelay-Reset"/>
+      <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Index="20" Value="T_SecurityRelay-Reset"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Cabinet-Power5V" Name="Cabinet - Power5V" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Power Supply Control 5V"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev02.0.5"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Cabinet"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Power5V"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="true"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Cabinet-Power24VMotors" Name="Cabinet - Power24VMotors" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Power Supply Drives 24V"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev02.0.6"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Cabinet"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Power24VMotors"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="true"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Cabinet-Power24VSensors" Name="Cabinet - Power24VSensors" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Power Supply Sensor / Actors 24V"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev02.0.7"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Cabinet"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Power24VSensors"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="true"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_SecurityRelay-Operational" Name="SecurityRelay - Operational" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Security Relay Operational"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cInput.dev03.0.0"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="SecurityRelay"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Operational"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="true"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_SecurityRelay-Reset" Name="SecurityRelay - Reset" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Security Relay Acknowledge"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.7"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="SecurityRelay"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Reset"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="true"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_SecurityRelay-Reset" Name="SecurityRelay - Reset" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Security Relay Acknowledge"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="i2cOutput.dev01.0.7"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="SecurityRelay"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="Reset"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="50"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Boolean" Index="100" Value="false"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="D_Configuration" Name="Configuration" Type="PlcLogicalDevice">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Configuration"/>
+      <Parameter Id="group" Name="Group" Type="String" Index="20" Value="07 Configuration"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="30" Value="70"/>
+    </ParameterBag>
+    <ParameterBag Id="relations" Name="Relations" Type="Relations">
+      <Parameter Id="addresses" Name="Addresses" Type="StringList" Interpretation="Resource-Ref" Uom="PlcAddress" Index="10" Value="A_Sector01-TransferDuration1, A_Sector01-TransferDuration2, A_Sector02-TransferDuration1, A_Sector02-TransferDuration2, A_FillStation-TransferDuration, A_DataLogicScanner-ScanDuration, A_Sector04-TransferDuration1, A_Sector04-TransferDuration2"/>
+      <Parameter Id="telegrams" Name="Telegrams" Type="StringList" Interpretation="Resource-Ref" Uom="PlcTelegram" Index="20" Value="T_Sector01-TransferDuration1, T_Sector01-TransferDuration2, T_Sector02-TransferDuration1, T_Sector02-TransferDuration2, T_FillStation-TransferDuration, T_DataLogicScanner-ScanDuration, T_Sector04-TransferDuration1, T_Sector04-TransferDuration2"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector01-TransferDuration1" Name="Sector01 - TransferDuration1" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 1.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector01TransferDuration1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration1"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector01-TransferDuration1" Name="Sector01 - TransferDuration1" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 1.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector01TransferDuration1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration1"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="10"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector01-TransferDuration2" Name="Sector01 - TransferDuration2" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 1.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector01TransferDuration2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration2"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector01-TransferDuration2" Name="Sector01 - TransferDuration2" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 1.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector01TransferDuration2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector01"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration2"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="20"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector02-TransferDuration1" Name="Sector02 - TransferDuration1" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 2.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector02TransferDuration1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration1"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector02-TransferDuration1" Name="Sector02 - TransferDuration1" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 2.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector02TransferDuration1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration1"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="30"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector02-TransferDuration2" Name="Sector02 - TransferDuration2" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 2.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector02TransferDuration2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration2"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector02-TransferDuration2" Name="Sector02 - TransferDuration2" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 2.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector02TransferDuration2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector02"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration2"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="40"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_FillStation-TransferDuration" Name="FillStation - TransferDuration" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Fill Station"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.FillStationTransferDuration"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="50"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="10"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_FillStation-TransferDuration" Name="FillStation - TransferDuration" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Fill Station"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.FillStationTransferDuration"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="FillStation"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="50"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="10"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_DataLogicScanner-ScanDuration" Name="DataLogicScanner - ScanDuration" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Barcode scan duration"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.DataLogicScannerScanDuration"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="DataLogicScanner"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ScanDuration"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="60"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="4"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_DataLogicScanner-ScanDuration" Name="DataLogicScanner - ScanDuration" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Barcode scan duration"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.DataLogicScannerScanDuration"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="DataLogicScanner"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="ScanDuration"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="60"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="4"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector04-TransferDuration1" Name="Sector04 - TransferDuration1" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 4.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector04TransferDuration1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration1"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="70"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector04-TransferDuration1" Name="Sector04 - TransferDuration1" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 4.1"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector04TransferDuration1"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration1"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="70"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="A_Sector04-TransferDuration2" Name="Sector04 - TransferDuration2" Type="PlcAddress">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 4.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector04TransferDuration2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration2"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="80"/>
+      <Parameter Id="inverted" Name="Inverted" Type="Boolean" Index="40" Value="false"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+  <Resource Id="T_Sector04-TransferDuration2" Name="Sector04 - TransferDuration2" Type="PlcTelegram">
+    <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
+      <Parameter Id="remote" Name="remote" Type="Boolean" Value="false"/>
+      <Parameter Id="description" Name="Description" Type="String" Index="5" Value="Transfer time Sector 4.2"/>
+      <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Index="10" Value="VirtualInteger.Sector04TransferDuration2"/>
+      <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Index="20" Value="Sector04"/>
+      <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Index="30" Value="TransferDuration2"/>
+      <Parameter Id="index" Name="Index" Type="Integer" Index="40" Value="80"/>
+      <Parameter Id="value" Name="Value" Type="Integer" Index="100" Value="30"/>
+    </ParameterBag>
+  </Resource>
+</StrolchModel>

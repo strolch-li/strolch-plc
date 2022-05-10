@@ -2,19 +2,9 @@
 <StrolchModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://strolch.li/xsd/StrolchModel-1.6.xsd"
               xsi:schemaLocation="https://strolch.li/xsd/StrolchModel-1.6.xsd StrolchModel-1.6.xsd">
 
-    <IncludeFile file="plc-templates.xml"/>
-
-    <IncludeFile file="strolch-plc-example.xml"/>
-    <IncludeFile file="strolch-plc-example-connections.xml"/>
-
-    <!--
-        PLC to store connection state to server
-    -->
-    <Resource Id="mfs-soh-plc01" Name="PLC" Type="Plc">
+    <Resource Id="configuration" Name="Configuration" Type="Configuration">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="connectionState" Name="Connection State" Type="String" Interpretation="Enumeration" Uom="ConnectionState" Value="Disconnected"/>
-            <Parameter Id="connectionStateMsg" Name="Connection State Msg" Type="String" Interpretation="Enumeration" Uom="ConnectionState"
-                       Value=""/>
+            <Parameter Id="verbose" Name="Verbose Override" Type="Boolean" Value="true"/>
         </ParameterBag>
     </Resource>
 
@@ -45,30 +35,33 @@
     </Resource>
     <Resource Id="addrPlcStarted" Name="PLC - Started" Type="PlcAddress">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="raspiBcmGpioOutput.27"/>
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="raspiBcmGpioOutput.4"/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Started"/>
             <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
             <Parameter Id="inverted" Name="Inverted" Type="Boolean" Value="false"/>
             <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+            <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
         </ParameterBag>
     </Resource>
     <Resource Id="telPlcStarted" Name="PLC - Started" Type="PlcTelegram">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="raspiBcmGpioOutput.27"/>
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="raspiBcmGpioOutput.4"/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Started"/>
             <Parameter Id="value" Name="Value" Type="Boolean" Value="true"/>
             <Parameter Id="index" Name="Index" Type="Integer" Value="10"/>
+            <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
         </ParameterBag>
     </Resource>
     <Resource Id="telPlcStopped" Name="PLC - Stopped" Type="PlcTelegram">
         <ParameterBag Id="parameters" Name="Parameters" Type="Parameters">
-            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="raspiBcmGpioOutput.27"/>
+            <Parameter Id="address" Name="HW Address" Type="String" Interpretation="PlcConnection" Value="raspiBcmGpioOutput.4"/>
             <Parameter Id="resource" Name="Resource ID for PlcAddress" Type="String" Value="PLC"/>
             <Parameter Id="action" Name="Action ID for PlcAddress" Type="String" Value="Stopped"/>
             <Parameter Id="value" Name="Value" Type="Boolean" Value="false"/>
             <Parameter Id="index" Name="Index" Type="Integer" Value="20"/>
+            <Parameter Id="remote" Name="remote" Type="Boolean" Value="true"/>
         </ParameterBag>
     </Resource>
 
