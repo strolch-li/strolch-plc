@@ -50,6 +50,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	private boolean verbose;
 
 	private String plcId;
+	private boolean gwConnectToServer;
 	private String gwUsername;
 	private String gwPassword;
 	private String gwServerUrl;
@@ -82,6 +83,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 		this.verbose = configuration.getBoolean("verbose", false);
 		this.plcId = getComponent(PlcHandler.class).getPlcId();
+		this.gwConnectToServer = configuration.getBoolean("gwConnectToServer", true);
 		this.gwUsername = configuration.getString("gwUsername", null);
 		this.gwPassword = configuration.getString("gwPassword", null);
 		this.gwServerUrl = configuration.getString("gwServerUrl", null);
@@ -102,10 +104,11 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			notifyPlcConnectionState(ConnectionState.Disconnected);
 		this.plcHandler.setGlobalListener(this);
 
-		delayConnect(INITIAL_DELAY, TimeUnit.SECONDS);
-
-		this.run = true;
-		this.messageSenderTask = getExecutorService("MessageSender").submit(this::sendMessages);
+		if (this.gwConnectToServer) {
+			delayConnect(INITIAL_DELAY, TimeUnit.SECONDS);
+			this.run = true;
+			this.messageSenderTask = getExecutorService("MessageSender").submit(this::sendMessages);
+		}
 
 		super.start();
 	}
