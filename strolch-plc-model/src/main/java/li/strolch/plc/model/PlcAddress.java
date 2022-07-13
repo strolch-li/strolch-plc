@@ -4,6 +4,21 @@ import java.util.Objects;
 
 import li.strolch.model.StrolchValueType;
 
+/**
+ * <p>This represents the address on the PLC. Addresses always consists of a resource and action field. This address includes:</p>
+ * <ul>
+ *     <li>the type defined as {@link PlcAddressType}</li>
+ *     <li>remote flag, denoting of this address should be sent to a remote listener</li>
+ *     <li>key field as a standard concatenation of resource and action</li>
+ *     <li>key address as a standard representation for logging</li>
+ *     <li>address being the hardware address of this address. I.e. the hardware address to which the resource and action fields are pointing</li>
+ *     <li>{@link StrolchValueType} for this address</li>
+ *     <li>the default value for the action and resource for when sending and notifying</li>
+ *     <li>inverted flag to define if a boolean value should be inverted. This is done by the system and the user need not invert as well</li>
+ * </ul>
+ *
+ * @see PlcAddressKey
+ */
 public class PlcAddress {
 
 	public final PlcAddressType type;
