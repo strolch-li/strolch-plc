@@ -453,7 +453,7 @@ public abstract class PlcService implements PlcListener {
 			try {
 				runnable.run();
 			} catch (Exception e) {
-				handleFailedSchedule(e);
+				handleFailedAsync(e);
 			}
 		});
 	}
@@ -475,7 +475,7 @@ public abstract class PlcService implements PlcListener {
 			try {
 				runnable.run();
 			} catch (Exception e) {
-				handleFailedSchedule(e);
+				handleFailedAsync(e);
 			}
 		}, delay, delayUnit);
 	}
@@ -497,7 +497,7 @@ public abstract class PlcService implements PlcListener {
 			try {
 				this.container.getPrivilegeHandler().runAsAgent(runnable);
 			} catch (Exception e) {
-				handleFailedSchedule(e);
+				handleFailedAsync(e);
 			}
 		}, delay, delayUnit);
 	}
@@ -522,7 +522,7 @@ public abstract class PlcService implements PlcListener {
 			try {
 				runnable.run();
 			} catch (Exception e) {
-				handleFailedSchedule(e);
+				handleFailedAsync(e);
 			}
 		}, initialDelay, period, delayUnit);
 	}
@@ -547,7 +547,7 @@ public abstract class PlcService implements PlcListener {
 			try {
 				this.container.getPrivilegeHandler().runAsAgent(runnable);
 			} catch (Exception e) {
-				handleFailedSchedule(e);
+				handleFailedAsync(e);
 			}
 		}, initialDelay, period, delayUnit);
 	}
@@ -572,7 +572,7 @@ public abstract class PlcService implements PlcListener {
 			try {
 				runnable.run();
 			} catch (Exception e) {
-				handleFailedSchedule(e);
+				handleFailedAsync(e);
 			}
 		}, initialDelay, period, delayUnit);
 	}
@@ -597,7 +597,7 @@ public abstract class PlcService implements PlcListener {
 			try {
 				this.container.getPrivilegeHandler().runAsAgent(runnable);
 			} catch (Exception e) {
-				handleFailedSchedule(e);
+				handleFailedAsync(e);
 			}
 		}, initialDelay, period, delayUnit);
 	}
@@ -608,7 +608,7 @@ public abstract class PlcService implements PlcListener {
 	 * @param e
 	 * 		the exception which occurred
 	 */
-	protected void handleFailedSchedule(Exception e) {
+	protected void handleFailedAsync(Exception e) {
 		logger.error("Failed to execute " + getClass().getSimpleName(), e);
 	}
 }

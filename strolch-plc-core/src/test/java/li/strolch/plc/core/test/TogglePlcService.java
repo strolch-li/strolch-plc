@@ -47,7 +47,7 @@ public class TogglePlcService extends PlcService {
 	}
 
 	@Override
-	protected void handleFailedSchedule(Exception e) {
+	protected void handleFailedAsync(Exception e) {
 		if (this.toggler != null)
 			this.toggler.cancel(true);
 
