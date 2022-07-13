@@ -1,10 +1,12 @@
 package li.strolch.plc.core;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
 import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
 import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.*;
 
@@ -48,12 +50,15 @@ public abstract class PlcService implements PlcListener {
 	protected final ComponentContainer container;
 	protected final PlcHandler plcHandler;
 
+	protected final Map<PlcAddress, Future<?>> debounceMap;
+
 	private PlcServiceState state;
 
 	public PlcService(PlcHandler plcHandler) {
 		this.container = plcHandler.getContainer();
 		this.plcHandler = plcHandler;
 		this.state = PlcServiceState.Unregistered;
+		this.debounceMap = new ConcurrentHashMap<>();
 	}
 
 	public PlcServiceState getState() {
@@ -416,6 +421,25 @@ public abstract class PlcService implements PlcListener {
 	 */
 	private ScheduledExecutorService getScheduledExecutor() {
 		return this.container.getAgent().getScheduledExecutor(getClass().getSimpleName());
+	}
+
+	/**
+	 * <p>Delays the execution of the given runnable by the given delay in milliseconds. Subsequent calls with the
+	 * given
+	 * {@link PlcAddress} will cancel any previous calls with the same address, delaying the execution again by the
+	 * given amount of time.</p>
+	 *
+	 * <p>This methods is used to handle hardware where the bits change often, before resting at a new state. E.g. a
+	 * light barrier where it might toggle between true and false a few times, before staying true when the light
+	 * barrier detects an object.</p>
+	 */
+	protected void debounce(PlcAddress address, Runnable runnable, int delay) {
+		Future<?> previousTask = this.debounceMap.put(address, schedule(() -> {
+			this.debounceMap.remove(address);
+			runnable.run();
+		}, delay, MILLISECONDS));
+		if (previousTask != null)
+			previousTask.cancel(true);
 	}
 
 	/**
