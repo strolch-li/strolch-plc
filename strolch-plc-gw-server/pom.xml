@@ -7,7 +7,7 @@
     <parent>
         <artifactId>strolch-plc</artifactId>
         <groupId>li.strolch</groupId>
-        <version>1.2.1</version>
+        <version>1.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
