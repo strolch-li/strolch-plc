@@ -1,10 +1,10 @@
 package li.strolch.plc.gw.server;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static li.strolch.plc.model.PlcConstants.*;
+import static li.strolch.utils.collections.SynchronizedCollections.synchronizedMapOfLists;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
-import static li.strolch.websocket.WebSocketRemoteIp.*;
+import static li.strolch.websocket.WebSocketRemoteIp.get;
 
 import javax.websocket.CloseReason;
 import javax.websocket.PongMessage;
@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonObject;
@@ -21,6 +22,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
+import li.strolch.exception.StrolchNotAuthenticatedException;
 import li.strolch.handler.operationslog.OperationsLog;
 import li.strolch.model.Locator;
 import li.strolch.model.log.LogMessage;
@@ -37,7 +39,6 @@ import li.strolch.runtime.privilege.PrivilegedRunnable;
 import li.strolch.runtime.privilege.PrivilegedRunnableWithResult;
 import li.strolch.utils.collections.MapOfLists;
 import li.strolch.utils.dbc.DBC;
-import li.strolch.websocket.WebSocketRemoteIp;
 
 public class PlcGwServerHandler extends StrolchComponent {
 
@@ -45,17 +46,24 @@ public class PlcGwServerHandler extends StrolchComponent {
 	public static final String THREAD_POOL = "PlcRequests";
 
 	private String runAsUser;
+	private String realm;
 	private Set<String> plcIds;
 	private PlcStateHandler plcStateHandler;
 
 	private Map<String, PlcSession> plcSessionsBySessionId;
 	private Map<String, PlcSession> plcSessionsByPlcId;
 
+	private MapOfLists<String, PlcConnectionStateListener> plcConnectionStateListeners;
 	private Map<String, MapOfLists<PlcAddressKey, PlcNotificationListener>> plcAddressListenersByPlcId;
 	private Map<Long, PlcResponse> plcResponses;
+	private ScheduledFuture<?> clearDeadConnectionsTask;
 
 	public PlcGwServerHandler(ComponentContainer container, String componentName) {
 		super(container, componentName);
+	}
+
+	public String getRealm() {
+		return this.realm;
 	}
 
 	public Set<String> getPlcIds() {
@@ -66,24 +74,50 @@ public class PlcGwServerHandler extends StrolchComponent {
 	public void initialize(ComponentConfiguration configuration) throws Exception {
 
 		this.runAsUser = configuration.getString("runAsUser", "plc-server");
+		this.realm = getContainer().getRealmNames().iterator().next();
 
-		this.plcIds = runAsAgentWithResult(
-				ctx -> getContainer().getPrivilegeHandler().getPrivilegeHandler().getUsers(ctx.getCertificate())
-						.stream() //
-						.filter(user -> user.hasRole(ROLE_PLC)).map(UserRep::getUsername) //
-						.collect(toSet()));
+		this.plcIds = runAsAgentWithResult(ctx -> getContainer().getPrivilegeHandler()
+				.getPrivilegeHandler()
+				.getUsers(ctx.getCertificate())
+				.stream() //
+				.filter(user -> user.hasRole(ROLE_PLC))
+				.map(UserRep::getUsername) //
+				.collect(toSet()));
 
-		this.plcStateHandler = new PlcStateHandler(getContainer());
+		this.plcStateHandler = getPlcStateHandler();
 		this.plcSessionsBySessionId = new ConcurrentHashMap<>();
 		this.plcSessionsByPlcId = new ConcurrentHashMap<>();
+		this.plcConnectionStateListeners = synchronizedMapOfLists(new MapOfLists<>());
 		this.plcAddressListenersByPlcId = new ConcurrentHashMap<>();
 		this.plcResponses = new ConcurrentHashMap<>();
 		super.initialize(configuration);
 	}
 
+	@Override
+	public void start() throws Exception {
+		this.clearDeadConnectionsTask = getAgent().getScheduledExecutor(getName())
+				.scheduleWithFixedDelay(this::clearDeadConnections, 10, 10, TimeUnit.SECONDS);
+		super.start();
+	}
+
+	@Override
+	public void stop() throws Exception {
+		if (this.clearDeadConnectionsTask != null)
+			this.clearDeadConnectionsTask.cancel(true);
+		super.stop();
+	}
+
+	protected PlcStateHandler getPlcStateHandler() {
+		return new PlcStateHandler(this);
+	}
+
 	public boolean isPlcConnected(String plcId) {
 		DBC.PRE.assertNotEmpty("plcId must not be empty", plcId);
 		return this.plcSessionsByPlcId.containsKey(plcId);
+	}
+
+	public void register(String plcId, PlcConnectionStateListener listener) {
+		this.plcConnectionStateListeners.addElement(plcId, listener);
 	}
 
 	public void register(String plcId, PlcAddressKey addressKey, PlcNotificationListener listener) {
@@ -379,6 +413,11 @@ public class PlcGwServerHandler extends StrolchComponent {
 		JsonObject msgJ = jsonObject.get(PARAM_MESSAGE).getAsJsonObject();
 		LogMessage logMessage = LogMessage.fromJson(msgJ);
 		logger.info("Received message " + logMessage.getLocator());
+		if (!logMessage.getRealm().equals(this.realm))
+			throw new IllegalStateException(
+					"Unexpected realm in message " + logMessage.getId() + " " + logMessage.getLocator() + " "
+							+ logMessage.getMessage());
+
 		OperationsLog log = getComponent(OperationsLog.class);
 		log.updateState(logMessage.getRealm(), logMessage.getLocator(), LogMessageState.Inactive);
 		log.addMessage(logMessage);
@@ -387,8 +426,10 @@ public class PlcGwServerHandler extends StrolchComponent {
 	private void handleDisableMessage(JsonObject jsonObject) {
 		String realm = jsonObject.get(PARAM_REALM).getAsString();
 		Locator locator = Locator.valueOf(jsonObject.get(PARAM_LOCATOR).getAsString());
-		logger.info("Received disable for messages with locator " + locator);
+		if (!realm.equals(this.realm))
+			throw new IllegalStateException("Unexpected realm in disable message action for message " + locator);
 
+		logger.info("Received disable for messages with locator " + locator);
 		OperationsLog operationsLog = getComponent(OperationsLog.class);
 		operationsLog.updateState(realm, locator, LogMessageState.Inactive);
 	}
@@ -465,12 +506,7 @@ public class PlcGwServerHandler extends StrolchComponent {
 		String plcId = new String(message.getApplicationData().array());
 
 		PlcSession plcSession = this.plcSessionsBySessionId.get(session.getId());
-		if (plcSession != null) {
-			plcSession.lastUpdate = System.currentTimeMillis();
-			logger.info(
-					"PLC " + plcId + " with SessionId " + plcSession.session.getId() + " is still alive on certificate "
-							+ (plcSession.certificate == null ? null : plcSession.certificate.getSessionId()));
-		} else {
+		if (plcSession == null) {
 			plcSession = new PlcSession(plcId, session);
 			plcSession.lastUpdate = System.currentTimeMillis();
 
@@ -495,17 +531,43 @@ public class PlcGwServerHandler extends StrolchComponent {
 		}
 
 		if (plcSession.certificate != null) {
-			StrolchSessionHandler sessionHandler = getContainer().getComponent(StrolchSessionHandler.class);
-			sessionHandler.validate(plcSession.certificate);
+			try {
+				StrolchSessionHandler sessionHandler = getContainer().getComponent(StrolchSessionHandler.class);
+				sessionHandler.validate(plcSession.certificate);
 
-			this.plcStateHandler.handleStillConnected(plcSession);
+				plcSession.lastUpdate = System.currentTimeMillis();
+				logger.info("PLC " + plcId + " with SessionId " + session.getId() + " is still alive on certificate "
+						+ plcSession.certificate.getSessionId());
+
+				this.plcStateHandler.handleStillConnected(plcSession);
+
+			} catch (StrolchNotAuthenticatedException e) {
+				logger.error("PLC session " + session.getId() + " is not authenticated anymore for plc " + plcId
+						+ ". Closing session.");
+
+				this.plcSessionsBySessionId.remove(plcId);
+				PlcSession registeredSession = this.plcSessionsByPlcId.get(plcId);
+				if (registeredSession != null && registeredSession.session.getId().equals(session.getId())) {
+					this.plcSessionsByPlcId.remove(plcId);
+				}
+				try {
+					//noinspection SynchronizationOnLocalVariableOrMethodParameter
+					synchronized (session) {
+						session.close(new CloseReason(CloseReason.CloseCodes.NOT_CONSISTENT, "Stale session"));
+					}
+				} catch (Exception e1) {
+					logger.error("Failed to close session " + session.getId(), e1);
+				}
+			}
 		}
 	}
 
 	private void clearDeadConnections() {
 
 		// find all sessions which are timed out
-		List<PlcSession> expiredSessions = this.plcSessionsBySessionId.values().stream().filter(this::hasExpired)
+		List<PlcSession> expiredSessions = this.plcSessionsBySessionId.values()
+				.stream()
+				.filter(this::hasExpired)
 				.toList();
 
 		for (PlcSession plcSession : expiredSessions) {
@@ -531,7 +593,17 @@ public class PlcGwServerHandler extends StrolchComponent {
 			}
 
 			this.plcSessionsBySessionId.remove(plcSession.session.getId());
-			this.plcSessionsByPlcId.remove(plcSession.plcId);
+
+			// see if this session is also still the registered session
+			// it might already have been overwritten by another session
+			PlcSession registeredSession = this.plcSessionsByPlcId.get(plcSession.plcId);
+			if (registeredSession != null && registeredSession.session.getId().equals(plcSession.session.getId())) {
+				this.plcSessionsByPlcId.remove(plcSession.plcId);
+
+				// handle state change
+				this.plcStateHandler.handlePlcState(plcSession, ConnectionState.Disconnected, "dead connection", null);
+				notifyObserversOfConnectionLost(plcSession.plcId);
+			}
 		}
 	}
 
@@ -584,7 +656,9 @@ public class PlcGwServerHandler extends StrolchComponent {
 				logger.warn("Notifying PlcResponse listener " + plcResponse + " of connection lost!");
 				plcResponse.getListener().run();
 			} catch (Exception e) {
-				logger.error("Failed to notify PlcResponse listener " + plcResponse);
+				logger.error(
+						"Failed to notify PlcResponse listener " + plcResponse + " of connection lost to PLC " + plcId,
+						e);
 			}
 		}
 
@@ -604,7 +678,26 @@ public class PlcGwServerHandler extends StrolchComponent {
 			for (PlcNotificationListener listener : listenersCopy) {
 				logger.warn("Notifying PlcNotificationListener " + addressKey + " with " + listener
 						+ " of connection lost!");
-				listener.handleConnectionLost();
+				try {
+					listener.handleConnectionLost();
+				} catch (Exception e) {
+					logger.error("Failed to notify listener " + listener + " of connection lost for PLC " + plcId, e);
+				}
+			}
+		}
+	}
+
+	public void notifyConnectionState(String plcId, ConnectionState connectionState) {
+		List<PlcConnectionStateListener> listeners = this.plcConnectionStateListeners.getList(plcId);
+		if (listeners == null)
+			return;
+		listeners = new ArrayList<>(listeners);
+		for (PlcConnectionStateListener listener : listeners) {
+			try {
+				listener.handleConnectionState(plcId, connectionState);
+			} catch (Exception e) {
+				logger.error("Failed to notify listener " + listener + " of new connection state " + connectionState
+						+ " for PLC " + plcId, e);
 			}
 		}
 	}

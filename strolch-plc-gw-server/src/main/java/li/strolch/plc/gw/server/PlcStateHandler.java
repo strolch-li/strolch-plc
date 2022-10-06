@@ -39,10 +39,12 @@ public class PlcStateHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlcStateHandler.class);
 
+	private final PlcGwServerHandler gwServerHandler;
 	private final ComponentContainer container;
 
-	public PlcStateHandler(ComponentContainer container) {
-		this.container = container;
+	public PlcStateHandler(PlcGwServerHandler gwServerHandler) {
+		this.gwServerHandler = gwServerHandler;
+		this.container = gwServerHandler.getContainer();
 	}
 
 	protected void runAsAgent(PrivilegedRunnable runnable) throws Exception {
@@ -60,15 +62,15 @@ public class PlcStateHandler {
 
 					// get the gateway and set the state
 					Resource plc = tx.getResourceBy(TYPE_PLC, plcSession.plcId, false);
-					if (plc == null)
+					if (plc == null) {
 						plc = buildNewPlc(plcSession, tx);
+						tx.add(plc);
+					}
 
-					StringParameter stateP = plc.getParameter(PARAM_CONNECTION_STATE, true);
-
+					StringParameter stateP = plc.getStringP(PARAM_CONNECTION_STATE);
 					if (!stateP.getValue().equals(ConnectionState.Connected.name())) {
 						stateP.setValue(ConnectionState.Connected.name());
-						StringParameter stateMsgP = plc.getParameter(PARAM_CONNECTION_STATE_MSG, true);
-						stateMsgP.setValue("");
+						plc.getStringP(PARAM_CONNECTION_STATE_MSG).clear();
 						tx.update(plc);
 						tx.commitOnClose();
 					}
@@ -90,15 +92,16 @@ public class PlcStateHandler {
 
 					// get the gateway and set the state
 					Resource plc = tx.getResourceBy(TYPE_PLC, plcSession.plcId, false);
-					if (plc == null)
+					if (plc == null) {
 						plc = buildNewPlc(plcSession, tx);
+						tx.add(plc);
+					}
 
-					StringParameter stateP = plc.getParameter(PARAM_CONNECTION_STATE, true);
+					StringParameter stateP = plc.getStringP(PARAM_CONNECTION_STATE);
 					existingState = ConnectionState.valueOf(stateP.getValue());
 					if (existingState != connectionState) {
 						stateP.setValue(connectionState.name());
-						StringParameter stateMsgP = plc.getParameter(PARAM_CONNECTION_STATE_MSG, true);
-						stateMsgP.setValue(connectionStateMsg);
+						plc.setString(PARAM_CONNECTION_STATE_MSG, connectionStateMsg);
 						tx.update(plc);
 
 						logger.info(
@@ -131,11 +134,7 @@ public class PlcStateHandler {
 					}
 				}
 
-				// trigger execution handler that we are connected
-				if (existingState != connectionState && connectionState == ConnectionState.Connected
-						&& this.container.hasComponent(ExecutionHandler.class))
-					this.container.getComponent(ExecutionHandler.class).triggerExecution(realm);
-
+				this.gwServerHandler.notifyConnectionState(plcSession.plcId, connectionState);
 			});
 		} catch (Exception e) {
 			logger.error("Failed to handle gateway connection state notification!", e);
@@ -223,16 +222,21 @@ public class PlcStateHandler {
 	}
 
 	private Resource buildNewPlc(PlcGwServerHandler.PlcSession plcSession, StrolchTransaction tx) {
-		Resource plc = new ResourceBuilder(plcSession.plcId, plcSession.plcId, TYPE_PLC) //
+		return new ResourceBuilder(plcSession.plcId, plcSession.plcId, TYPE_PLC) //
 				.defaultBag() //
+
 				.string(PARAM_CONNECTION_STATE, buildParamName(PARAM_CONNECTION_STATE))
-				.enumeration(ConnectionState.Disconnected).end() //
-				.string(PARAM_CONNECTION_STATE_MSG, buildParamName(PARAM_CONNECTION_STATE_MSG)).end() //
-				.string(PARAM_LOCAL_IP, buildParamName(PARAM_LOCAL_IP)).end() //
+				.enumeration(ConnectionState.Disconnected)
+				.end() //
+
+				.string(PARAM_CONNECTION_STATE_MSG, buildParamName(PARAM_CONNECTION_STATE_MSG))
+				.end() //
+
+				.stringList(PARAM_LOCAL_IP, buildParamName(PARAM_LOCAL_IP))
+				.end() //
+
 				.endBag() //
 				.build();
-		tx.add(plc);
-		return plc;
 	}
 
 	private void setSystemState(JsonObject systemState, Resource gateway) {

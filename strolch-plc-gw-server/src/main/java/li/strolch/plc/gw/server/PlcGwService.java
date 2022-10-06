@@ -2,6 +2,7 @@ package li.strolch.plc.gw.server;
 
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC;
 import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
+import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +21,7 @@ import li.strolch.plc.model.PlcServiceState;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.privilege.PrivilegedRunnable;
 import li.strolch.runtime.privilege.PrivilegedRunnableWithResult;
+import li.strolch.utils.CheckedBiFunction;
 import li.strolch.utils.dbc.DBC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,10 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		this.container = plcHandler.getContainer();
 		this.plcHandler = plcHandler;
 		this.state = PlcServiceState.Unregistered;
+	}
+
+	public ComponentContainer getContainer() {
+		return this.container;
 	}
 
 	public PlcServiceState getState() {
@@ -115,6 +121,10 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		throw new UnsupportedOperationException("Not implemented!");
 	}
 
+	protected boolean hasExecutionHandler() {
+		return this.container.hasComponent(ExecutionHandler.class);
+	}
+
 	protected ExecutionHandler getExecutionHandler() {
 		return this.container.getComponent(ExecutionHandler.class);
 	}
@@ -135,15 +145,68 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		try {
 			this.plcHandler.run(runnable);
 		} catch (Exception e) {
-			logger.error("Runnable " + runnable + " failed!", e);
-			if (hasOperationsLogs()) {
-				getOperationsLogs().addMessage(
-						new LogMessage(this.container.getRealmNames().iterator().next(), SYSTEM_USER_AGENT,
-								Resource.locatorFor(TYPE_PLC, this.plcId), LogSeverity.Exception,
-								LogMessageState.Information, PlcGwSrvI18n.bundle, "systemAction.failed")
-								.withException(e).value("action", runnable).value("reason", e));
-			}
+			handleFailedRunnable(runnable.toString(), e);
 		}
+	}
+
+	protected <T> T run(PrivilegedRunnableWithResult<T> runnable) {
+		try {
+			return this.plcHandler.runWithResult(runnable);
+		} catch (Exception e) {
+			handleFailedRunnable(runnable.toString(), e);
+			throw new IllegalStateException("Failed to execute runnable " + runnable, e);
+		}
+	}
+
+	private void handleFailedRunnable(String runnable, Exception e) {
+		logger.error("Runnable " + runnable + " failed!", e);
+		if (hasOperationsLogs()) {
+			getOperationsLogs().addMessage(
+					new LogMessage(this.container.getRealmNames().iterator().next(), SYSTEM_USER_AGENT,
+							Resource.locatorFor(TYPE_PLC, this.plcId), LogSeverity.Exception,
+							LogMessageState.Information, PlcGwSrvI18n.bundle, "systemAction.failed").withException(e)
+							.value("action", runnable));
+		}
+	}
+
+	/**
+	 * Executes the given consumer in a read-only transaction
+	 *
+	 * @param consumer
+	 * 		the consumer to run in a read-only transaction
+	 */
+	protected <T> T runReadOnlyTx(CheckedBiFunction<PrivilegeContext, StrolchTransaction, T> consumer) {
+		return run(ctx -> {
+			try (StrolchTransaction tx = openTx(ctx, getCallerMethod(), true)) {
+				return consumer.apply(ctx, tx);
+			}
+		});
+	}
+
+	/**
+	 * <p>Executes the given consumer in a writeable transaction</p>
+	 *
+	 * <p><b>Note:</b> The transaction is automatically committed by calling {@link StrolchTransaction#commitOnClose()}
+	 * when the runnable is completed and the TX is dirty, i.e. {@link StrolchTransaction#needsCommit()} returns
+	 * true</p>
+	 *
+	 * @param consumer
+	 * 		the consumer to run in a writeable transaction
+	 */
+	protected <T> T runWritableTx(CheckedBiFunction<PrivilegeContext, StrolchTransaction, T> consumer) {
+		return run(ctx -> {
+			try (StrolchTransaction tx = openTx(ctx, getCallerMethod(), false)) {
+				try {
+					T t = consumer.apply(ctx, tx);
+					if (tx.needsCommit())
+						tx.commitOnClose();
+					return t;
+				} catch (Exception e) {
+					tx.rollbackOnClose();
+					throw e;
+				}
+			}
+		});
 	}
 
 	protected <T> T runWithResult(PrivilegedRunnableWithResult<T> runnable) throws Exception {
@@ -166,7 +229,8 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 
 	protected ScheduledFuture<?> scheduleAtFixedRate(PrivilegedRunnable runnable, long initialDelay, long period,
 			TimeUnit delayUnit) {
-		return this.container.getAgent().getScheduledExecutor(PlcGwService.class.getSimpleName())
+		return this.container.getAgent()
+				.getScheduledExecutor(PlcGwService.class.getSimpleName())
 				.scheduleAtFixedRate(() -> {
 					try {
 						this.container.getPrivilegeHandler().runAsAgent(runnable);
@@ -178,7 +242,8 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 
 	protected ScheduledFuture<?> scheduleWithFixedDelay(PrivilegedRunnable runnable, long initialDelay, long period,
 			TimeUnit delayUnit) {
-		return this.container.getAgent().getScheduledExecutor(PlcGwService.class.getSimpleName())
+		return this.container.getAgent()
+				.getScheduledExecutor(PlcGwService.class.getSimpleName())
 				.scheduleWithFixedDelay(() -> {
 					try {
 						this.container.getPrivilegeHandler().runAsAgent(runnable);
