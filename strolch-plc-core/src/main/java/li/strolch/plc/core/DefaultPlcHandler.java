@@ -149,14 +149,15 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	@Override
 	public void stop() throws Exception {
 		stopPlc();
-		if (this.ctx != null)
-			getContainer().getPrivilegeHandler().invalidate(this.ctx.getCertificate());
 
 		this.run = false;
 		if (this.messageSenderTask != null)
 			this.messageSenderTask.cancel(true);
 		if (this.updateStateTask != null)
 			this.updateStateTask.cancel(true);
+
+		if (this.ctx != null)
+			getContainer().getPrivilegeHandler().invalidate(this.ctx.getCertificate());
 
 		super.stop();
 	}

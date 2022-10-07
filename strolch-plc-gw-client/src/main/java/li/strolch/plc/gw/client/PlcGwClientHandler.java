@@ -133,7 +133,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		this.run = false;
 		this.authenticated = false;
 		if (this.messageSenderTask != null)
-			this.messageSenderTask.cancel(false);
+			this.messageSenderTask.cancel(true);
 
 		notifyPlcConnectionState(ConnectionState.Disconnected);
 
