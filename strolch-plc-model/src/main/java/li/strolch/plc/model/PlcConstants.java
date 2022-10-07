@@ -60,6 +60,7 @@ public class PlcConstants {
 	public static final String MSG_TYPE_AUTHENTICATION = "Authentication";
 	public static final String MSG_TYPE_PLC_NOTIFICATION = "PlcNotification";
 	public static final String MSG_TYPE_PLC_TELEGRAM = "PlcTelegram";
+	public static final String MSG_TYPE_PLC_GET_ADDRESS_STATE = "PlcGetAddressState";
 	public static final String MSG_TYPE_MESSAGE = "Message";
 	public static final String MSG_TYPE_DISABLE_MESSAGE = "DisableMessage";
 	public static final String MSG_TYPE_STATE_NOTIFICATION = "StateNotification";

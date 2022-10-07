@@ -2,7 +2,6 @@ package li.strolch.plc.gw.server.service;
 
 import static li.strolch.plc.model.PlcConstants.*;
 
-import com.google.gson.JsonPrimitive;
 import li.strolch.model.StrolchValueType;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.gw.server.PlcGwServerHandler;
@@ -77,17 +76,6 @@ public class SendPlcTelegramCommand extends Command {
 
 		// sending with a value
 		StrolchValueType valueType = StrolchValueType.parse(this.valueTypeS);
-		Object value = valueType.parseValue(valueS);
-		JsonPrimitive valueJ;
-		if (value instanceof String)
-			valueJ = new JsonPrimitive((String) value);
-		else if (value instanceof Number)
-			valueJ = new JsonPrimitive((Number) value);
-		else if (value instanceof Boolean)
-			valueJ = new JsonPrimitive((Boolean) value);
-		else
-			throw new IllegalArgumentException("Unhandled value type " + valueType);
-
-		this.response = plcHandler.sendMessageSync(addressKey, this.plcId, valueJ);
+		this.response = plcHandler.sendMessageSync(addressKey, this.plcId, valueType.parseValue(valueS));
 	}
 }

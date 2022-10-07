@@ -1,5 +1,6 @@
 package li.strolch.plc.gw.server;
 
+import static li.strolch.plc.model.ModelHelper.valueToJson;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC;
 import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
 import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
@@ -68,10 +69,17 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		this.state = PlcServiceState.Unregistered;
 	}
 
-	protected PlcAddressKey register(String resource, String action) {
+	protected void register(String resource, String action) {
 		PlcAddressKey addressKey = keyFor(resource, action);
 		this.plcHandler.register(this.plcId, addressKey, this);
-		return addressKey;
+	}
+
+	protected void register(PlcConnectionStateListener listener) {
+		this.plcHandler.register(this.plcId, listener);
+	}
+
+	protected void unregister(PlcConnectionStateListener listener) {
+		this.plcHandler.unregister(this.plcId, listener);
 	}
 
 	protected void register(PlcAddressKey key) {
@@ -90,25 +98,20 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 		return PlcAddressKey.keyFor(resource, action);
 	}
 
-	public void sendMessage(PlcAddressKey addressKey, String plcId, boolean value,
-			PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, value, listener);
+	public void sendMessage(String resource, String action, Object value, PlcAddressResponseListener listener) {
+		this.plcHandler.sendMessage(keyFor(resource, action), this.plcId, valueToJson(value), listener);
 	}
 
-	public void sendMessage(PlcAddressKey addressKey, String plcId, int value, PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, value, listener);
+	public void sendMessage(PlcAddressKey addressKey, Object value, PlcAddressResponseListener listener) {
+		this.plcHandler.sendMessage(addressKey, this.plcId, value, listener);
 	}
 
-	public void sendMessage(PlcAddressKey addressKey, String plcId, double value, PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, value, listener);
+	public void readState(String resource, String action, PlcAddressResponseValueListener listener) {
+		this.plcHandler.asyncGetAddressState(keyFor(resource, action), this.plcId, listener);
 	}
 
-	public void sendMessage(PlcAddressKey addressKey, String plcId, String value, PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, value, listener);
-	}
-
-	public void sendMessage(PlcAddressKey addressKey, String plcId, PlcAddressResponseListener listener) {
-		this.plcHandler.sendMessage(addressKey, plcId, listener);
+	public void readState(PlcAddressKey addressKey, PlcAddressResponseValueListener listener) {
+		this.plcHandler.asyncGetAddressState(addressKey, this.plcId, listener);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package li.strolch.plc.model;
 
+import li.strolch.utils.CheckedRunnable;
+
 public class PlcResponse {
 
 	private static long lastSequenceId = System.currentTimeMillis();
@@ -9,7 +11,7 @@ public class PlcResponse {
 	protected PlcResponseState state;
 	protected String stateMsg;
 
-	private Runnable listener;
+	private CheckedRunnable listener;
 
 	public PlcResponse(String plcId) {
 		this.plcId = plcId;
@@ -60,11 +62,11 @@ public class PlcResponse {
 		this.stateMsg = stateMsg;
 	}
 
-	public Runnable getListener() {
+	public CheckedRunnable getListener() {
 		return this.listener;
 	}
 
-	public void setListener(Runnable listener) {
+	public void setListener(CheckedRunnable listener) {
 		this.listener = listener;
 	}
 }
