@@ -2,6 +2,7 @@ package li.strolch.plc.gw.client;
 
 import static java.net.NetworkInterface.getByInetAddress;
 import static li.strolch.model.Tags.Json.*;
+import static li.strolch.plc.model.ModelHelper.valueToJson;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
 import static li.strolch.utils.helper.ExceptionHelper.*;
@@ -17,12 +18,14 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import li.strolch.agent.api.*;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
@@ -34,6 +37,7 @@ import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.model.*;
 import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
+import li.strolch.utils.CheckedRunnable;
 import li.strolch.utils.helper.NetworkHelper;
 import org.glassfish.tyrus.client.ClientManager;
 
@@ -64,7 +68,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	private ScheduledFuture<?> serverConnectFuture;
 
 	private Map<PlcAddress, Object> notConnectedQueue;
-	private LinkedBlockingDeque<Callable<?>> messageQueue;
+	private LinkedBlockingDeque<CheckedRunnable> messageQueue;
 	private int maxMessageQueue;
 	private boolean run;
 	private Future<?> messageSenderTask;
@@ -129,7 +133,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		this.run = false;
 		this.authenticated = false;
 		if (this.messageSenderTask != null)
-			this.messageSenderTask.cancel(false);
+			this.messageSenderTask.cancel(true);
 
 		notifyPlcConnectionState(ConnectionState.Disconnected);
 
@@ -176,6 +180,10 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 				logger.error(
 						"Connection refused to connect to server. Will try to connect again in " + RETRY_DELAY + "s: "
 								+ getExceptionMessageWithCauses(e));
+			} else if (rootCause.getMessage() != null && rootCause.getMessage()
+					.contains("Response code was not 101: 404.")) {
+				logger.error("Connection failed with 404 error code. Is URL " + this.gwServerUrl + " correct?");
+				logger.error("Server not yet ready with 404 error. Will try again in " + RETRY_DELAY + "s");
 			} else {
 				logger.error("Failed to connect to server! Will try to connect again in " + RETRY_DELAY + "s", e);
 			}
@@ -300,15 +308,15 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		}
 	}
 
-	private void addMsg(Callable<?> callable) {
+	private void async(CheckedRunnable runnable) {
 		if (this.messageQueue.size() > this.maxMessageQueue)
 			this.messageQueue.removeFirst();
-		this.messageQueue.addLast(callable);
+		this.messageQueue.addLast(runnable);
 	}
 
 	@Override
 	public void sendMsg(LogMessage message) {
-		addMsg(() -> {
+		async(() -> {
 
 			JsonObject messageJ = new JsonObject();
 			messageJ.addProperty(PARAM_PLC_ID, this.plcId);
@@ -318,14 +326,12 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			sendDataToClient(messageJ);
 			if (this.verbose)
 				logger.info("Sent msg " + message.getLocator() + " to server");
-
-			return null;
 		});
 	}
 
 	@Override
 	public void disableMsg(Locator locator) {
-		addMsg(() -> {
+		async(() -> {
 
 			JsonObject messageJ = new JsonObject();
 			messageJ.addProperty(PARAM_PLC_ID, this.plcId);
@@ -336,8 +342,6 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			sendDataToClient(messageJ);
 			if (this.verbose)
 				logger.info("Sent msg " + locator + " to server");
-
-			return null;
 		});
 	}
 
@@ -345,29 +349,19 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		if (!plcAddress.remote)
 			return;
 
-		addMsg(() -> {
+		async(() -> {
 
 			JsonObject notificationJ = new JsonObject();
 			notificationJ.addProperty(PARAM_PLC_ID, this.plcId);
 			notificationJ.addProperty(PARAM_MESSAGE_TYPE, MSG_TYPE_PLC_NOTIFICATION);
 			notificationJ.addProperty(PARAM_RESOURCE, plcAddress.resource);
 			notificationJ.addProperty(PARAM_ACTION, plcAddress.action);
-
-			if (value instanceof Boolean)
-				notificationJ.add(PARAM_VALUE, new JsonPrimitive((Boolean) value));
-			else if (value instanceof Number)
-				notificationJ.add(PARAM_VALUE, new JsonPrimitive((Number) value));
-			else if (value instanceof String)
-				notificationJ.add(PARAM_VALUE, new JsonPrimitive((String) value));
-			else
-				notificationJ.add(PARAM_VALUE, new JsonPrimitive(value.toString()));
+			notificationJ.add(PARAM_VALUE, valueToJson(value));
 
 			sendDataToClient(notificationJ);
 
 			if (this.verbose)
 				logger.info("Sent notification for " + plcAddress.toKey() + " to server");
-
-			return null;
 		});
 	}
 
@@ -382,11 +376,12 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 		try {
 			runAsAgent(ctx -> {
-
 				if (MSG_TYPE_AUTHENTICATION.equals(messageType)) {
 					handleAuthResponse(ctx, jsonObject);
 				} else if (MSG_TYPE_PLC_TELEGRAM.equals(messageType)) {
-					handleTelegram(jsonObject);
+					async(() -> handleTelegram(jsonObject));
+				} else if (MSG_TYPE_PLC_GET_ADDRESS_STATE.equals(messageType)) {
+					async(() -> handleGetAddressState(ctx, jsonObject));
 				} else {
 					logger.error("Unhandled message type " + messageType);
 				}
@@ -396,54 +391,55 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		}
 	}
 
-	private void handleTelegram(JsonObject telegramJ) {
+	private void handleGetAddressState(PrivilegeContext ctx, JsonObject telegramJ) throws Exception {
+		PlcAddress plcAddress = null;
+		try (StrolchTransaction tx = openTx(ctx.getCertificate(), true)) {
+			plcAddress = parsePlcAddress(telegramJ);
+
+			String plcAddressId = this.plcHandler.getPlcAddressId(plcAddress.resource, plcAddress.action);
+			Resource address = tx.getResourceBy(TYPE_PLC_ADDRESS, plcAddressId, true);
+			Object value = address.getParameter(PARAM_VALUE, true).getValue();
+			telegramJ.add(PARAM_VALUE, valueToJson(value));
+
+			telegramJ.addProperty(PARAM_STATE, PlcResponseState.Done.name());
+			telegramJ.addProperty(PARAM_STATE_MSG, "");
+
+			if (this.verbose)
+				logger.info("Sent address state for " + plcAddress.toKey() + " = " + value + " to server");
+
+		} catch (Exception e) {
+			handleFailedTelegram(telegramJ, plcAddress, e);
+		}
+
+		sendDataToClient(telegramJ);
+	}
+
+	private void handleTelegram(JsonObject telegramJ) throws Exception {
 
 		PlcAddress plcAddress = null;
-
 		try {
-			if (!telegramJ.has(PARAM_RESOURCE) || !telegramJ.has(PARAM_ACTION))
-				throw new IllegalArgumentException("Both " + PARAM_RESOURCE + " and " + PARAM_ACTION + " is required!");
-
-			String resource = telegramJ.get(PARAM_RESOURCE).getAsString();
-			String action = telegramJ.get(PARAM_ACTION).getAsString();
-
-			plcAddress = this.plcHandler.getPlcAddress(resource, action);
+			plcAddress = parsePlcAddress(telegramJ);
 
 			if (telegramJ.has(PARAM_VALUE)) {
 				String valueS = telegramJ.get(PARAM_VALUE).getAsString();
 				Object value = plcAddress.valueType.parseValue(valueS);
-				this.plcHandler.send(resource, action, value, false, false);
+				this.plcHandler.send(plcAddress.resource, plcAddress.action, value, false, false);
 			} else {
-				this.plcHandler.send(resource, action, false, false);
+				this.plcHandler.send(plcAddress.resource, plcAddress.action, false, false);
 			}
 
 			telegramJ.addProperty(PARAM_STATE, PlcResponseState.Done.name());
 			telegramJ.addProperty(PARAM_STATE_MSG, "");
 
 		} catch (Exception e) {
-
-			if (plcAddress == null) {
-				logger.error("Failed to handle telegram: " + telegramJ, e);
-				telegramJ.addProperty(PARAM_STATE, PlcResponseState.Failed.name());
-				telegramJ.addProperty(PARAM_STATE_MSG,
-						"Could not evaluate PlcAddress: " + getExceptionMessage(getRootCause(e), false));
-			} else {
-				logger.error("Failed to execute telegram: " + plcAddress.toKeyAddress(), e);
-				telegramJ.addProperty(PARAM_STATE, PlcResponseState.Failed.name());
-				telegramJ.addProperty(PARAM_STATE_MSG,
-						"Failed to perform " + plcAddress.toKey() + ": " + getExceptionMessage(getRootCause(e), false));
-			}
+			handleFailedTelegram(telegramJ, plcAddress, e);
 		}
 
-		// async sending of response
-		PlcAddress address = plcAddress;
-		addMsg(() -> {
-			sendDataToClient(telegramJ);
-			if (this.verbose)
-				logger.info(
-						"Sent Telegram response for " + (address == null ? "unknown" : address.toKey()) + " to server");
-			return null;
-		});
+		sendDataToClient(telegramJ);
+
+		if (this.verbose)
+			logger.info("Sent Telegram response for " + (plcAddress == null ? "unknown" : plcAddress.toKey())
+					+ " to server");
 	}
 
 	private void handleAuthResponse(PrivilegeContext ctx, JsonObject response) {
@@ -542,15 +538,15 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 				continue;
 			}
 
-			Callable<?> callable = null;
+			CheckedRunnable runnable = null;
 			try {
-				callable = this.messageQueue.takeFirst();
-				callable.call();
+				runnable = this.messageQueue.takeFirst();
+				runnable.run();
 			} catch (Exception e) {
 				closeBrokenGwSessionUpdateState("Failed to send message",
 						"Failed to send message, reconnecting in " + RETRY_DELAY + "s.");
-				if (callable != null) {
-					this.messageQueue.addFirst(callable);
+				if (runnable != null) {
+					this.messageQueue.addFirst(runnable);
 					logger.error(
 							"Failed to send message, reconnecting in " + RETRY_DELAY + "s. And then retrying message.",
 							e);
@@ -584,9 +580,10 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			VersionQueryResult versionQueryResult = getContainer().getAgent().getVersion();
 			this.versions.add(AGENT_VERSION, versionQueryResult.getAgentVersion().toJson());
 			this.versions.add(APP_VERSION, versionQueryResult.getAppVersion().toJson());
-			this.versions.add(COMPONENT_VERSIONS,
-					versionQueryResult.getComponentVersions().stream().map(ComponentVersion::toJson)
-							.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+			this.versions.add(COMPONENT_VERSIONS, versionQueryResult.getComponentVersions()
+					.stream()
+					.map(ComponentVersion::toJson)
+					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		}
 
 		return this.versions;
@@ -633,6 +630,30 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		}
 
 		notifyServer(address, value);
+	}
+
+	private PlcAddress parsePlcAddress(JsonObject telegramJ) {
+		if (!telegramJ.has(PARAM_RESOURCE) || !telegramJ.has(PARAM_ACTION))
+			throw new IllegalArgumentException("Both " + PARAM_RESOURCE + " and " + PARAM_ACTION + " is required!");
+
+		String resource = telegramJ.get(PARAM_RESOURCE).getAsString();
+		String action = telegramJ.get(PARAM_ACTION).getAsString();
+
+		return this.plcHandler.getPlcAddress(resource, action);
+	}
+
+	private static void handleFailedTelegram(JsonObject telegramJ, PlcAddress plcAddress, Exception e) {
+		if (plcAddress == null) {
+			logger.error("Failed to handle telegram: " + telegramJ, e);
+			telegramJ.addProperty(PARAM_STATE, PlcResponseState.Failed.name());
+			telegramJ.addProperty(PARAM_STATE_MSG,
+					"Could not evaluate PlcAddress: " + getExceptionMessage(getRootCause(e), false));
+		} else {
+			logger.error("Failed to execute telegram: " + plcAddress.toKeyAddress(), e);
+			telegramJ.addProperty(PARAM_STATE, PlcResponseState.Failed.name());
+			telegramJ.addProperty(PARAM_STATE_MSG,
+					"Failed to perform " + plcAddress.toKey() + ": " + getExceptionMessage(getRootCause(e), false));
+		}
 	}
 
 	@ClientEndpoint
