@@ -14,7 +14,6 @@ import java.util.stream.StreamSupport;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import li.strolch.agent.api.ComponentContainer;
-import li.strolch.execution.ExecutionHandler;
 import li.strolch.handler.operationslog.OperationsLog;
 import li.strolch.model.Locator;
 import li.strolch.model.ParameterBag;
@@ -118,23 +117,27 @@ public class PlcStateHandler {
 					tx.commitOnClose();
 				}
 
-				if (existingState != connectionState && this.container.hasComponent(OperationsLog.class)) {
-					OperationsLog operationsLog = this.container.getComponent(OperationsLog.class);
-					Locator msgLocator = locatorFor(TYPE_PLC, plcSession.plcId).append(
-							ConnectionState.class.getSimpleName());
-					operationsLog.updateState(realm, msgLocator, LogMessageState.Inactive);
-					if (connectionState == ConnectionState.Connected) {
-						operationsLog.addMessage(new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Info,
-								LogMessageState.Information, PlcGwSrvI18n.bundle, "execution.plc.connected").value(
-								"plc", plcSession.plcId));
-					} else {
-						operationsLog.addMessage(new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Error,
-								LogMessageState.Active, PlcGwSrvI18n.bundle, "execution.plc.connectionLost").value(
-								"plc", plcSession.plcId));
+				if (existingState != connectionState) {
+					if (this.container.hasComponent(OperationsLog.class)) {
+						OperationsLog operationsLog = this.container.getComponent(OperationsLog.class);
+						Locator msgLocator = locatorFor(TYPE_PLC, plcSession.plcId).append(
+								ConnectionState.class.getSimpleName());
+						operationsLog.updateState(realm, msgLocator, LogMessageState.Inactive);
+						if (connectionState == ConnectionState.Connected) {
+							operationsLog.addMessage(
+									new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Info,
+											LogMessageState.Information, PlcGwSrvI18n.bundle,
+											"execution.plc.connected").value("plc", plcSession.plcId));
+						} else {
+							operationsLog.addMessage(
+									new LogMessage(realm, plcSession.plcId, msgLocator, LogSeverity.Error,
+											LogMessageState.Active, PlcGwSrvI18n.bundle,
+											"execution.plc.connectionLost").value("plc", plcSession.plcId));
+						}
 					}
-				}
 
-				this.gwServerHandler.notifyConnectionState(plcSession.plcId, connectionState);
+					this.gwServerHandler.notifyConnectionState(plcSession.plcId, connectionState);
+				}
 			});
 		} catch (Exception e) {
 			logger.error("Failed to handle gateway connection state notification!", e);
