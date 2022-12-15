@@ -47,7 +47,7 @@
             <artifactId>li.strolch.model</artifactId>
         </dependency>
 
-        <!-- Web -->
+        <!-- utils -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>

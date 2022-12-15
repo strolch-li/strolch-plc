@@ -1,8 +1,7 @@
 package li.strolch.plc.rest.ws;
 
-import javax.websocket.EndpointConfig;
-import javax.websocket.Session;
-
+import jakarta.websocket.EndpointConfig;
+import jakarta.websocket.Session;
 import li.strolch.agent.api.ObserverHandler;
 import li.strolch.agent.api.StrolchAgent;
 import li.strolch.websocket.WebSocketClient;

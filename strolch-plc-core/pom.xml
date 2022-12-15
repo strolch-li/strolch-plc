@@ -64,18 +64,18 @@
         <dependency>
             <groupId>li.strolch</groupId>
             <artifactId>strolch-plc-model</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+
+        <!-- utils -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
 
         <!-- PI4j -->
         <dependency>
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
         </dependency>
 
         <!-- test -->

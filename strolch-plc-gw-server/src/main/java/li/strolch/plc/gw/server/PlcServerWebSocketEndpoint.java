@@ -1,10 +1,9 @@
 package li.strolch.plc.gw.server;
 
-import javax.websocket.*;
-import javax.websocket.server.ServerEndpoint;
-
 import java.io.IOException;
 
+import jakarta.websocket.*;
+import jakarta.websocket.server.ServerEndpoint;
 import li.strolch.rest.RestfulStrolchComponent;
 
 @ServerEndpoint("/websocket/strolch/plc")

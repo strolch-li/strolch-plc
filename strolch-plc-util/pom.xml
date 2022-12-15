@@ -48,22 +48,20 @@
             <artifactId>li.strolch.model</artifactId>
         </dependency>
 
-        <!-- utils -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
-        </dependency>
-
         <!-- PLC -->
         <dependency>
             <groupId>li.strolch</groupId>
             <artifactId>strolch-plc-model</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
+        <!-- utils -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
         </dependency>
 
         <!-- test -->

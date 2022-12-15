@@ -3,15 +3,14 @@ package li.strolch.plc.rest;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.rest.StrolchRestfulConstants.DATA;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import com.google.gson.JsonObject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.service.SetPlcStateService;
-import com.google.gson.JsonObject;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.rest.RestfulStrolchComponent;
 import li.strolch.rest.StrolchRestfulConstants;

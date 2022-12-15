@@ -8,9 +8,6 @@ import static li.strolch.utils.collections.SynchronizedCollections.synchronizedM
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 import static li.strolch.websocket.WebSocketRemoteIp.get;
 
-import javax.websocket.CloseReason;
-import javax.websocket.PongMessage;
-import javax.websocket.Session;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.PongMessage;
+import jakarta.websocket.Session;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
 import li.strolch.exception.StrolchNotAuthenticatedException;

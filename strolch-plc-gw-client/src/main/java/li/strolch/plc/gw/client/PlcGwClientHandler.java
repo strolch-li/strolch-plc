@@ -9,8 +9,6 @@ import static li.strolch.utils.helper.ExceptionHelper.*;
 import static li.strolch.utils.helper.NetworkHelper.formatMacAddress;
 import static li.strolch.utils.helper.StringHelper.isEmpty;
 
-import javax.websocket.*;
-import javax.websocket.CloseReason.CloseCodes;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.URI;
@@ -26,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import jakarta.websocket.*;
+import jakarta.websocket.CloseReason.CloseCodes;
 import li.strolch.agent.api.*;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;

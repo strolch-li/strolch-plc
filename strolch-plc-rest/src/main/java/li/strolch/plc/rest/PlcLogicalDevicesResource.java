@@ -5,17 +5,17 @@ import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.plc.rest.PlcModelVisitor.*;
 import static li.strolch.rest.StrolchRestfulConstants.DATA;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import li.strolch.model.Resource;
 import li.strolch.model.Tags;
 import li.strolch.persistence.api.Operation;
@@ -57,7 +57,8 @@ public class PlcLogicalDevicesResource {
 				List<Resource> devices = devicesByGroup.getList(group);
 				JsonObject groupJ = new JsonObject();
 				groupJ.addProperty(Tags.Json.NAME, group);
-				groupJ.add(DATA, devices.stream().map(e -> e.accept(plcLogicalDeviceToJson()))
+				groupJ.add(DATA, devices.stream()
+						.map(e -> e.accept(plcLogicalDeviceToJson()))
 						.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 
 				dataJ.add(groupJ);
@@ -80,7 +81,8 @@ public class PlcLogicalDevicesResource {
 			Resource plcLogicalDevice = tx.getResourceBy(TYPE_PLC_LOGICAL_DEVICE, id, true);
 			tx.assertHasPrivilege(Operation.GET, plcLogicalDevice);
 
-			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true).stream()
+			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true)
+					.stream()
 					.map(e -> e.accept(plcAddressToJson(simple)))
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 		}
@@ -101,7 +103,8 @@ public class PlcLogicalDevicesResource {
 			Resource plcLogicalDevice = tx.getResourceBy(TYPE_PLC_LOGICAL_DEVICE, id, true);
 			tx.assertHasPrivilege(Operation.GET, plcLogicalDevice);
 
-			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true).stream()
+			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true)
+					.stream()
 					.map(e -> e.accept(plcAddressToJson(simple)))
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 		}
@@ -122,7 +125,8 @@ public class PlcLogicalDevicesResource {
 			Resource plcLogicalDevice = tx.getResourceBy(TYPE_PLC_LOGICAL_DEVICE, id, true);
 			tx.assertHasPrivilege(Operation.GET, plcLogicalDevice);
 
-			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_TELEGRAMS, true).stream()
+			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_TELEGRAMS, true)
+					.stream()
 					.map(e -> e.accept(plcTelegramToJson(simple)))
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
 		}
