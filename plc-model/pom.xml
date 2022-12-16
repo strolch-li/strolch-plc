@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>plc-model</artifactId>
-    <name>strolch-plc-model</name>
+    <name>plc-model</name>
     <packaging>jar</packaging>
     <url>https://github.com/4treesCH/strolch-plc</url>
 

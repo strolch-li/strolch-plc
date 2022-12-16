@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>plc-util</artifactId>
-    <name>strolch-plc-util</name>
+    <name>plc-util</name>
     <packaging>jar</packaging>
     <url>https://github.com/4treesCH/strolch-plc</url>
 

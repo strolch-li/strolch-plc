@@ -12,7 +12,7 @@
 
     <artifactId>strolch-plc-bom</artifactId>
     <packaging>pom</packaging>
-    <name>strolch-plc-bom</name>
+    <name>plc-bom</name>
     <description>All of Strolch PLC's dependencies for easy dependency management</description>
 
     <dependencyManagement>
