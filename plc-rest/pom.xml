@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>strolch-plc</artifactId>
         <groupId>li.strolch</groupId>
-        <version>1.2.0-SNAPSHOT</version>
+        <artifactId>strolch-plc</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>strolch-plc-gw-client</artifactId>
-    <name>strolch-plc-gw-client</name>
+    <artifactId>plc-rest</artifactId>
+    <name>strolch-plc-rest</name>
     <packaging>jar</packaging>
     <url>https://github.com/4treesCH/strolch-plc</url>
 
@@ -42,27 +42,27 @@
         <!-- Strolch -->
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.utils</artifactId>
+            <artifactId>utils</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.model</artifactId>
+            <artifactId>model</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.agent</artifactId>
+            <artifactId>agent</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.service</artifactId>
+            <artifactId>service</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.rest</artifactId>
+            <artifactId>web-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.websocket</artifactId>
+            <artifactId>websocket</artifactId>
         </dependency>
 
         <!-- utils -->
@@ -74,7 +74,7 @@
         <!-- PLC -->
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>strolch-plc-core</artifactId>
+            <artifactId>plc-core</artifactId>
         </dependency>
 
         <!-- REST using Apache Jersey -->
@@ -109,12 +109,6 @@
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
-        </dependency>
-
-        <!-- Tyrus REST Client -->
-        <dependency>
-            <groupId>org.glassfish.tyrus</groupId>
-            <artifactId>tyrus-container-grizzly-client</artifactId>
         </dependency>
 
         <!-- test -->

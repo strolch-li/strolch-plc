@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>li.strolch</groupId>
         <artifactId>strolch-plc</artifactId>
-        <version>1.2.0-SNAPSHOT</version>
+        <groupId>li.strolch</groupId>
+        <version>2.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>strolch-plc-core</artifactId>
-    <name>strolch-plc-core</name>
+    <artifactId>plc-gw-client</artifactId>
+    <name>strolch-plc-gw-client</name>
     <packaging>jar</packaging>
     <url>https://github.com/4treesCH/strolch-plc</url>
 
@@ -36,34 +36,39 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Strolch -->
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.utils</artifactId>
+            <artifactId>utils</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.model</artifactId>
+            <artifactId>model</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.agent</artifactId>
+            <artifactId>agent</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.service</artifactId>
+            <artifactId>service</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.rest</artifactId>
+            <artifactId>web-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>li.strolch</groupId>
+            <artifactId>websocket</artifactId>
         </dependency>
 
         <!-- PLC -->
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>strolch-plc-model</artifactId>
+            <artifactId>plc-core</artifactId>
         </dependency>
 
         <!-- utils -->
@@ -72,10 +77,45 @@
             <artifactId>gson</artifactId>
         </dependency>
 
-        <!-- PI4j -->
+
+        <!-- REST using Apache Jersey -->
         <dependency>
-            <groupId>com.pi4j</groupId>
-            <artifactId>pi4j-core</artifactId>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-grizzly2-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+        </dependency>
+
+        <!-- Tyrus REST Client -->
+        <dependency>
+            <groupId>org.glassfish.tyrus</groupId>
+            <artifactId>tyrus-container-grizzly-client</artifactId>
         </dependency>
 
         <!-- test -->
@@ -83,10 +123,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>li.strolch</groupId>
-            <artifactId>li.strolch.testbase</artifactId>
         </dependency>
     </dependencies>
 
@@ -110,18 +146,14 @@
         </resources>
 
         <plugins>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <artifactId>maven-eclipse-plugin</artifactId>
             </plugin>
-
         </plugins>
     </build>
-
 </project>
