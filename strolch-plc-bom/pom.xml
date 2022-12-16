@@ -18,16 +18,12 @@
     <dependencyManagement>
         <dependencies>
 
-            <!-- Strolch -->
+            <!-- PLC -->
             <dependency>
                 <groupId>li.strolch</groupId>
-                <artifactId>strolch-bom</artifactId>
-                <type>pom</type>
-                <version>${strolch.version}</version>
-                <scope>import</scope>
+                <artifactId>plc-model</artifactId>
+                <version>${project.version}</version>
             </dependency>
-
-            <!-- PLC -->
             <dependency>
                 <groupId>li.strolch</groupId>
                 <artifactId>plc-core</artifactId>

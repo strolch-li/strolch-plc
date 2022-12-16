@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>plc-gw-server</artifactId>
-    <name>strolch-plc-gw-client</name>
+    <name>plc-gw-server</name>
     <packaging>jar</packaging>
     <url>https://github.com/4treesCH/strolch-plc</url>
 
@@ -78,7 +78,7 @@
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>strolch-plc-core</artifactId>
+            <artifactId>plc-core</artifactId>
         </dependency>
 
         <!-- REST using Apache Jersey -->
