@@ -13,12 +13,12 @@
     <artifactId>plc-model</artifactId>
     <name>plc-model</name>
     <packaging>jar</packaging>
-    <url>https://github.com/4treesCH/strolch-plc</url>
+    <url>https://github.com/strolch-li/strolch-plc</url>
 
     <scm>
-        <connection>scm:git:git@github.com:4treesCH/strolch-plc.git</connection>
-        <developerConnection>scm:git:git@github.com:4treesCH/strolch-plc.git</developerConnection>
-        <url>https://github.com/4treesCH/strolch-plc</url>
+        <connection>scm:git:git@github.com:strolch-li/strolch-plc.git</connection>
+        <developerConnection>scm:git:git@github.com:strolch-li/strolch-plc.git</developerConnection>
+        <url>https://github.com/strolch-li/strolch-plc</url>
     </scm>
 
     <properties>
