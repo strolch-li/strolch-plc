@@ -301,11 +301,11 @@ public class RSL366OverHorterI2cTest {
 				pos++;
 			}
 
-			return new String(hex, "ASCII"); //$NON-NLS-1$
+			return new String(hex, "ASCII");
 
 		} catch (UnsupportedEncodingException e) {
 			String msg = MessageFormat
-					.format("Something went wrong while converting to HEX: {0}", e.getMessage()); //$NON-NLS-1$
+					.format("Something went wrong while converting to HEX: {0}", e.getMessage());
 			throw new RuntimeException(msg, e);
 		}
 	}
