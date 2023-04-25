@@ -57,6 +57,11 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 		this.registeredKeys.add(key);
 	}
 
+	protected void unregister(PlcAddressKey key) {
+		this.plcHandler.unregister(getPlcId(), key, this);
+		this.registeredKeys.remove(key);
+	}
+
 	protected void unregisterAll() {
 		this.registeredKeys.forEach(k -> this.plcHandler.unregister(getPlcId(), k, this));
 	}
