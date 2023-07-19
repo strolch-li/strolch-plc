@@ -5,7 +5,7 @@
 
 A soft real time PLC written in Strolch running on Strolch
 
-Checkout the documentation at https://strolch.li/plc.html
+Checkout the documentation at https://strolch.li/plc/
 
 ## Features
 Strolch PLC supports the following features:
