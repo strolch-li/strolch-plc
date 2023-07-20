@@ -425,16 +425,6 @@
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-eclipse-plugin</artifactId>
-                    <version>${maven-eclipse-plugin.version}</version>
-                    <configuration>
-                        <downloadJavadocs>true</downloadJavadocs>
-                        <downloadSources>true</downloadSources>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven-jar-plugin.version}</version>
                     <configuration>
