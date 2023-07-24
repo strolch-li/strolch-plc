@@ -1,19 +1,5 @@
 package li.strolch.plc.core;
 
-import static java.lang.System.nanoTime;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
-import static li.strolch.plc.model.PlcConstants.*;
-import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
-import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
-import static li.strolch.utils.helper.StringHelper.formatNanoDuration;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Consumer;
-
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
 import li.strolch.model.Locator;
@@ -34,6 +20,20 @@ import li.strolch.privilege.model.PrivilegeContext;
 import li.strolch.runtime.configuration.ComponentConfiguration;
 import li.strolch.utils.collections.MapOfMaps;
 import li.strolch.utils.dbc.DBC;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.function.Consumer;
+
+import static java.lang.System.nanoTime;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
+import static li.strolch.plc.model.PlcConstants.*;
+import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
+import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
+import static li.strolch.utils.helper.StringHelper.formatNanoDuration;
 
 public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, PlcConnectionStateChangeListener {
 
@@ -257,8 +257,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			try {
 				getContainer().getPrivilegeHandler().validateSystemSession(this.ctx);
 			} catch (Exception e) {
-				logger.error("PrivilegeContext for session " + this.ctx.getCertificate().getSessionId()
-						+ " is not valid, reopening.", e);
+				logger.error("PrivilegeContext for session " + this.ctx.getCertificate().getSessionId() +
+						" is not valid, reopening.", e);
 				this.ctx = getContainer().getPrivilegeHandler().openAgentSystemUserContext();
 			}
 		}
