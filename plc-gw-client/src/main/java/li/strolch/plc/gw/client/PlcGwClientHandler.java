@@ -2,6 +2,7 @@ package li.strolch.plc.gw.client;
 
 import static java.net.NetworkInterface.getByInetAddress;
 import static li.strolch.model.Tags.Json.*;
+import static li.strolch.plc.core.DefaultPlcHandler.SILENT_THRESHOLD;
 import static li.strolch.plc.model.ModelHelper.valueToJson;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
@@ -393,7 +394,8 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 	private void handleGetAddressState(PrivilegeContext ctx, JsonObject telegramJ) throws Exception {
 		PlcAddress plcAddress = null;
-		try (StrolchTransaction tx = openTx(ctx.getCertificate(), true)) {
+		try (StrolchTransaction tx = openTx(ctx.getCertificate(), true).silentThreshold(SILENT_THRESHOLD,
+				TimeUnit.MILLISECONDS)) {
 			plcAddress = parsePlcAddress(telegramJ);
 
 			String plcAddressId = this.plcHandler.getPlcAddressId(plcAddress.resource, plcAddress.action);
@@ -560,7 +562,8 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	private void saveServerConnectionState(PrivilegeContext ctx, ConnectionState state, String stateMsg) {
 
 		StrolchRealm realm = getContainer().getRealm(ctx.getCertificate());
-		try (StrolchTransaction tx = realm.openTx(ctx.getCertificate(), "saveServerConnectionState", false)) {
+		try (StrolchTransaction tx = realm.openTx(ctx.getCertificate(), "saveServerConnectionState", false)
+				.silentThreshold(SILENT_THRESHOLD, TimeUnit.MILLISECONDS)) {
 			Resource plc = tx.getResourceBy(TYPE_PLC, this.plcId, true);
 
 			StringParameter stateP = plc.getParameter(PARAM_CONNECTION_STATE, true);
