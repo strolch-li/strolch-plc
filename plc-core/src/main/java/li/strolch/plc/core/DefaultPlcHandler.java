@@ -37,7 +37,7 @@ import li.strolch.utils.dbc.DBC;
 
 public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, PlcConnectionStateChangeListener {
 
-	public static final int SILENT_THRESHOLD = 60;
+	public static final int SILENT_THRESHOLD = 100;
 	private static final int MAX_MESSAGE_QUEUE = 200;
 
 	private PrivilegeContext ctx;
