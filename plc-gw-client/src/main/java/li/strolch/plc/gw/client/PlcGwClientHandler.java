@@ -406,8 +406,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			telegramJ.addProperty(PARAM_STATE, PlcResponseState.Done.name());
 			telegramJ.addProperty(PARAM_STATE_MSG, "");
 
-			if (this.verbose)
-				logger.info("Sent address state for " + plcAddress.toKey() + " = " + value + " to server");
+			logger.info("Sent address state for " + plcAddress.toKey() + " = " + value + " to server");
 
 		} catch (Exception e) {
 			handleFailedTelegram(telegramJ, plcAddress, e);
