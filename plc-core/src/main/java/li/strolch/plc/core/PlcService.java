@@ -1,15 +1,5 @@
 package li.strolch.plc.core;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
-import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
-import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
-import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
-
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.concurrent.*;
-
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
@@ -27,6 +17,18 @@ import li.strolch.runtime.privilege.PrivilegedRunnable;
 import li.strolch.runtime.privilege.PrivilegedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.concurrent.*;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
+import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
+import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
 /**
  * <p>This is an interface to implement short use cases in a plc.</p>
@@ -51,6 +53,7 @@ public abstract class PlcService implements PlcListener {
 	protected final PlcHandler plcHandler;
 
 	protected final Map<PlcAddress, Future<?>> debounceMap;
+	protected final List<PlcAddressKey> registeredKeys;
 
 	private PlcServiceState state;
 
@@ -59,6 +62,7 @@ public abstract class PlcService implements PlcListener {
 		this.plcHandler = plcHandler;
 		this.state = PlcServiceState.Unregistered;
 		this.debounceMap = new ConcurrentHashMap<>();
+		this.registeredKeys = new ArrayList<>();
 	}
 
 	public PlcServiceState getState() {
@@ -99,6 +103,7 @@ public abstract class PlcService implements PlcListener {
 	 * Called to unregister this service from previously registered addresses
 	 */
 	public void unregister() {
+		unregisterAll();
 		this.state = PlcServiceState.Unregistered;
 	}
 
@@ -112,6 +117,7 @@ public abstract class PlcService implements PlcListener {
 	 */
 	public void register(String resource, String action) {
 		this.plcHandler.register(resource, action, this);
+		this.registeredKeys.add(PlcAddressKey.keyFor(resource, action));
 	}
 
 	/**
@@ -124,6 +130,13 @@ public abstract class PlcService implements PlcListener {
 	 */
 	public void unregister(String resource, String action) {
 		this.plcHandler.unregister(resource, action, this);
+	}
+
+	/**
+	 * Unregisters this {@link PlcService} from all previously registered addresses
+	 */
+	protected void unregisterAll() {
+		this.registeredKeys.forEach(key -> this.plcHandler.unregister(key.resource, key.action, this));
 	}
 
 	/**
