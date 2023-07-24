@@ -179,10 +179,10 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 			if (rootCause.getMessage() != null && rootCause.getMessage().contains("Connection refused")) {
 				logger.error(
-						"Connection refused to connect to server. Will try to connect again in " + RETRY_DELAY + "s: "
-								+ getExceptionMessageWithCauses(e));
-			} else if (rootCause.getMessage() != null && rootCause.getMessage()
-					.contains("Response code was not 101: 404.")) {
+						"Connection refused to connect to server. Will try to connect again in " + RETRY_DELAY + "s: " +
+								getExceptionMessageWithCauses(e));
+			} else if (rootCause.getMessage() != null &&
+					rootCause.getMessage().contains("Response code was not 101: 404.")) {
 				logger.error("Connection failed with 404 error code. Is URL " + this.gwServerUrl + " correct?");
 				logger.error("Server not yet ready with 404 error. Will try again in " + RETRY_DELAY + "s");
 			} else {
@@ -190,8 +190,8 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			}
 
 			closeBrokenGwSessionUpdateState("Failed to connect to server",
-					"Connection refused to connect to server. Will try to connect again in " + RETRY_DELAY + "s: "
-							+ getExceptionMessageWithCauses(e));
+					"Connection refused to connect to server. Will try to connect again in " + RETRY_DELAY + "s: " +
+							getExceptionMessageWithCauses(e));
 			delayConnect(RETRY_DELAY, TimeUnit.SECONDS);
 			return;
 		}
@@ -440,8 +440,8 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		sendDataToClient(telegramJ);
 
 		if (this.verbose)
-			logger.info("Sent Telegram response for " + (plcAddress == null ? "unknown" : plcAddress.toKey())
-					+ " to server");
+			logger.info("Sent Telegram response for " + (plcAddress == null ? "unknown" : plcAddress.toKey()) +
+					" to server");
 	}
 
 	private void handleAuthResponse(PrivilegeContext ctx, JsonObject response) {
@@ -449,12 +449,12 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		if (!response.has(PARAM_STATE) || !response.has(PARAM_STATE_MSG) || !response.has(PARAM_AUTH_TOKEN)) {
 
 			closeBrokenGwSessionUpdateState(ctx, "Auth failed!",
-					"Failed to authenticated with Server: At least one of " + PARAM_STATE + ", " + PARAM_STATE_MSG
-							+ ", " + PARAM_AUTH_TOKEN + " params is missing on Auth Response");
+					"Failed to authenticated with Server: At least one of " + PARAM_STATE + ", " + PARAM_STATE_MSG +
+							", " + PARAM_AUTH_TOKEN + " params is missing on Auth Response");
 
 			throw new IllegalStateException(
-					"Failed to authenticated with Server: At least one of " + PARAM_STATE + ", " + PARAM_STATE_MSG
-							+ ", " + PARAM_AUTH_TOKEN + " params is missing on Auth Response");
+					"Failed to authenticated with Server: At least one of " + PARAM_STATE + ", " + PARAM_STATE_MSG +
+							", " + PARAM_AUTH_TOKEN + " params is missing on Auth Response");
 		}
 
 		if (PlcResponseState.valueOf(response.get(PARAM_STATE).getAsString()) != PlcResponseState.Sent) {
@@ -493,13 +493,13 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 
 	public void onWsClose(Session session, CloseReason closeReason) {
 		this.authenticated = false;
-		logger.info("Session closed with ID " + session.getId() + " due to " + closeReason.getCloseCode() + " "
-				+ closeReason.getReasonPhrase() + ". Reconnecting in " + RETRY_DELAY + "s.");
+		logger.info("Session closed with ID " + session.getId() + " due to " + closeReason.getCloseCode() + " " +
+				closeReason.getReasonPhrase() + ". Reconnecting in " + RETRY_DELAY + "s.");
 
 		if (this.gwSession != null) {
 			closeBrokenGwSessionUpdateState(closeReason.getReasonPhrase(),
-					"Session closed with ID " + session.getId() + " due to " + closeReason.getCloseCode() + " "
-							+ closeReason.getReasonPhrase() + ". Reconnecting in " + RETRY_DELAY + "s.");
+					"Session closed with ID " + session.getId() + " due to " + closeReason.getCloseCode() + " " +
+							closeReason.getReasonPhrase() + ". Reconnecting in " + RETRY_DELAY + "s.");
 		}
 
 		delayConnect(RETRY_DELAY, TimeUnit.SECONDS);
@@ -583,18 +583,17 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 			VersionQueryResult versionQueryResult = getContainer().getAgent().getVersion();
 			this.versions.add(AGENT_VERSION, versionQueryResult.getAgentVersion().toJson());
 			this.versions.add(APP_VERSION, versionQueryResult.getAppVersion().toJson());
-			this.versions.add(COMPONENT_VERSIONS, versionQueryResult.getComponentVersions()
-					.stream()
-					.map(ComponentVersion::toJson)
-					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
+			this.versions.add(COMPONENT_VERSIONS,
+					versionQueryResult.getComponentVersions().stream().map(ComponentVersion::toJson)
+							.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		}
 
 		return this.versions;
 	}
 
 	public JsonArray getIpAddresses() {
-		if (this.ipAddresses == null || this.ipAddresses.size() == 0 || (
-				System.currentTimeMillis() - this.ipAddressesUpdateTime > 10000L)) {
+		if (this.ipAddresses == null || this.ipAddresses.size() == 0 ||
+				(System.currentTimeMillis() - this.ipAddressesUpdateTime > 10000L)) {
 			try {
 				this.ipAddresses = NetworkHelper.findInet4Addresses().stream().map(add -> {
 					String mac;
