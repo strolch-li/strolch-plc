@@ -380,7 +380,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			logger.error("Failed to update PlcAddress " + addressId + " with new value " + value, e);
 		}
 
-		if (this.verbose)
+		if (this.verbose && (nanoTime() - s > MILLISECONDS.toNanos(SILENT_THRESHOLD)))
 			logger.info("async update " + address.toKey() + " took " + (formatNanoDuration(nanoTime() - s)));
 	}
 
