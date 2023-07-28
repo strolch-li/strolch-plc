@@ -90,7 +90,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		this.plcId = getComponent(PlcHandler.class).getPlcId();
 		this.gwConnectToServer = configuration.getBoolean("gwConnectToServer", true);
 		this.gwUsername = configuration.getString("gwUsername", null);
-		this.gwPassword = configuration.getString("gwPassword", null);
+		this.gwPassword = configuration.getSecret("gwPassword");
 		this.gwServerUrl = configuration.getString("gwServerUrl", null);
 
 		this.maxMessageQueue = configuration.getInt("maxMessageQueue", 100);
