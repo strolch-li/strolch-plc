@@ -5,7 +5,6 @@
             <applicationName>Strolch PLC</applicationName>
             <Properties>
                 <locale>en</locale>
-                <verbose>true</verbose>
                 <timezone>Europe/Zurich</timezone>
             </Properties>
         </Runtime>
