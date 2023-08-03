@@ -72,7 +72,7 @@ public class PlcPostInitializer extends SimplePostInitializer {
 				+ "\tYour Server.";
 
 		try {
-			getContainer().getComponent(MailHandler.class).sendMail(subject, body, recipients);
+			getContainer().getComponent(MailHandler.class).sendMailAsync(subject, body, recipients);
 		} catch (Exception e) {
 			logger.error("Notifying of server startup failed: " + ExceptionHelper.getRootCause(e), e);
 		}
