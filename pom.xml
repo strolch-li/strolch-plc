@@ -27,13 +27,13 @@
     <licenses>
         <license>
             <name>Apache License 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
 
     <organization>
         <name>Strolch</name>
-        <url>http://www.strolch.li/plc</url>
+        <url>https://www.strolch.li/plc</url>
     </organization>
 
     <developers>
@@ -66,7 +66,8 @@
         <hikaricp.version>5.0.1</hikaricp.version>
         <postgresql.version>42.5.1</postgresql.version>
         <antlr.version>4.9.3</antlr.version>
-        <javaxmail.version>1.6.2</javaxmail.version>
+        <jakarta-mail.version>2.1.0</jakarta-mail.version>
+        <angus-mail.version>2.0.1</angus-mail.version>
         <csv.version>1.9.0</csv.version>
         <cron.version>1.6.2</cron.version>
 
@@ -94,15 +95,14 @@
         <!-- maven plug-in dependencies -->
         <maven-scm-plugin.version>1.12.2</maven-scm-plugin.version>
         <buildnumber-maven-plugin.version>3.0.0</buildnumber-maven-plugin.version>
+        <git-versioner-maven-plugin.version>0.2.0</git-versioner-maven-plugin.version>
         <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <dependency-check-maven-plugin.version>6.5.2</dependency-check-maven-plugin.version>
-        <maven-site-plugin.version>3.10.0</maven-site-plugin.version>
-        <maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
+        <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
         <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
-        <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
-        <tomcat7-maven-plugin.version>2.2</tomcat7-maven-plugin.version>
+        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
         <maven-javadoc-plugin.version>3.3.1</maven-javadoc-plugin.version>
         <maven-deploy-plugin.version>3.0.0-M2</maven-deploy-plugin.version>
         <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
@@ -327,7 +327,6 @@
 
         <pluginManagement>
             <plugins>
-
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
@@ -421,16 +420,6 @@
                     <version>${maven-site-plugin.version}</version>
                     <configuration>
                         <outputEncoding>UTF-8</outputEncoding>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-eclipse-plugin</artifactId>
-                    <version>${maven-eclipse-plugin.version}</version>
-                    <configuration>
-                        <downloadJavadocs>true</downloadJavadocs>
-                        <downloadSources>true</downloadSources>
                     </configuration>
                 </plugin>
 

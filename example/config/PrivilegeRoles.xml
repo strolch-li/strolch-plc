@@ -44,6 +44,12 @@
     </Role>
 
     <Role name="StrolchAdmin">
+        <Privilege name="Inspector" policy="DefaultPrivilege">
+            <AllAllowed>true</AllAllowed>
+        </Privilege>
+        <Privilege name="Agent" policy="DefaultPrivilege">
+            <AllAllowed>true</AllAllowed>
+        </Privilege>
         <Privilege name="PrivilegeAddUser" policy="UserAccessPrivilege">
             <AllAllowed>true</AllAllowed>
         </Privilege>

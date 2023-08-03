@@ -230,17 +230,6 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 	}
 
 	@Override
-	public void unregister() {
-		unregister(R_CONVEYOR_01, A_OCCUPIED);
-		unregister(R_CONVEYOR_02, A_OCCUPIED);
-		unregister(R_CONVEYOR_03, A_OCCUPIED);
-		unregister(R_CONVEYOR_04, A_OCCUPIED);
-
-		unregister(R_CONVEYOR_03, A_BARCODE);
-		super.unregister();
-	}
-
-	@Override
 	public void start(StrolchTransaction tx) {
 
 		this.conveyor1Occupied = new AtomicBoolean(getAddressState(tx, R_CONVEYOR_01, A_OCCUPIED));

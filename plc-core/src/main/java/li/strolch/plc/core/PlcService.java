@@ -1,15 +1,5 @@
 package li.strolch.plc.core;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
-import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
-import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
-import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
-
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.concurrent.*;
-
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
@@ -27,6 +17,18 @@ import li.strolch.runtime.privilege.PrivilegedRunnable;
 import li.strolch.runtime.privilege.PrivilegedRunnableWithResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.concurrent.*;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
+import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
+import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
 /**
  * <p>This is an interface to implement short use cases in a plc.</p>
@@ -51,6 +53,7 @@ public abstract class PlcService implements PlcListener {
 	protected final PlcHandler plcHandler;
 
 	protected final Map<PlcAddress, Future<?>> debounceMap;
+	protected final List<PlcAddressKey> registeredKeys;
 
 	private PlcServiceState state;
 
@@ -59,6 +62,7 @@ public abstract class PlcService implements PlcListener {
 		this.plcHandler = plcHandler;
 		this.state = PlcServiceState.Unregistered;
 		this.debounceMap = new ConcurrentHashMap<>();
+		this.registeredKeys = new ArrayList<>();
 	}
 
 	public PlcServiceState getState() {
@@ -74,8 +78,7 @@ public abstract class PlcService implements PlcListener {
 	 * Called to initialize this service, here one would read the model state of a given address using
 	 * {@link #getAddressState(StrolchTransaction, String, String)}
 	 *
-	 * @param tx
-	 * 		the transaction giving access to the model
+	 * @param tx the transaction giving access to the model
 	 */
 	public void start(StrolchTransaction tx) {
 		this.state = PlcServiceState.Started;
@@ -99,42 +102,44 @@ public abstract class PlcService implements PlcListener {
 	 * Called to unregister this service from previously registered addresses
 	 */
 	public void unregister() {
+		unregisterAll();
 		this.state = PlcServiceState.Unregistered;
 	}
 
 	/**
 	 * Register this service with the given resource and action
 	 *
-	 * @param resource
-	 * 		the resource ID
-	 * @param action
-	 * 		the action
+	 * @param resource the resource ID
+	 * @param action   the action
 	 */
 	public void register(String resource, String action) {
 		this.plcHandler.register(resource, action, this);
+		this.registeredKeys.add(PlcAddressKey.keyFor(resource, action));
 	}
 
 	/**
 	 * Unregister this service with the given resource and action
 	 *
-	 * @param resource
-	 * 		the resource ID
-	 * @param action
-	 * 		the action
+	 * @param resource the resource ID
+	 * @param action   the action
 	 */
 	public void unregister(String resource, String action) {
 		this.plcHandler.unregister(resource, action, this);
 	}
 
 	/**
+	 * Unregisters this {@link PlcService} from all previously registered addresses
+	 */
+	protected void unregisterAll() {
+		this.registeredKeys.forEach(key -> this.plcHandler.unregister(key.resource, key.action, this));
+	}
+
+	/**
 	 * Returns the {@link Resource} of type #TYPE_PLC_ADDRESS for the given resource and action
 	 *
-	 * @param tx
-	 * 		the current TX
-	 * @param resource
-	 * 		the resource
-	 * @param action
-	 * 		the action
+	 * @param tx       the current TX
+	 * @param resource the resource
+	 * @param action   the action
 	 *
 	 * @return the {@link Resource}
 	 */
@@ -147,14 +152,10 @@ public abstract class PlcService implements PlcListener {
 	 * Returns the value of a plc address by calling {@link #getPlcAddress(StrolchTransaction, String, String)} for the
 	 * given resource and action
 	 *
-	 * @param tx
-	 * 		the current TX
-	 * @param resource
-	 * 		the resource
-	 * @param action
-	 * 		the action
-	 * @param <T>
-	 * 		the type of value to return
+	 * @param tx       the current TX
+	 * @param resource the resource
+	 * @param action   the action
+	 * @param <T>      the type of value to return
 	 *
 	 * @return the value of the given address
 	 */
@@ -166,12 +167,9 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Enables an operations log message to be seen by a user
 	 *
-	 * @param addressKey
-	 * 		the address for which the message is enabled
-	 * @param bundle
-	 * 		the resource bundle containing the message
-	 * @param severity
-	 * 		the severity of the message
+	 * @param addressKey the address for which the message is enabled
+	 * @param bundle     the resource bundle containing the message
+	 * @param severity   the severity of the message
 	 */
 	protected void enableMsg(PlcAddressKey addressKey, ResourceBundle bundle, LogSeverity severity) {
 		sendMsg(logMessageFor(addressKey, bundle, severity, LogMessageState.Active));
@@ -180,8 +178,7 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Disables an operations log message which was previously enabled
 	 *
-	 * @param addressKey
-	 * 		the address for which the message was enabled
+	 * @param addressKey the address for which the message was enabled
 	 */
 	protected void disableMsg(PlcAddressKey addressKey) {
 		disableMsg(Locator.valueOf("Plc", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action));
@@ -190,12 +187,9 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Enables an operations log message to be seen by a user
 	 *
-	 * @param i18nKey
-	 * 		the key of the message in the resource bundle
-	 * @param bundle
-	 * 		the resource bundle containing the message
-	 * @param severity
-	 * 		the severity of the message
+	 * @param i18nKey  the key of the message in the resource bundle
+	 * @param bundle   the resource bundle containing the message
+	 * @param severity the severity of the message
 	 */
 	protected void enableMsg(String i18nKey, ResourceBundle bundle, LogSeverity severity) {
 		sendMsg(logMessageFor(i18nKey, bundle, severity, LogMessageState.Active));
@@ -204,10 +198,8 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Disables an operations log message which was previously enabled
 	 *
-	 * @param i18nKey
-	 * 		the key of the message in the resource bundle for which the message was enabled
-	 * @param bundle
-	 * 		the resource bundle containing the message
+	 * @param i18nKey the key of the message in the resource bundle for which the message was enabled
+	 * @param bundle  the resource bundle containing the message
 	 */
 	protected void disableMsg(String i18nKey, ResourceBundle bundle) {
 		disableMsg(Locator.valueOf("Plc", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey));
@@ -216,12 +208,9 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Sends a message created for the given properties to a remote listener
 	 *
-	 * @param i18nKey
-	 * 		the key of the message
-	 * @param bundle
-	 * 		the bundle containing the key
-	 * @param severity
-	 * 		the severity of the message
+	 * @param i18nKey  the key of the message
+	 * @param bundle   the bundle containing the key
+	 * @param severity the severity of the message
 	 */
 	protected void sendMsg(String i18nKey, ResourceBundle bundle, LogSeverity severity) {
 		sendMsg(logMessageFor(i18nKey, bundle, severity));
@@ -230,12 +219,9 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Creates a {@link LogMessage} for the given fields
 	 *
-	 * @param addressKey
-	 * 		the address for the key
-	 * @param bundle
-	 * 		the bundle containing the message
-	 * @param severity
-	 * 		the severity of the message
+	 * @param addressKey the address for the key
+	 * @param bundle     the bundle containing the message
+	 * @param severity   the severity of the message
 	 *
 	 * @return the {@link LogMessage} instance
 	 */
@@ -246,14 +232,10 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Creates a {@link LogMessage} for the given fields
 	 *
-	 * @param addressKey
-	 * 		the address for the key
-	 * @param bundle
-	 * 		the bundle containing the message
-	 * @param severity
-	 * 		the severity of the message
-	 * @param state
-	 * 		the state of the message
+	 * @param addressKey the address for the key
+	 * @param bundle     the bundle containing the message
+	 * @param severity   the severity of the message
+	 * @param state      the state of the message
 	 *
 	 * @return the {@link LogMessage} instance
 	 */
@@ -267,12 +249,9 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Creates a {@link LogMessage} for the given fields
 	 *
-	 * @param i18nKey
-	 * 		the key of the message
-	 * @param bundle
-	 * 		the bundle containing the message
-	 * @param severity
-	 * 		the severity of the message
+	 * @param i18nKey  the key of the message
+	 * @param bundle   the bundle containing the message
+	 * @param severity the severity of the message
 	 *
 	 * @return the {@link LogMessage} instance
 	 */
@@ -283,14 +262,10 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Creates a {@link LogMessage} for the given fields
 	 *
-	 * @param i18nKey
-	 * 		the key of the message
-	 * @param bundle
-	 * 		the bundle containing the message
-	 * @param severity
-	 * 		the severity of the message
-	 * @param state
-	 * 		the state of the message
+	 * @param i18nKey  the key of the message
+	 * @param bundle   the bundle containing the message
+	 * @param severity the severity of the message
+	 * @param state    the state of the message
 	 *
 	 * @return the {@link LogMessage} instance
 	 */
@@ -304,14 +279,13 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Sends the given {@link LogMessage} to the remote listener
 	 *
-	 * @param logMessage
-	 * 		the message to send
+	 * @param logMessage the message to send
 	 */
 	protected void sendMsg(LogMessage logMessage) {
 		switch (logMessage.getSeverity()) {
-		case Info, Notification -> logger.info(logMessage.toString());
-		case Warning -> logger.warn(logMessage.toString());
-		case Error, Exception -> logger.error(logMessage.toString());
+			case Info, Notification -> logger.info(logMessage.toString());
+			case Warning -> logger.warn(logMessage.toString());
+			case Error, Exception -> logger.error(logMessage.toString());
 		}
 		this.plcHandler.sendMsg(logMessage);
 	}
@@ -319,8 +293,7 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Disables a message with the given {@link Locator}
 	 *
-	 * @param locator
-	 * 		the locator of the message
+	 * @param locator the locator of the message
 	 */
 	protected void disableMsg(Locator locator) {
 		logger.info("Disabling message for locator " + locator);
@@ -330,10 +303,8 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Causes the {@link PlcAddress} for the given resource and action to be sent as a telegram with its default value
 	 *
-	 * @param resource
-	 * 		the resource
-	 * @param action
-	 * 		the action
+	 * @param resource the resource
+	 * @param action   the action
 	 */
 	protected void send(String resource, String action) {
 		this.plcHandler.send(resource, action);
@@ -342,12 +313,9 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Causes the {@link PlcAddress} for the given resource and action to be sent as a telegram with the given value
 	 *
-	 * @param resource
-	 * 		the resource
-	 * @param action
-	 * 		the action
-	 * @param value
-	 * 		the value to send with the {@link PlcAddress}
+	 * @param resource the resource
+	 * @param action   the action
+	 * @param value    the value to send with the {@link PlcAddress}
 	 */
 	protected void send(String resource, String action, Object value) {
 		this.plcHandler.send(resource, action, value);
@@ -356,12 +324,9 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Notifies listeners on the {@link PlcAddress} for the given resource and action, of the new value
 	 *
-	 * @param resource
-	 * 		the resource
-	 * @param action
-	 * 		the action
-	 * @param value
-	 * 		the value to notify the listeners with
+	 * @param resource the resource
+	 * @param action   the action
+	 * @param value    the value to notify the listeners with
 	 */
 	protected void notify(String resource, String action, Object value) {
 		this.plcHandler.notify(resource, action, value);
@@ -370,8 +335,7 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Runs the given {@link PrivilegedRunnable} as the agent user
 	 *
-	 * @param runnable
-	 * 		the runnable to run
+	 * @param runnable the runnable to run
 	 */
 	protected void run(PrivilegedRunnable runnable) throws Exception {
 		this.container.getPrivilegeHandler().runAsAgent(runnable);
@@ -380,10 +344,8 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Runs the given {@link PrivilegedRunnableWithResult} as the agent user, returning a value as the result
 	 *
-	 * @param runnable
-	 * 		the runnable to run
-	 * @param <T>
-	 * 		the type of object being returned in the runnable
+	 * @param runnable the runnable to run
+	 * @param <T>      the type of object being returned in the runnable
 	 *
 	 * @return the result of the runnable
 	 */
@@ -394,10 +356,8 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Opens a new {@link StrolchTransaction} with the given {@link PrivilegeContext}
 	 *
-	 * @param ctx
-	 * 		the {@link PrivilegeContext}
-	 * @param readOnly
-	 * 		true for the TX to be read only
+	 * @param ctx      the {@link PrivilegeContext}
+	 * @param readOnly true for the TX to be read only
 	 *
 	 * @return the new TX to be used in a try-with-resource block
 	 */
@@ -425,9 +385,8 @@ public abstract class PlcService implements PlcListener {
 
 	/**
 	 * <p>Delays the execution of the given runnable by the given delay in milliseconds. Subsequent calls with the
-	 * given
-	 * {@link PlcAddress} will cancel any previous calls with the same address, delaying the execution again by the
-	 * given amount of time.</p>
+	 * given {@link PlcAddress} will cancel any previous calls with the same address, delaying the execution again by
+	 * the given amount of time.</p>
 	 *
 	 * <p>This methods is used to handle hardware where the bits change often, before resting at a new state. E.g. a
 	 * light barrier where it might toggle between true and false a few times, before staying true when the light
@@ -445,8 +404,7 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Submits the given runnable for asynchronous execution
 	 *
-	 * @param runnable
-	 * 		the runnable to execute asynchronously
+	 * @param runnable the runnable to execute asynchronously
 	 */
 	protected void async(Runnable runnable) {
 		getExecutor().submit(() -> {
@@ -461,12 +419,9 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Delay the execution of the given {@link Runnable} by the given delay
 	 *
-	 * @param runnable
-	 * 		the runnable to delay
-	 * @param delay
-	 * 		the time to delay
-	 * @param delayUnit
-	 * 		the unit of the time to delay
+	 * @param runnable  the runnable to delay
+	 * @param delay     the time to delay
+	 * @param delayUnit the unit of the time to delay
 	 *
 	 * @return a future to cancel the executor before execution
 	 */
@@ -483,12 +438,9 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Delay the execution of the given {@link PrivilegedRunnable} by the given delay
 	 *
-	 * @param runnable
-	 * 		the runnable to delay
-	 * @param delay
-	 * 		the time to delay
-	 * @param delayUnit
-	 * 		the unit of the time to delay
+	 * @param runnable  the runnable to delay
+	 * @param delay     the time to delay
+	 * @param delayUnit the unit of the time to delay
 	 *
 	 * @return a future to cancel the executor before execution
 	 */
@@ -505,14 +457,10 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Submit the given {@link Runnable} for repeated execution
 	 *
-	 * @param runnable
-	 * 		the runnable to delay
-	 * @param initialDelay
-	 * 		the initial delay
-	 * @param period
-	 * 		the delay between subsequent executions
-	 * @param delayUnit
-	 * 		the unit of the time to delay
+	 * @param runnable     the runnable to delay
+	 * @param initialDelay the initial delay
+	 * @param period       the delay between subsequent executions
+	 * @param delayUnit    the unit of the time to delay
 	 *
 	 * @return a future to cancel the executor before execution
 	 */
@@ -530,14 +478,10 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Submit the given {@link PrivilegedRunnable} for repeated execution
 	 *
-	 * @param runnable
-	 * 		the runnable to delay
-	 * @param initialDelay
-	 * 		the initial delay
-	 * @param period
-	 * 		the delay between subsequent executions
-	 * @param delayUnit
-	 * 		the unit of the time to delay
+	 * @param runnable     the runnable to delay
+	 * @param initialDelay the initial delay
+	 * @param period       the delay between subsequent executions
+	 * @param delayUnit    the unit of the time to delay
 	 *
 	 * @return a future to cancel the executor before execution
 	 */
@@ -555,14 +499,10 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Submit the given {@link Runnable} for repeated execution
 	 *
-	 * @param runnable
-	 * 		the runnable to delay
-	 * @param initialDelay
-	 * 		the initial delay
-	 * @param period
-	 * 		the delay between subsequent executions
-	 * @param delayUnit
-	 * 		the unit of the time to delay
+	 * @param runnable     the runnable to delay
+	 * @param initialDelay the initial delay
+	 * @param period       the delay between subsequent executions
+	 * @param delayUnit    the unit of the time to delay
 	 *
 	 * @return a future to cancel the executor before execution
 	 */
@@ -580,14 +520,10 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Submit the given {@link PrivilegedRunnable} for repeated execution
 	 *
-	 * @param runnable
-	 * 		the runnable to delay
-	 * @param initialDelay
-	 * 		the initial delay
-	 * @param period
-	 * 		the delay between subsequent executions
-	 * @param delayUnit
-	 * 		the unit of the time to delay
+	 * @param runnable     the runnable to delay
+	 * @param initialDelay the initial delay
+	 * @param period       the delay between subsequent executions
+	 * @param delayUnit    the unit of the time to delay
 	 *
 	 * @return a future to cancel the executor before execution
 	 */
@@ -605,8 +541,7 @@ public abstract class PlcService implements PlcListener {
 	/**
 	 * Notifies the caller of one of the async, or schedule methods that the execution of a runnable failed
 	 *
-	 * @param e
-	 * 		the exception which occurred
+	 * @param e the exception which occurred
 	 */
 	protected void handleFailedAsync(Exception e) {
 		logger.error("Failed to execute " + getClass().getSimpleName(), e);
