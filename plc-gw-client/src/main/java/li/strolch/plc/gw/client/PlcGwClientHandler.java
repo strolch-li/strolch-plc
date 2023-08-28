@@ -580,10 +580,10 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		if (this.versions == null) {
 			this.versions = new JsonObject();
 			VersionQueryResult versionQueryResult = getContainer().getAgent().getVersion();
-			this.versions.add(AGENT_VERSION, versionQueryResult.getAgentVersion().toJson());
-			this.versions.add(APP_VERSION, versionQueryResult.getAppVersion().toJson());
+			this.versions.add(AGENT_VERSION, versionQueryResult.getAgentVersion().toJson(true));
+			this.versions.add(APP_VERSION, versionQueryResult.getAppVersion().toJson(true));
 			this.versions.add(COMPONENT_VERSIONS,
-					versionQueryResult.getComponentVersions().stream().map(ComponentVersion::toJson)
+					versionQueryResult.getComponentVersions().stream().map(v -> v.toJson(true))
 							.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		}
 
@@ -591,7 +591,7 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 	}
 
 	public JsonArray getIpAddresses() {
-		if (this.ipAddresses == null || this.ipAddresses.size() == 0 ||
+		if (this.ipAddresses == null || this.ipAddresses.isEmpty() ||
 				(System.currentTimeMillis() - this.ipAddressesUpdateTime > 10000L)) {
 			try {
 				this.ipAddresses = NetworkHelper.findInet4Addresses().stream().map(add -> {
