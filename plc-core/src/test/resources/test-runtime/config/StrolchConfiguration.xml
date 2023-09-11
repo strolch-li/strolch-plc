@@ -27,7 +27,6 @@
                 <realms>defaultRealm</realms>
                 <dataStoreMode>TRANSIENT</dataStoreMode>
                 <dataStoreFile>defaultModel.xml</dataStoreFile>
-                <enableObserverUpdates>true</enableObserverUpdates>
             </Properties>
         </Component>
 

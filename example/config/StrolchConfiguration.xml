@@ -36,7 +36,6 @@
                 <realms>defaultRealm</realms>
                 <dataStoreMode>CACHED</dataStoreMode>
                 <dataStoreFile>defaultModel.xml</dataStoreFile>
-                <enableObserverUpdates>true</enableObserverUpdates>
             </Properties>
         </Component>
 
