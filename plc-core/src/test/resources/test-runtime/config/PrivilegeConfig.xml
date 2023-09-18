@@ -9,7 +9,6 @@
             <Parameter name="secretSalt" value="changeMe"/>
             <Parameter name="persistSessions" value="true"/>
             <Parameter name="autoPersistOnUserChangesData" value="false"/>
-            <Parameter name="privilegeConflictResolution" value="MERGE"/>
         </Parameters>
 
         <EncryptionHandler class="li.strolch.privilege.handler.DefaultEncryptionHandler">
