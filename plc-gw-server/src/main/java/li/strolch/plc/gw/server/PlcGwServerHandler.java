@@ -34,7 +34,7 @@ import li.strolch.privilege.base.PrivilegeException;
 import li.strolch.privilege.model.Certificate;
 import li.strolch.privilege.model.Usage;
 import li.strolch.privilege.model.UserRep;
-import li.strolch.rest.StrolchSessionHandler;
+import li.strolch.runtime.sessions.StrolchSessionHandler;
 import li.strolch.runtime.configuration.ComponentConfiguration;
 import li.strolch.runtime.privilege.PrivilegedRunnable;
 import li.strolch.runtime.privilege.PrivilegedRunnableWithResult;

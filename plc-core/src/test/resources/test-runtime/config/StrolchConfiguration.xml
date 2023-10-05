@@ -52,8 +52,8 @@
 
         <Component>
             <name>SessionHandler</name>
-            <api>li.strolch.rest.StrolchSessionHandler</api>
-            <impl>li.strolch.rest.DefaultStrolchSessionHandler</impl>
+            <api>li.strolch.runtime.sessions.StrolchSessionHandler</api>
+            <impl>li.strolch.runtime.sessions.DefaultStrolchSessionHandler</impl>
             <depends>PrivilegeHandler</depends>
             <Properties>
                 <session.ttl.minutes>30</session.ttl.minutes>
