@@ -96,9 +96,8 @@
             <impl>li.strolch.runtime.sessions.DefaultStrolchSessionHandler</impl>
             <depends>PrivilegeHandler</depends>
             <Properties>
-                <session.ttl.minutes>30</session.ttl.minutes>
+                <session.ttl.minutes>1440</session.ttl.minutes>
                 <session.maxKeepAlive.minutes>10080</session.maxKeepAlive.minutes>
-                <session.reload>true</session.reload>
             </Properties>
         </Component>
         <Component>
