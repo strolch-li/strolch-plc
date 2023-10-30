@@ -86,7 +86,7 @@
 
         <javafx.version>17.0.1</javafx.version>
 
-        <strolch.version>2.1.0-SNAPSHOT</strolch.version>
+        <strolch.version>2.1.1</strolch.version>
 
         <!-- test time dependencies -->
         <junit.version>4.13.2</junit.version>
