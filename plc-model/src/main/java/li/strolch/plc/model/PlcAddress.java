@@ -1,11 +1,14 @@
 package li.strolch.plc.model;
 
-import java.util.Objects;
-
 import li.strolch.model.StrolchValueType;
 
+import java.util.Objects;
+
+import static java.text.MessageFormat.format;
+
 /**
- * <p>This represents the address on the PLC. Addresses always consists of a resource and action field. This address includes:</p>
+ * <p>This represents the address on the PLC. Addresses always consists of a resource and action field. This address
+ * includes:</p>
  * <ul>
  *     <li>the type defined as {@link PlcAddressType}</li>
  *     <li>remote flag, denoting of this address should be sent to a remote listener</li>
@@ -87,8 +90,8 @@ public class PlcAddress {
 
 	@Override
 	public String toString() {
-		return this.type + " " + this.resource + "-" + this.action + " " + this.valueType.getType() + " @ "
-				+ this.address;
+		return format("{0} {1}-{2} {3} @ {4}", this.type, this.resource, this.action, this.valueType.getType(),
+				this.address);
 	}
 
 	public String toKey() {

@@ -1,12 +1,5 @@
 package li.strolch.plc.core.hw;
 
-import static java.util.stream.Collectors.toSet;
-
-import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.Stream;
-
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcAddressType;
@@ -14,6 +7,13 @@ import li.strolch.utils.ExecutorPool;
 import li.strolch.utils.collections.MapOfLists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 public class DefaultPlc implements Plc {
 
@@ -79,15 +79,15 @@ public class DefaultPlc implements Plc {
 	@Override
 	public void register(PlcAddress address, PlcListener listener) {
 		this.listeners.addElement(address, listener);
-		logger.info(address.toKeyAddress() + ": " + listener.getClass().getSimpleName());
+		logger.info("{}: {}", address.toKeyAddress(), listener.getClass().getSimpleName());
 	}
 
 	@Override
 	public void unregister(PlcAddress address, PlcListener listener) {
 		if (this.listeners.removeElement(address, listener)) {
-			logger.info(address + ": " + listener.getClass().getName());
+			logger.info("{}: {}", address, listener.getClass().getName());
 		} else {
-			logger.warn("Listener not registered with key " + address.toKeyAddress() + ": " +
+			logger.warn("Listener not registered with key {}: {}", address.toKeyAddress(),
 					listener.getClass().getSimpleName());
 		}
 	}
@@ -105,7 +105,7 @@ public class DefaultPlc implements Plc {
 	private void doNotify(String address, Object value) {
 		PlcAddress plcAddress = this.notificationMappings.get(address);
 		if (plcAddress == null) {
-			logger.warn("No mapping to PlcAddress for hwAddress " + address);
+			logger.warn("No mapping to PlcAddress for hwAddress {}", address);
 			return;
 		}
 
@@ -113,7 +113,7 @@ public class DefaultPlc implements Plc {
 			if (value instanceof Boolean)
 				value = !((boolean) value);
 			else
-				logger.error(plcAddress + " is marked as inverted, but the value is not a boolean, but a " +
+				logger.error("{} is marked as inverted, but the value is not a boolean, but a {}", plcAddress,
 						value.getClass());
 		}
 
@@ -130,11 +130,11 @@ public class DefaultPlc implements Plc {
 			for (PlcListener listener : listeners) {
 				try {
 					if (this.verbose)
-						logger.info("Notifying " + plcAddress.toKey() + ": " + value + " @ " + listener);
+						logger.info("Notifying {}: {} @ {}", plcAddress.toKey(), value, listener);
 					listener.handleNotification(plcAddress, value);
 				} catch (Exception e) {
 					if (catchExceptions) {
-						logger.error("Failed to notify listener " + listener + " for address " + plcAddress, e);
+						logger.error("Failed to notify listener {} for address {}", listener, plcAddress, e);
 					} else {
 						throw e;
 					}
@@ -157,7 +157,7 @@ public class DefaultPlc implements Plc {
 				logger.error("Interrupted!");
 			} catch (Exception e) {
 				if (task != null)
-					logger.error("Failed to perform notification for " + task.address + ": " + task.value, e);
+					logger.error("Failed to perform notification for {}: {}", task.address, task.value, e);
 				else
 					logger.error("Failed to get notification task", e);
 			}
@@ -209,10 +209,10 @@ public class DefaultPlc implements Plc {
 	public void addConnection(PlcConnection connection) {
 		this.connections.put(connection.getId(), connection);
 		Set<String> addresses = connection.getAddresses();
-		logger.info("Adding connection " + connection.getId() + " " + connection.getClass().getName() + " with " +
-				addresses.size() + " addresses...");
+		logger.info("Adding connection {} {} with {} addresses...", connection.getId(), connection.getClass().getName(),
+				addresses.size());
 		for (String address : addresses) {
-			logger.info("  Adding " + address + "...");
+			logger.info("  Adding {}...", address);
 			this.connectionsByAddress.put(address, connection);
 		}
 	}
@@ -268,23 +268,13 @@ public class DefaultPlc implements Plc {
 			throw new IllegalArgumentException(
 					"Replaced mapping for address " + address.address + " for key " + replaced + " with " + address);
 
-		logger.info("Registered " + address);
+		logger.info("Registered {}", address);
 	}
 
 	private void validateVirtualAddress(PlcAddress address) {
-
-		if (address.address.equals(VIRTUAL_BOOLEAN) || address.address.equals(VIRTUAL_BOOLEAN + ".")) {
-			throw new IllegalStateException(
-					"Virtual address " + address.address + " is missing sub component for " + address);
-		}
-
-		if (address.address.equals(VIRTUAL_STRING) || address.address.equals(VIRTUAL_STRING + ".")) {
-			throw new IllegalStateException(
-					"Virtual address " + address.address + " is missing sub component for " + address);
-		}
-
-		if (address.address.equals(VIRTUAL_INTEGER) || address.address.equals(VIRTUAL_INTEGER + ".")) {
-			throw new IllegalStateException(
+		switch (address.address) {
+			case VIRTUAL_BOOLEAN, VIRTUAL_BOOLEAN + ".", VIRTUAL_STRING, VIRTUAL_STRING + ".", VIRTUAL_INTEGER,
+				 VIRTUAL_INTEGER + "." -> throw new IllegalStateException(
 					"Virtual address " + address.address + " is missing sub component for " + address);
 		}
 	}

@@ -15,11 +15,11 @@ public class RandomStringConnection extends SimplePlcConnection {
 	@Override
 	public void send(String address, Object value) {
 		assertConnected();
-		PlcConnection.logger.info("Sending " + address + " => " + value);
+		PlcConnection.logger.info("Sending {} => {}", address, value);
 		byte[] data = new byte[8];
 		new SecureRandom().nextBytes(data);
 		String newValue = StringHelper.toHexString(data);
-		PlcConnection.logger.info("Generated random value " + newValue);
+		PlcConnection.logger.info("Generated random value {}", newValue);
 		this.plc.syncNotify(address, newValue);
 	}
 }

@@ -296,7 +296,7 @@ public abstract class PlcService implements PlcListener {
 	 * @param locator the locator of the message
 	 */
 	protected void disableMsg(Locator locator) {
-		logger.info("Disabling message for locator " + locator);
+		logger.info("Disabling message for locator {}", locator);
 		this.plcHandler.disableMsg(locator);
 	}
 
@@ -544,6 +544,6 @@ public abstract class PlcService implements PlcListener {
 	 * @param e the exception which occurred
 	 */
 	protected void handleFailedAsync(Exception e) {
-		logger.error("Failed to execute " + getClass().getSimpleName(), e);
+		logger.error("Failed to execute {}", getClass().getSimpleName(), e);
 	}
 }

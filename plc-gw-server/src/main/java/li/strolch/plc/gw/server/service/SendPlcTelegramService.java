@@ -1,13 +1,13 @@
 package li.strolch.plc.gw.server.service;
 
-import static li.strolch.plc.model.PlcConstants.*;
-
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.model.PlcAddressResponse;
 import li.strolch.service.StringMapArgument;
 import li.strolch.service.api.AbstractService;
 import li.strolch.service.api.ServiceResult;
 import li.strolch.utils.dbc.DBC;
+
+import static li.strolch.plc.model.PlcConstants.*;
 
 public class SendPlcTelegramService extends AbstractService<StringMapArgument, ServiceResult> {
 

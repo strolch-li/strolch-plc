@@ -1,8 +1,5 @@
 package li.strolch.plc.rest;
 
-import static li.strolch.plc.model.PlcConstants.*;
-import static li.strolch.rest.StrolchRestfulConstants.DATA;
-
 import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
@@ -18,6 +15,10 @@ import li.strolch.rest.helper.ResponseUtil;
 import li.strolch.service.StringMapArgument;
 import li.strolch.service.api.ServiceHandler;
 import li.strolch.service.api.ServiceResult;
+import li.strolch.utils.dbc.DBC;
+
+import static li.strolch.plc.model.PlcConstants.*;
+import static li.strolch.rest.StrolchRestfulConstants.DATA;
 
 @Path("plc")
 public class PlcResource {
@@ -27,6 +28,8 @@ public class PlcResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getState(@Context HttpServletRequest request) {
 		PlcHandler plcHandler = RestfulStrolchComponent.getInstance().getComponent(PlcHandler.class);
+		Certificate cert = (Certificate) request.getAttribute(StrolchRestfulConstants.STROLCH_CERTIFICATE);
+		DBC.PRE.assertNotNull("No certificate available!", cert);
 
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.addProperty(PARAM_STATE, plcHandler.getPlcState().name());

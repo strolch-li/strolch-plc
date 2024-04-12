@@ -19,12 +19,12 @@ public abstract class SimplePlcConnection extends PlcConnection {
 
 	@Override
 	public void initialize(Map<String, Object> parameters) throws Exception {
-		logger.info("Configured " + getClass().getSimpleName() + " " + this.id);
+		logger.info("Configured {} {}", getClass().getSimpleName(), this.id);
 	}
 
 	@Override
 	public boolean connect() {
-		logger.info(this.id + ": Is now connected.");
+		logger.info("{}: Is now connected.", this.id);
 		if (this.simulated)
 			logger.info("Running SIMULATED");
 		this.connectionState = ConnectionState.Connected;
@@ -35,7 +35,7 @@ public abstract class SimplePlcConnection extends PlcConnection {
 
 	@Override
 	public void disconnect() {
-		logger.info(this.id + ": Is now disconnected.");
+		logger.info("{}: Is now disconnected.", this.id);
 		this.connectionState = ConnectionState.Disconnected;
 		this.connectionStateMsg = "-";
 		this.plc.notifyConnectionStateChanged(this);

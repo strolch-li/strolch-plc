@@ -1,14 +1,13 @@
 package li.strolch.plc.core.hw.i2c;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.text.MessageFormat;
-
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * <p>Compile:</p>
@@ -51,7 +50,7 @@ public class RSL366OverHorterI2cTest {
 	static final byte STATUS_BAD_PTR = 0x08;
 	static final byte STATUS_CONF_TOO_MUCH_DATA = 0x09;
 
-	static byte[] systemValues = new byte[] { 0, 0, 0, 0 };
+	static byte[] systemValues = new byte[]{0, 0, 0, 0};
 
 	static byte system;
 	static byte device;
@@ -70,8 +69,11 @@ public class RSL366OverHorterI2cTest {
 		byte[] status = configure();
 
 		String version = status[ADDR_INFO_VER_MAJOR] + "." + status[ADDR_INFO_VER_MINOR];
-		System.out.println("Connected to Horter I2C to 433MHz version " + version + " supporting "
-				+ status[ADDR_INFO_NR_OF_KNOWN_PROTOCOLS] + " 433MHz protocols");
+		System.out.println("Connected to Horter I2C to 433MHz version "
+				+ version
+				+ " supporting "
+				+ status[ADDR_INFO_NR_OF_KNOWN_PROTOCOLS]
+				+ " 433MHz protocols");
 
 		System.out.println();
 		readCodes(input);
@@ -86,21 +88,11 @@ public class RSL366OverHorterI2cTest {
 				String action = input.readLine();
 
 				switch (action) {
-				case "o":
-					setState(system, device, true);
-					break;
-				case "f":
-					setState(system, device, false);
-					break;
-				case "c":
-					configure();
-					break;
-				case "e":
-					readCodes(input);
-					break;
-				case "x":
-					run = false;
-					break;
+					case "o" -> setState(system, device, true);
+					case "f" -> setState(system, device, false);
+					case "c" -> configure();
+					case "e" -> readCodes(input);
+					case "x" -> run = false;
 				}
 
 			} catch (Exception e) {
@@ -116,7 +108,7 @@ public class RSL366OverHorterI2cTest {
 		byte protocol = 2;
 		byte repeats = 1;
 		System.out.println("Configuring...");
-		byte[] data = { protocol, repeats };
+		byte[] data = {protocol, repeats};
 		System.out.println("=> " + toHexString(ADDR_REG_CONF_CODE) + " " + toHexString(data));
 		dev.write(ADDR_REG_CONF_CODE, data);
 		Thread.sleep(50L);
@@ -164,14 +156,19 @@ public class RSL366OverHorterI2cTest {
 			throw new IllegalStateException(
 					"DeviceCode is invalid after sending deviceCode: " + parseStatus(status[ADDR_INFO_STATUS]));
 		if (!isDeviceTransmitting(status))
-			throw new IllegalStateException(
-					"Device is not transmitting after sending " + toHexString(system) + "." + toHexString(value)
-							+ "...");
+			throw new IllegalStateException("Device is not transmitting after sending "
+					+ toHexString(system)
+					+ "."
+					+ toHexString(value)
+					+ "...");
 
 		showInfoRegister(status);
-		System.out.println(
-				"Successfully sent state change to " + (state ? "on" : "off") + " for device " + system + ", "
-						+ device);
+		System.out.println("Successfully sent state change to "
+				+ (state ? "on" : "off")
+				+ " for device "
+				+ system
+				+ ", "
+				+ device);
 	}
 
 	private static void waitForDeviceIdle() throws Exception {
@@ -229,30 +226,19 @@ public class RSL366OverHorterI2cTest {
 	}
 
 	private static String parseStatus(byte status) {
-		switch (status) {
-		case STATUS_OK:
-			return "OK";
-		case STATUS_SYS_TOO_MUCH_DATA:
-			return "Too much SystemCode data";
-		case STATUS_SYS_MISSING_DATA:
-			return "SystemCode missing data";
-		case STATUS_SYS_INVALID_DATA:
-			return "Invalid SystemCode";
-		case STATUS_SYS_MISSING:
-			return "SystemCode Missing";
-		case STATUS_DEV_TOO_MUCH_DATA:
-			return "Too much device data";
-		case STATUS_DEV_INVALID_DATA:
-			return "DeviceCode invalid";
-		case STATUS_PROTO_UNKNOWN:
-			return "Invalid protocol";
-		case STATUS_BAD_PTR:
-			return "Bad pointer";
-		case STATUS_CONF_TOO_MUCH_DATA:
-			return "Too much config data";
-		default:
-			return "Unknown status " + toHexString(status);
-		}
+		return switch (status) {
+			case STATUS_OK -> "OK";
+			case STATUS_SYS_TOO_MUCH_DATA -> "Too much SystemCode data";
+			case STATUS_SYS_MISSING_DATA -> "SystemCode missing data";
+			case STATUS_SYS_INVALID_DATA -> "Invalid SystemCode";
+			case STATUS_SYS_MISSING -> "SystemCode Missing";
+			case STATUS_DEV_TOO_MUCH_DATA -> "Too much device data";
+			case STATUS_DEV_INVALID_DATA -> "DeviceCode invalid";
+			case STATUS_PROTO_UNKNOWN -> "Invalid protocol";
+			case STATUS_BAD_PTR -> "Bad pointer";
+			case STATUS_CONF_TOO_MUCH_DATA -> "Too much config data";
+			default -> "Unknown status " + toHexString(status);
+		};
 	}
 
 	private static void readCodes(BufferedReader input) {
@@ -288,44 +274,25 @@ public class RSL366OverHorterI2cTest {
 	}
 
 	public static String toHexString(byte[] raw, int offset, int length) throws RuntimeException {
-		try {
-			byte[] hex = new byte[2 * length];
-			int index = 0;
+		byte[] hex = new byte[2 * length];
+		int index = 0;
 
-			int pos = offset;
-			for (int i = 0; i < length; i++) {
-				byte b = raw[pos];
-				int v = b & 0xFF;
-				hex[index++] = HEX_CHAR_TABLE[v >>> 4];
-				hex[index++] = HEX_CHAR_TABLE[v & 0xF];
-				pos++;
-			}
-
-			return new String(hex, "ASCII");
-
-		} catch (UnsupportedEncodingException e) {
-			String msg = MessageFormat
-					.format("Something went wrong while converting to HEX: {0}", e.getMessage());
-			throw new RuntimeException(msg, e);
+		int pos = offset;
+		for (int i = 0; i < length; i++) {
+			byte b = raw[pos];
+			int v = b & 0xFF;
+			hex[index++] = HEX_CHAR_TABLE[v >>> 4];
+			hex[index++] = HEX_CHAR_TABLE[v & 0xF];
+			pos++;
 		}
+
+		return new String(hex, StandardCharsets.US_ASCII);
+
 	}
 
-	private static final byte[] HEX_CHAR_TABLE = { (byte) '0',
-			(byte) '1',
-			(byte) '2',
-			(byte) '3',
-			(byte) '4',
-			(byte) '5',
-			(byte) '6',
-			(byte) '7',
-			(byte) '8',
-			(byte) '9',
-			(byte) 'a',
-			(byte) 'b',
-			(byte) 'c',
-			(byte) 'd',
-			(byte) 'e',
-			(byte) 'f' };
+	private static final byte[] HEX_CHAR_TABLE = {(byte) '0', (byte) '1', (byte) '2', (byte) '3', (byte) '4',
+			(byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'a', (byte) 'b', (byte) 'c', (byte) 'd',
+			(byte) 'e', (byte) 'f'};
 
 	public static String asBinary(byte b) {
 

@@ -27,16 +27,22 @@ public class PlcModelVisitor {
 
 			// add the custom parameters with keys for the id, name and value, so we can show them on the UI
 			JsonArray parametersJ = new JsonArray();
-			connectionR.getParameterBag(BAG_PARAMETERS, true).getParameters().stream()
+			connectionR
+					.getParameterBag(BAG_PARAMETERS, true)
+					.getParameters()
+					.stream()
 					.sorted(comparing(Parameter::getIndex))
-					.filter(p -> !(p.getId().equals(PARAM_STATE) || p.getId().equals(PARAM_STATE_MSG) || p.getId()
-							.equals(PARAM_CLASS_NAME))).forEach(parameter -> {
-				JsonObject paramJ = new JsonObject();
-				paramJ.addProperty(Tags.Json.ID, parameter.getId());
-				paramJ.addProperty(Tags.Json.NAME, parameter.getName());
-				paramJ.addProperty(Tags.Json.VALUE, parameter.getValueAsString());
-				parametersJ.add(paramJ);
-			});
+					.filter(p -> !(
+							p.getId().equals(PARAM_STATE) || p.getId().equals(PARAM_STATE_MSG) || p
+									.getId()
+									.equals(PARAM_CLASS_NAME)))
+					.forEach(parameter -> {
+						JsonObject paramJ = new JsonObject();
+						paramJ.addProperty(Tags.Json.ID, parameter.getId());
+						paramJ.addProperty(Tags.Json.NAME, parameter.getName());
+						paramJ.addProperty(Tags.Json.VALUE, parameter.getValueAsString());
+						parametersJ.add(paramJ);
+					});
 			connectionJ.add(BAG_PARAMETERS, parametersJ);
 		});
 	}

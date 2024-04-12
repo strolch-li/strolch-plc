@@ -38,11 +38,11 @@ public class PlcConnectionsResource {
 
 		Paging<JsonObject> paging;
 		try (StrolchTransaction tx = RestfulStrolchComponent.getInstance().openTx(cert, getContext())) {
-			paging = new PlcConnectionSearch() //
-					.stringQuery(query) //
-					.search(tx) //
-					.orderByName() //
-					.visitor(plcConnectionToJson()) //
+			paging = new PlcConnectionSearch()
+					.stringQuery(query)
+					.search(tx)
+					.orderByName()
+					.visitor(plcConnectionToJson())
 					.toPaging(offset, limit);
 		}
 

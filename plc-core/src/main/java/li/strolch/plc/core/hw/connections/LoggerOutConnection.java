@@ -11,6 +11,6 @@ public class LoggerOutConnection extends SimplePlcConnection {
 	@Override
 	public void send(String address, Object value) {
 		assertConnected();
-		logger.info(address + " -> " + value);
+		logger.info("{} -> {}", address, value);
 	}
 }

@@ -30,24 +30,23 @@ public class SetPlcStateService extends AbstractService<StringMapArgument, Servi
 		PlcServiceInitializer plcServiceInitializer = getComponent(PlcServiceInitializer.class);
 
 		switch (newState) {
-		case Stopped:
-			if (plcHandler.getPlcState() == PlcState.Stopped)
-				return ServiceResult.error("Already stopped");
-			plcServiceInitializer.stop();
-			plcHandler.stopPlc();
-			break;
-		case Started:
-			if (plcHandler.getPlcState() == PlcState.Started)
-				return ServiceResult.error("Already started");
-			plcHandler.startPlc();
-			plcServiceInitializer.start();
-			break;
-		case Configured:
-			if (!plcHandler.reconfigurePlc())
-				return ServiceResult.error(plcHandler.getPlcStateMsg());
-			break;
-		default:
-			throw new IllegalArgumentException("Can not switch to state " + newState);
+			case Stopped -> {
+				if (plcHandler.getPlcState() == PlcState.Stopped)
+					return ServiceResult.error("Already stopped");
+				plcServiceInitializer.stop();
+				plcHandler.stopPlc();
+			}
+			case Started -> {
+				if (plcHandler.getPlcState() == PlcState.Started)
+					return ServiceResult.error("Already started");
+				plcHandler.startPlc();
+				plcServiceInitializer.start();
+			}
+			case Configured -> {
+				if (!plcHandler.reconfigurePlc())
+					return ServiceResult.error(plcHandler.getPlcStateMsg());
+			}
+			default -> throw new IllegalArgumentException("Can not switch to state " + newState);
 		}
 
 		return ServiceResult.success();

@@ -11,10 +11,8 @@ public interface PlcListener {
 	/**
 	 * Notifies the listener of the new value at the given address
 	 *
-	 * @param address
-	 * 		the address at which the event was detected
-	 * @param value
-	 * 		the new value at the address
+	 * @param address the address at which the event was detected
+	 * @param value   the new value at the address
 	 */
 	void handleNotification(PlcAddress address, Object value);
 }

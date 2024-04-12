@@ -35,7 +35,7 @@ public class DataLogicScannerConnectionTest {
 
 		logger.info("Connecting to scanner...");
 		scanner.connect();
-		logger.info("Connected to scanner " + scanner.getId());
+		logger.info("Connected to scanner {}", scanner.getId());
 		logger.info("Sending trigger...");
 		scanner.send("test.trigger", true);
 		logger.info("Trigger sent.");

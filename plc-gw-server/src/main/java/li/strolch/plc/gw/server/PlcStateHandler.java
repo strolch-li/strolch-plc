@@ -103,9 +103,8 @@ public class PlcStateHandler {
 						plc.setString(PARAM_CONNECTION_STATE_MSG, connectionStateMsg);
 						tx.update(plc);
 
-						logger.info(
-								"Updated connection state for PLC " + plc.getId() + " to " + connectionState + (isEmpty(
-										connectionStateMsg) ? "" : ": " + connectionStateMsg));
+						logger.info("Updated connection state for PLC {} to {}{}", plc.getId(), connectionState,
+								isEmpty(connectionStateMsg) ? "" : ": " + connectionStateMsg);
 					}
 
 					if (stateJ != null) {
@@ -145,7 +144,7 @@ public class PlcStateHandler {
 	}
 
 	private void saveGatewayIpAddresses(StrolchTransaction tx, Resource plc, JsonArray ipAddresses) {
-		if (ipAddresses.size() == 0)
+		if (ipAddresses.isEmpty())
 			return;
 
 		// update local IPs
@@ -225,20 +224,20 @@ public class PlcStateHandler {
 	}
 
 	private Resource buildNewPlc(PlcGwServerHandler.PlcSession plcSession, StrolchTransaction tx) {
-		return new ResourceBuilder(plcSession.plcId, plcSession.plcId, TYPE_PLC) //
-				.defaultBag() //
+		return new ResourceBuilder(plcSession.plcId, plcSession.plcId, TYPE_PLC)
+				.defaultBag()
 
 				.string(PARAM_CONNECTION_STATE, buildParamName(PARAM_CONNECTION_STATE))
 				.enumeration(ConnectionState.Disconnected)
-				.end() //
+				.end()
 
 				.string(PARAM_CONNECTION_STATE_MSG, buildParamName(PARAM_CONNECTION_STATE_MSG))
-				.end() //
+				.end()
 
 				.stringList(PARAM_LOCAL_IP, buildParamName(PARAM_LOCAL_IP))
-				.end() //
+				.end()
 
-				.endBag() //
+				.endBag()
 				.build();
 	}
 
@@ -246,18 +245,16 @@ public class PlcStateHandler {
 		if (systemState == null)
 			return;
 
-		new ResourceSystemStateFromJson().compactStates() //
+		new ResourceSystemStateFromJson().compactStates()
 
 				// os
-				.withSystemLoadAverageState() //
+				.withSystemLoadAverageState()
 
 				// memory
-				.withMemoryRounding(DataUnit.MegaBytes) //
-				.withFreePhysicalMemorySizeState() //
+				.withMemoryRounding(DataUnit.MegaBytes).withFreePhysicalMemorySizeState()
 
 				// storage
-				.withStorageSpaceRounding(DataUnit.GigaBytes) //
-				.withFreeSpaceState() //
+				.withStorageSpaceRounding(DataUnit.GigaBytes).withFreeSpaceState()
 
 				.fillElement(systemState, gateway);
 	}

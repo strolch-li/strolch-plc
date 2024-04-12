@@ -90,11 +90,11 @@ public class PlcHandlerTest {
 		assertFalse(value.get());
 
 		plcHandler.register("PLC", "Running", (address, v) -> {
-			logger.error("Setting " + address + " to " + v);
+			logger.error("Setting {} to {}", address, v);
 			value.set((Boolean) v);
 		});
 		plcHandler.register("PLC", "NotRunning", (address, v) -> {
-			logger.error("Setting " + address + " to " + v);
+			logger.error("Setting {} to {}", address, v);
 			value.set((Boolean) v);
 		});
 

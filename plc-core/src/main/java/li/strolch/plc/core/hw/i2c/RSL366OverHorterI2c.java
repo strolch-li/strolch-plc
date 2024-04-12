@@ -1,19 +1,20 @@
 package li.strolch.plc.core.hw.i2c;
 
-import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
-import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
-import static li.strolch.utils.helper.StringHelper.toHexString;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.Callable;
-
 import com.pi4j.io.i2c.I2CFactory;
 import com.pi4j.io.i2c.impl.I2CBusImpl;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.Callable;
+
+import static java.text.MessageFormat.format;
+import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
+import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
+import static li.strolch.utils.helper.StringHelper.toHexString;
 
 public class RSL366OverHorterI2c extends SimplePlcConnection {
 
@@ -84,11 +85,11 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 		Map<String, byte[]> positionsByAddress = new HashMap<>();
 		for (byte i = 1; i < 5; i++) {
 			for (byte j = 1; j < 5; j++)
-				positionsByAddress.put(this.id + "." + i + "." + j, new byte[] { i, j });
+				positionsByAddress.put(this.id + "." + i + "." + j, new byte[]{i, j});
 		}
 		this.positionsByAddress = Collections.unmodifiableMap(positionsByAddress);
 
-		logger.info("Configured RSL366 over Horter I2c on address 0x" + toHexString(this.address));
+		logger.info("Configured RSL366 over Horter I2c on address 0x{}", toHexString(this.address));
 	}
 
 	public <T> T runBusLockedDeviceAction(final Callable<T> action) throws IOException {
@@ -98,16 +99,16 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 	@Override
 	public synchronized boolean connect() {
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			return super.connect();
 		}
 
 		if (isConnected()) {
-			logger.warn(this.id + ": Already connected");
+			logger.warn("{}: Already connected", this.id);
 			return true;
 		}
 
-		logger.info(this.id + ": Connecting...");
+		logger.info("{}: Connecting...", this.id);
 
 		try {
 			if (this.i2cBus == null) {
@@ -119,18 +120,18 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 			byte[] status = runBusLockedDeviceAction(this::configure);
 
 			String version = status[ADDR_INFO_VER_MAJOR] + "." + status[ADDR_INFO_VER_MINOR];
-			logger.info("Connected to 433MHz RSL366 over HorterI2C version " + version + " supporting "
-					+ status[ADDR_INFO_NR_OF_KNOWN_PROTOCOLS] + " protocols");
+			logger.info("Connected to 433MHz RSL366 over HorterI2C version {} supporting {} protocols", version,
+					status[ADDR_INFO_NR_OF_KNOWN_PROTOCOLS]);
 
-			logger.info("Connected to I2C device at address 0x" + toHexString(this.address) + " on I2C Bus "
-					+ this.i2cBusNr);
+			logger.info("Connected to I2C device at address 0x{} on I2C Bus {}", toHexString(this.address),
+					this.i2cBusNr);
 
 			return super.connect();
 
 		} catch (Throwable e) {
 			handleBrokenConnection(
-					"Failed to connect to 433MHz RSL366 over HorterI2C at address 0x" + toHexString(this.address)
-							+ " on I2C Bus " + this.i2cBusNr + ": " + getExceptionMessageWithCauses(e), e);
+					format("Failed to connect to 433MHz RSL366 over HorterI2C at address 0x{0} on I2C Bus {1}: {2}",
+							toHexString(this.address), this.i2cBusNr, getExceptionMessageWithCauses(e)), e);
 
 			return false;
 		}
@@ -144,7 +145,7 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 	@Override
 	public synchronized void send(String address, Object value) {
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			return;
 		}
 
@@ -165,8 +166,8 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 		} catch (Exception e) {
 			if (e instanceof IllegalStateException)
 				throw (IllegalStateException) e;
-			String msg = "Failed to send " + (on ? "on" : "off") + " to system " + system + " device " + device
-					+ " at address 0x" + toHexString(this.address) + " on I2C Bus " + this.i2cBusNr;
+			String msg = format("Failed to send {0} to system {1} device {2} at address 0x{3} on I2C Bus {4}",
+					on ? "on" : "off", system, device, toHexString(this.address), this.i2cBusNr);
 			handleBrokenConnection(msg + ": " + getExceptionMessageWithCauses(e), e);
 			throw new IllegalStateException(msg, e);
 		}
@@ -175,7 +176,7 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 	private byte[] configure() throws IOException, InterruptedException {
 
 		logger.info("Configuring...");
-		byte[] data = { CONF_PROTOCOL, repeats };
+		byte[] data = {CONF_PROTOCOL, repeats};
 		this.dev.write(this.verbose, ADDR_REG_CONF_CODE, data);
 		Thread.sleep(20L);
 
@@ -191,14 +192,14 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 		if (status[ADDR_INFO_REPEATS] != repeats)
 			throw new IllegalStateException("Repeats could not bet set to " + repeats);
 
-		logger.info("Configured with protocol " + CONF_PROTOCOL + " and " + repeats + " repeats.");
+		logger.info("Configured with protocol " + CONF_PROTOCOL + " and {} repeats.", repeats);
 		return status;
 	}
 
 	private void setState(byte system, byte device, boolean state) throws Exception {
 
-		logger.info("System: " + toHexString(system));
-		logger.info("Device: " + toHexString(device));
+		logger.info("System: {}", toHexString(system));
+		logger.info("Device: {}", toHexString(device));
 
 		byte[] status = readInfo(false);
 		if (isDeviceTransmitting(status)) {
@@ -233,8 +234,7 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 		}
 
 		showInfoRegister(status);
-		logger.info("Successfully sent state change to " + (state ? "on" : "off") + " for device " + system + ", "
-				+ device);
+		logger.info("Successfully sent state change to {} for device {}, {}", state ? "on" : "off", system, device);
 	}
 
 	private void waitForDeviceIdle() throws Exception {
@@ -269,12 +269,12 @@ public class RSL366OverHorterI2c extends SimplePlcConnection {
 	}
 
 	private static void showInfoRegister(byte[] status) {
-		logger.info("    Pointer  : " + toHexString(status[ADDR_INFO_PTR]));
-		logger.info("    Status   : " + toHexString(status[ADDR_INFO_STATUS]) + " " + parseStatus(
-				status[ADDR_INFO_STATUS]));
-		logger.info("    TX       : " + toHexString(status[ADDR_INFO_TRANSMITTING]));
-		logger.info("    Protocol : " + toHexString(status[ADDR_INFO_PROTOCOL]));
-		logger.info("    Repeats  : " + toHexString(status[ADDR_INFO_REPEATS]));
+		logger.info("    Pointer  : {}", toHexString(status[ADDR_INFO_PTR]));
+		logger.info("    Status   : {} {}", toHexString(status[ADDR_INFO_STATUS]),
+				parseStatus(status[ADDR_INFO_STATUS]));
+		logger.info("    TX       : {}", toHexString(status[ADDR_INFO_TRANSMITTING]));
+		logger.info("    Protocol : {}", toHexString(status[ADDR_INFO_PROTOCOL]));
+		logger.info("    Repeats  : {}", toHexString(status[ADDR_INFO_REPEATS]));
 	}
 
 	private static boolean isDeviceTransmitting(byte[] status) {

@@ -1,14 +1,5 @@
 package li.strolch.plc.rest;
 
-import static java.util.Comparator.comparing;
-import static li.strolch.plc.model.PlcConstants.*;
-import static li.strolch.plc.rest.PlcModelVisitor.*;
-import static li.strolch.rest.StrolchRestfulConstants.DATA;
-
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +18,15 @@ import li.strolch.rest.StrolchRestfulConstants;
 import li.strolch.rest.helper.ResponseUtil;
 import li.strolch.utils.collections.MapOfLists;
 
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static java.util.Comparator.comparing;
+import static li.strolch.plc.model.PlcConstants.*;
+import static li.strolch.plc.rest.PlcModelVisitor.*;
+import static li.strolch.rest.StrolchRestfulConstants.DATA;
+
 @Path("plc/logicalDevices")
 public class PlcLogicalDevicesResource {
 
@@ -44,12 +44,11 @@ public class PlcLogicalDevicesResource {
 		JsonArray dataJ = new JsonArray();
 		try (StrolchTransaction tx = RestfulStrolchComponent.getInstance().openTx(cert, getContext())) {
 
-			MapOfLists<String, Resource> devicesByGroup = new PlcLogicalDeviceSearch() //
-					.stringQuery(query) //
-					.search(tx) //
-					.orderBy(comparing((Resource o) -> o.getParameter(PARAM_INDEX).getValue())) //
-					.toMapOfLists(r -> r.hasParameter(PARAM_GROUP) ?
-							r.getParameter(PARAM_GROUP).getValueAsString() :
+			MapOfLists<String, Resource> devicesByGroup = new PlcLogicalDeviceSearch()
+					.stringQuery(query)
+					.search(tx)
+					.orderBy(comparing((Resource o) -> o.getParameter(PARAM_INDEX).getValue()))
+					.toMapOfLists(r -> r.hasParameter(PARAM_GROUP) ? r.getParameter(PARAM_GROUP).getValueAsString() :
 							"default");
 
 			Set<String> groups = new TreeSet<>(devicesByGroup.keySet());
@@ -57,7 +56,8 @@ public class PlcLogicalDevicesResource {
 				List<Resource> devices = devicesByGroup.getList(group);
 				JsonObject groupJ = new JsonObject();
 				groupJ.addProperty(Tags.Json.NAME, group);
-				groupJ.add(DATA, devices.stream()
+				groupJ.add(DATA, devices
+						.stream()
 						.map(e -> e.accept(plcLogicalDeviceToJson()))
 						.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 
@@ -81,7 +81,8 @@ public class PlcLogicalDevicesResource {
 			Resource plcLogicalDevice = tx.getResourceBy(TYPE_PLC_LOGICAL_DEVICE, id, true);
 			tx.assertHasPrivilege(Operation.GET, plcLogicalDevice);
 
-			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true)
+			dataJ = tx
+					.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true)
 					.stream()
 					.map(e -> e.accept(plcAddressToJson(simple)))
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
@@ -103,7 +104,8 @@ public class PlcLogicalDevicesResource {
 			Resource plcLogicalDevice = tx.getResourceBy(TYPE_PLC_LOGICAL_DEVICE, id, true);
 			tx.assertHasPrivilege(Operation.GET, plcLogicalDevice);
 
-			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true)
+			dataJ = tx
+					.getResourcesByRelation(plcLogicalDevice, PARAM_ADDRESSES, true)
 					.stream()
 					.map(e -> e.accept(plcAddressToJson(simple)))
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
@@ -125,7 +127,8 @@ public class PlcLogicalDevicesResource {
 			Resource plcLogicalDevice = tx.getResourceBy(TYPE_PLC_LOGICAL_DEVICE, id, true);
 			tx.assertHasPrivilege(Operation.GET, plcLogicalDevice);
 
-			dataJ = tx.getResourcesByRelation(plcLogicalDevice, PARAM_TELEGRAMS, true)
+			dataJ = tx
+					.getResourcesByRelation(plcLogicalDevice, PARAM_TELEGRAMS, true)
 					.stream()
 					.map(e -> e.accept(plcTelegramToJson(simple)))
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll);

@@ -162,12 +162,13 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 	}
 
 	private void handleFailedRunnable(String runnable, Exception e) {
-		logger.error("Runnable " + runnable + " failed!", e);
+		logger.error("Runnable {} failed!", runnable, e);
 		if (hasOperationsLogs()) {
 			getOperationsLogs().addMessage(
 					new LogMessage(this.container.getRealmNames().iterator().next(), SYSTEM_USER_AGENT,
 							Resource.locatorFor(TYPE_PLC, this.plcId), LogSeverity.Exception,
-							LogMessageState.Information, PlcGwSrvI18n.bundle, "systemAction.failed").withException(e)
+							LogMessageState.Information, PlcGwSrvI18n.bundle, "systemAction.failed")
+							.withException(e)
 							.value("action", runnable));
 		}
 	}
@@ -175,8 +176,7 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 	/**
 	 * Executes the given consumer in a read-only transaction
 	 *
-	 * @param consumer
-	 * 		the consumer to run in a read-only transaction
+	 * @param consumer the consumer to run in a read-only transaction
 	 */
 	protected <T> T runReadOnlyTx(CheckedBiFunction<PrivilegeContext, StrolchTransaction, T> consumer) {
 		return run(ctx -> {
@@ -193,8 +193,7 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 	 * when the runnable is completed and the TX is dirty, i.e. {@link StrolchTransaction#needsCommit()} returns
 	 * true</p>
 	 *
-	 * @param consumer
-	 * 		the consumer to run in a writeable transaction
+	 * @param consumer the consumer to run in a writeable transaction
 	 */
 	protected <T> T runWritableTx(CheckedBiFunction<PrivilegeContext, StrolchTransaction, T> consumer) {
 		return run(ctx -> {
@@ -232,7 +231,8 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 
 	protected ScheduledFuture<?> scheduleAtFixedRate(PrivilegedRunnable runnable, long initialDelay, long period,
 			TimeUnit delayUnit) {
-		return this.container.getAgent()
+		return this.container
+				.getAgent()
 				.getScheduledExecutor(PlcGwService.class.getSimpleName())
 				.scheduleAtFixedRate(() -> {
 					try {
@@ -245,7 +245,8 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 
 	protected ScheduledFuture<?> scheduleWithFixedDelay(PrivilegedRunnable runnable, long initialDelay, long period,
 			TimeUnit delayUnit) {
-		return this.container.getAgent()
+		return this.container
+				.getAgent()
 				.getScheduledExecutor(PlcGwService.class.getSimpleName())
 				.scheduleWithFixedDelay(() -> {
 					try {
@@ -257,6 +258,6 @@ public abstract class PlcGwService implements PlcNotificationListener, PlcAddres
 	}
 
 	protected void handleFailedSchedule(Exception e) {
-		logger.error("Failed to execute " + getClass().getSimpleName(), e);
+		logger.error("Failed to execute {}", getClass().getSimpleName(), e);
 	}
 }

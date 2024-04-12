@@ -13,6 +13,6 @@ public class PlcAddressGeneratorTest {
 		String importFile = "../example/data/strolch-plc-example.csv";
 		String exportFile = "../example/data/strolch-plc-example.xml";
 
-		PlcAddressGenerator.main(new String[] { templatesFile, importFile, exportFile });
+		PlcAddressGenerator.main(new String[]{templatesFile, importFile, exportFile});
 	}
 }

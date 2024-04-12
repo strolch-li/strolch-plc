@@ -1,28 +1,25 @@
 package li.strolch.plc.gw.server.policy.execution;
 
-import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
-import static li.strolch.model.log.LogMessageState.*;
-import static li.strolch.plc.gw.server.PlcGwSrvI18n.*;
-import static li.strolch.plc.model.PlcConstants.PARAM_PLC_ID;
-import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import li.strolch.execution.ExecutionHandler;
 import li.strolch.execution.policy.SimpleExecution;
 import li.strolch.model.activity.Action;
 import li.strolch.model.log.LogMessage;
-import li.strolch.model.log.LogMessageState;
 import li.strolch.model.log.LogSeverity;
 import li.strolch.model.parameter.StringParameter;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.gw.server.PlcAddressResponseListener;
 import li.strolch.plc.gw.server.PlcGwServerHandler;
-import li.strolch.plc.gw.server.PlcGwSrvI18n;
 import li.strolch.plc.gw.server.PlcNotificationListener;
 import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcAddressResponse;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
+import static li.strolch.model.log.LogMessageState.Information;
+import static li.strolch.plc.gw.server.PlcGwSrvI18n.bundle;
+import static li.strolch.plc.model.PlcConstants.PARAM_PLC_ID;
+import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
 
 public abstract class PlcExecutionPolicy extends SimpleExecution
 		implements PlcNotificationListener, PlcAddressResponseListener {
@@ -85,12 +82,10 @@ public abstract class PlcExecutionPolicy extends SimpleExecution
 	}
 
 	protected boolean assertResponse(PlcAddressResponse response) {
-		if (response.getState().isFailed()) {
-			toError(msgFailedToSendMessage(response));
-			return false;
-		}
-
-		return true;
+		if (!response.getState().isFailed())
+			return true;
+		toError(msgFailedToSendMessage(response));
+		return false;
 	}
 
 	protected void send(PlcAddressKey key, boolean value) {

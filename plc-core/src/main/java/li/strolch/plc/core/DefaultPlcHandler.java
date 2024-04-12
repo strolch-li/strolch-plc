@@ -212,7 +212,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			if (this.globalListener != null)
 				this.plc.setGlobalListener(this.globalListener);
 
-			logger.info("Reconfigured PLC with " + this.plcAddresses.size() + " addresses");
+			logger.info("Reconfigured PLC with {} addresses", this.plcAddresses.size());
 			return true;
 
 		} catch (Exception e) {
@@ -239,7 +239,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 			if (tx.getConfiguration().hasParameter(PARAM_VERBOSE)) {
 				boolean verboseOverride = tx.getConfiguration().getBoolean(PARAM_VERBOSE);
-				logger.info("Overriding XML verbose property from configuration resource to " + verboseOverride);
+				logger.info("Overriding XML verbose property from configuration resource to {}", verboseOverride);
 				this.verbose = verboseOverride;
 			}
 
@@ -257,8 +257,8 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			try {
 				getContainer().getPrivilegeHandler().validateSystemSession(this.ctx);
 			} catch (Exception e) {
-				logger.error("PrivilegeContext for session " + this.ctx.getCertificate().getSessionId() +
-						" is not valid, reopening.", e);
+				logger.error("PrivilegeContext for session {} is not valid, reopening.",
+						this.ctx.getCertificate().getSessionId(), e);
 				this.ctx = getContainer().getPrivilegeHandler().openAgentSystemUserContext();
 			}
 		}
@@ -284,7 +284,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 	public void unregister(String resource, String action, PlcListener listener) {
 		PlcAddress plcAddress = this.plcAddresses.getElement(resource, action);
 		if (plcAddress == null) {
-			logger.warn("No PlcAddress exists for " + resource + "-" + action);
+			logger.warn("No PlcAddress exists for {}-{}", resource, action);
 		} else {
 			this.plc.unregister(plcAddress, listener);
 		}
@@ -353,7 +353,7 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 		String addressId = this.addressesToResourceId.get(address);
 		if (addressId == null) {
-			logger.error("No PlcAddress mapping for " + address);
+			logger.error("No PlcAddress mapping for {}", address);
 			return;
 		}
 
@@ -377,11 +377,11 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 			tx.update(addressRes);
 			tx.commitOnClose();
 		} catch (Exception e) {
-			logger.error("Failed to update PlcAddress " + addressId + " with new value " + value, e);
+			logger.error("Failed to update PlcAddress {} with new value {}", addressId, value, e);
 		}
 
 		if (this.verbose && (nanoTime() - s > MILLISECONDS.toNanos(SILENT_THRESHOLD)))
-			logger.info("async update " + address.toKey() + " took " + (formatNanoDuration(nanoTime() - s)));
+			logger.info("async update {} took {}", address.toKey(), formatNanoDuration(nanoTime() - s));
 	}
 
 	private void updateConnectionState(String id, ConnectionState state, String stateMsg) {
@@ -405,11 +405,11 @@ public class DefaultPlcHandler extends StrolchComponent implements PlcHandler, P
 
 			tx.commitOnClose();
 		} catch (Exception e) {
-			logger.error("Failed to update state for connection " + id, e);
+			logger.error("Failed to update state for connection {}", id, e);
 		}
 
 		if (this.verbose)
-			logger.info("updateConnectionState took " + (formatNanoDuration(nanoTime() - s)));
+			logger.info("updateConnectionState took {}", formatNanoDuration(nanoTime() - s));
 	}
 
 	@Override

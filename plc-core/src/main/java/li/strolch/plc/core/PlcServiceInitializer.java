@@ -31,12 +31,12 @@ public abstract class PlcServiceInitializer extends StrolchComponent {
 				try {
 					plcService.stop();
 				} catch (Exception e) {
-					logger.error("Failed to stop PlcService " + plcService.getClass().getName(), e);
+					logger.error("Failed to stop PlcService {}", plcService.getClass().getName(), e);
 				}
 				try {
 					plcService.unregister();
 				} catch (Exception e) {
-					logger.error("Failed to unregister PlcService " + plcService.getClass().getName(), e);
+					logger.error("Failed to unregister PlcService {}", plcService.getClass().getName(), e);
 				}
 			});
 		super.stop();
@@ -45,7 +45,7 @@ public abstract class PlcServiceInitializer extends StrolchComponent {
 	protected void startPlcServices() {
 		PlcHandler plcHandler = getComponent(PlcHandler.class);
 		if (plcHandler.getPlcState() != PlcState.Started) {
-			logger.error("Can not start PlcServices as PlcState is " + plcHandler.getPlcState());
+			logger.error("Can not start PlcServices as PlcState is {}", plcHandler.getPlcState());
 			return;
 		}
 
@@ -54,7 +54,7 @@ public abstract class PlcServiceInitializer extends StrolchComponent {
 			try {
 				plcService.register();
 			} catch (Exception e) {
-				logger.error("Failed to register PlcService " + plcService.getClass().getName(), e);
+				logger.error("Failed to register PlcService {}", plcService.getClass().getName(), e);
 			}
 		}
 
@@ -68,7 +68,7 @@ public abstract class PlcServiceInitializer extends StrolchComponent {
 						try {
 							plcService.start(tx);
 						} catch (Exception e) {
-							logger.error("Failed to register PlcService " + plcService.getClass().getName(), e);
+							logger.error("Failed to register PlcService {}", plcService.getClass().getName(), e);
 						}
 					}
 				}

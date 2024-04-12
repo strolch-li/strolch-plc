@@ -30,9 +30,9 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 	private AtomicBoolean conveyor3On;
 	private AtomicBoolean conveyor4On;
 
-	private AtomicBoolean conveyor1WaitingForTransfer;
-	private AtomicBoolean conveyor2WaitingForTransfer;
-	private AtomicBoolean conveyor3WaitingForTransfer;
+	private final AtomicBoolean conveyor1WaitingForTransfer;
+	private final AtomicBoolean conveyor2WaitingForTransfer;
+	private final AtomicBoolean conveyor3WaitingForTransfer;
 
 	public ExamplePlcConveyorPlcService(PlcHandler plcHandler) {
 		super(plcHandler);
@@ -50,62 +50,54 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 		boolean state = (boolean) value;
 
 		switch (resource) {
+			case R_CONVEYOR_01 -> {
 
-		case R_CONVEYOR_01:
-
-			if (action.equals(A_OCCUPIED)) {
-				conveyor1Occupied.set(state);
-				handleTransfer(null, R_CONVEYOR_01, R_CONVEYOR_02, //
-						null, conveyor1Occupied, conveyor2Occupied, //
-						null, conveyor1On, conveyor2On, //
-						null, conveyor1WaitingForTransfer);
-			} else {
-				logger.error("Unhandled action " + resource + "-" + action);
+				if (action.equals(A_OCCUPIED)) {
+					conveyor1Occupied.set(state);
+					handleTransfer(null, R_CONVEYOR_01, R_CONVEYOR_02, //
+							null, conveyor1Occupied, conveyor2Occupied, //
+							null, conveyor1On, conveyor2On, //
+							null, conveyor1WaitingForTransfer);
+				} else {
+					logger.error("Unhandled action {}-{}", resource, action);
+				}
 			}
+			case R_CONVEYOR_02 -> {
 
-			break;
-
-		case R_CONVEYOR_02:
-
-			if (action.equals(A_OCCUPIED)) {
-				conveyor2Occupied.set(state);
-				handleTransfer(R_CONVEYOR_01, R_CONVEYOR_02, R_CONVEYOR_03, //
-						conveyor1Occupied, conveyor2Occupied, conveyor3Occupied, //
-						conveyor1On, conveyor2On, conveyor3On, //
-						conveyor1WaitingForTransfer, conveyor2WaitingForTransfer);
-			} else {
-				logger.error("Unhandled action " + resource + "-" + action);
+				if (action.equals(A_OCCUPIED)) {
+					conveyor2Occupied.set(state);
+					handleTransfer(R_CONVEYOR_01, R_CONVEYOR_02, R_CONVEYOR_03, //
+							conveyor1Occupied, conveyor2Occupied, conveyor3Occupied, //
+							conveyor1On, conveyor2On, conveyor3On, //
+							conveyor1WaitingForTransfer, conveyor2WaitingForTransfer);
+				} else {
+					logger.error("Unhandled action {}-{}", resource, action);
+				}
 			}
+			case R_CONVEYOR_03 -> {
 
-			break;
-
-		case R_CONVEYOR_03:
-
-			if (action.equals(A_OCCUPIED)) {
-				conveyor3Occupied.set(state);
-				handleTransfer(R_CONVEYOR_02, R_CONVEYOR_03, R_CONVEYOR_04, //
-						conveyor2Occupied, conveyor3Occupied, conveyor4Occupied, //
-						conveyor2On, conveyor3On, conveyor4On, //
-						conveyor2WaitingForTransfer, conveyor3WaitingForTransfer);
-			} else {
-				logger.error("Unhandled action " + resource + "-" + action);
+				if (action.equals(A_OCCUPIED)) {
+					conveyor3Occupied.set(state);
+					handleTransfer(R_CONVEYOR_02, R_CONVEYOR_03, R_CONVEYOR_04, //
+							conveyor2Occupied, conveyor3Occupied, conveyor4Occupied, //
+							conveyor2On, conveyor3On, conveyor4On, //
+							conveyor2WaitingForTransfer, conveyor3WaitingForTransfer);
+				} else {
+					logger.error("Unhandled action {}-{}", resource, action);
+				}
 			}
+			case R_CONVEYOR_04 -> {
 
-			break;
-
-		case R_CONVEYOR_04:
-
-			if (action.equals(A_OCCUPIED)) {
-				conveyor4Occupied.set(state);
-				handleTransfer(R_CONVEYOR_03, R_CONVEYOR_04, null, //
-						conveyor3Occupied, conveyor4Occupied, null, //
-						conveyor3On, conveyor4On, null, //
-						conveyor3WaitingForTransfer, null);
-			} else {
-				logger.error("Unhandled action " + resource + "-" + action);
+				if (action.equals(A_OCCUPIED)) {
+					conveyor4Occupied.set(state);
+					handleTransfer(R_CONVEYOR_03, R_CONVEYOR_04, null, //
+							conveyor3Occupied, conveyor4Occupied, null, //
+							conveyor3On, conveyor4On, null, //
+							conveyor3WaitingForTransfer, null);
+				} else {
+					logger.error("Unhandled action {}-{}", resource, action);
+				}
 			}
-
-			break;
 		}
 	}
 
@@ -119,37 +111,37 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 			// handle current conveyor is now occupied
 			if (next == null) {
 				if (currentOn.get()) {
-					logger.info(current + " is now occupied without a next conveyor, stopping conveyor");
+					logger.info("{} is now occupied without a next conveyor, stopping conveyor", current);
 					send(current, A_MOTOR_OFF);
 					currentOn.set(false);
 				} else {
-					logger.info(current + " is now occupied, conveyor is off and no next conveyor: transfer complete.");
+					logger.info("{} is now occupied, conveyor is off and no next conveyor: transfer complete.",
+							current);
 				}
 
 				return;
 			}
 
 			if (nextOccupied.get()) {
-				logger.info(current + " is now occupied, next conveyor " + next + " is still occupied, so waiting...");
+				logger.info("{} is now occupied, next conveyor {} is still occupied, so waiting...", current, next);
 				if (currentWaitingForTransfer.get())
-					logger.error("What the hell, current " + current + " is already waiting for a transfer!");
+					logger.error("What the hell, current {} is already waiting for a transfer!", current);
 				currentWaitingForTransfer.set(true);
 			} else {
-				logger.info(
-						current + " is now occupied, next conveyor " + next + " is not occupied, so transferring...");
+				logger.info("{} is now occupied, next conveyor {} is not occupied, so transferring...", current, next);
 
 				if (nextOn.get()) {
-					logger.info("Next conveyor " + next + " is already running, waiting for transfer to complete...");
+					logger.info("Next conveyor {} is already running, waiting for transfer to complete...", next);
 				} else {
-					logger.info("Starting " + next + " and waiting for transfer to complete...");
+					logger.info("Starting {} and waiting for transfer to complete...", next);
 					send(next, A_MOTOR_ON);
 					nextOn.set(true);
 				}
 
 				if (currentOn.get()) {
-					logger.info(current + " is already running, waiting for transfer to complete...");
+					logger.info("{} is already running, waiting for transfer to complete...", current);
 				} else {
-					logger.info("Starting " + current + " and waiting for transfer to complete...");
+					logger.info("Starting {} and waiting for transfer to complete...", current);
 					send(current, A_MOTOR_ON);
 					currentOn.set(true);
 				}
@@ -165,11 +157,11 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 			// no previous conveyor, so just stop current, if still on
 
 			if (currentOn.get()) {
-				logger.info(current + " is now unoccupied, stopping conveyor");
+				logger.info("{} is now unoccupied, stopping conveyor", current);
 				send(current, A_MOTOR_OFF);
 				currentOn.set(false);
 			} else {
-				logger.info(current + " is now unoccupied, conveyor is already off");
+				logger.info("{} is now unoccupied, conveyor is already off", current);
 			}
 
 			return;
@@ -178,16 +170,18 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 		// handle transfer of previous to current
 
 		if (!previousOccupied.get()) {
-			logger.info(previous + " is not occupied, so no transfer required.");
+			logger.info("{} is not occupied, so no transfer required.", previous);
 
 			if (currentOn.get()) {
-				logger.info(current + " is now unoccupied and previous " + previous
-						+ " is not occupied, so no transfer required: Stopping conveyor");
+				logger.info(
+						"{} is now unoccupied and previous {} is not occupied, so no transfer required: Stopping conveyor",
+						current, previous);
 				send(current, A_MOTOR_OFF);
 				currentOn.set(false);
 			} else {
-				logger.info(current + " is now unoccupied and previous " + previous
-						+ " is not occupied, and conveyor not running. Nothing else to do");
+				logger.info(
+						"{} is now unoccupied and previous {} is not occupied, and conveyor not running. Nothing else to do",
+						current, previous);
 			}
 
 			return;
@@ -195,23 +189,23 @@ public class ExamplePlcConveyorPlcService extends PlcService {
 
 		// previous is occupied, so transfer to current, but only if previous was waiting
 		if (!previousWaitingForTransfer.get()) {
-			logger.info(previous + " conveyor is not waiting for a transfer. Nothing else to do.");
+			logger.info("{} conveyor is not waiting for a transfer. Nothing else to do.", previous);
 		} else {
 
-			logger.info(previous + " conveyor is waiting for a transfer, so starting transfer");
+			logger.info("{} conveyor is waiting for a transfer, so starting transfer", previous);
 
 			if (currentOn.get()) {
-				logger.info(current + " is already on, waiting for transfer...");
+				logger.info("{} is already on, waiting for transfer...", current);
 			} else {
-				logger.info("Turning " + current + " on for transfer");
+				logger.info("Turning {} on for transfer", current);
 				send(current, A_MOTOR_ON);
 				currentOn.set(true);
 			}
 
 			if (previousOn.get()) {
-				logger.info(previous + " is already on, waiting for transfer...");
+				logger.info("{} is already on, waiting for transfer...", previous);
 			} else {
-				logger.info("Turning " + previous + " on for transfer");
+				logger.info("Turning {} on for transfer", previous);
 				send(previous, A_MOTOR_ON);
 				previousOn.set(true);
 			}

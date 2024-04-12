@@ -16,7 +16,6 @@ import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 
 	private boolean verbose;
-	private List<Integer> outputBcmAddresses;
 	private Map<String, Pin> pinsByAddress;
 	private Map<String, GpioPinDigitalOutput> gpioPinsByAddress;
 	private boolean inverted;
@@ -29,25 +28,22 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 	public void initialize(Map<String, Object> parameters) {
 		this.simulated = parameters.containsKey(PARAM_SIMULATED) && (boolean) parameters.get(PARAM_SIMULATED);
 
-		@SuppressWarnings("unchecked")
-		List<Integer> bcmOutputPins = (List<Integer>) parameters.get("bcmOutputPins");
-		this.outputBcmAddresses = bcmOutputPins;
+		@SuppressWarnings("unchecked") List<Integer> bcmOutputPins = (List<Integer>) parameters.get("bcmOutputPins");
 
 		this.pinsByAddress = new HashMap<>();
-		for (Integer address : this.outputBcmAddresses) {
+		for (Integer address : bcmOutputPins) {
 			Pin pin = RaspiBcmPin.getPinByAddress(address);
 			if (pin == null)
 				throw new IllegalArgumentException("RaspiBcmPin " + address + " does not exist!");
 			String key = this.id + "." + address;
 			this.pinsByAddress.put(key, pin);
-			logger.info("Registered address " + key + " for RaspiBcmPin " + pin);
+			logger.info("Registered address {} for RaspiBcmPin {}", key, pin);
 		}
 
 		this.verbose = parameters.containsKey("verbose") && (Boolean) parameters.get("verbose");
 		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
-		logger.info(
-				"Configured Raspi BCM GPIO Output for Pins " + this.outputBcmAddresses.stream().map(Object::toString)
-						.collect(joining(", ")));
+		logger.info("Configured Raspi BCM GPIO Output for Pins {}",
+				bcmOutputPins.stream().map(Object::toString).collect(joining(", ")));
 	}
 
 	@Override
@@ -65,7 +61,7 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 				Pin pin = this.pinsByAddress.get(address);
 				GpioPinDigitalOutput outputPin = gpioController.provisionDigitalOutputPin(pin);
 				this.gpioPinsByAddress.put(address, outputPin);
-				logger.info("Provisioned output pin  " + outputPin + " for address " + address);
+				logger.info("Provisioned output pin  {} for address {}", outputPin, address);
 			}
 
 			return super.connect();
@@ -79,7 +75,7 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 	@Override
 	public void disconnect() {
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			super.disconnect();
 			return;
 		}
@@ -91,7 +87,7 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 			}
 			this.gpioPinsByAddress.clear();
 		} catch (Error e) {
-			logger.error("Failed to disconnect " + this.id, e);
+			logger.error("Failed to disconnect {}", this.id, e);
 		}
 
 		super.disconnect();
@@ -100,7 +96,7 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 	@Override
 	public void send(String address, Object value) {
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			return;
 		}
 
@@ -114,7 +110,7 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 
 		PinState newState = high ? PinState.HIGH : PinState.LOW;
 		if (this.verbose)
-			logger.info("Setting pin " + outputPin + " to new state " + newState);
+			logger.info("Setting pin {} to new state {}", outputPin, newState);
 		outputPin.setState(newState);
 	}
 

@@ -28,7 +28,7 @@ class PlcConfigurator {
 			Map<PlcAddress, String> addressesToResourceId) throws Exception {
 
 		// instantiate Plc
-		logger.info("Configuring PLC " + plcClassName + "...");
+		logger.info("Configuring PLC {}...", plcClassName);
 		Plc plc = ClassHelper.instantiateClass(plcClassName);
 
 		// instantiate all PlcConnections
@@ -44,10 +44,10 @@ class PlcConfigurator {
 
 		// first all addresses
 		for (Resource resource : logicalDevices) {
-			logger.info("Configuring PlcAddresses for PlcLogicalDevice " + resource.getId() + "...");
+			logger.info("Configuring PlcAddresses for PlcLogicalDevice {}...", resource.getId());
 			List<Resource> addresses = tx.getResourcesByRelation(resource, PARAM_ADDRESSES, true);
 			if (addresses.isEmpty()) {
-				logger.warn("\tNo PlcAddresses for " + resource.getId());
+				logger.warn("\tNo PlcAddresses for {}", resource.getId());
 			} else {
 				for (Resource addressRes : addresses) {
 					buildPlcAddress(plc, plcAddresses, addressesToResourceId, plcAddressesByHwAddress, addressRes);
@@ -57,10 +57,10 @@ class PlcConfigurator {
 
 		// now telegrams
 		for (Resource logicalDevice : logicalDevices) {
-			logger.info("Configuring PlcTelegrams for PlcLogicalDevice " + logicalDevice.getId() + "...");
+			logger.info("Configuring PlcTelegrams for PlcLogicalDevice {}...", logicalDevice.getId());
 			List<Resource> telegrams = tx.getResourcesByRelation(logicalDevice, PARAM_TELEGRAMS, true);
 			if (telegrams.isEmpty()) {
-				logger.warn("\tNo PlcTelegrams for " + logicalDevice.getId());
+				logger.warn("\tNo PlcTelegrams for {}", logicalDevice.getId());
 			} else {
 				for (Resource telegramRes : telegrams) {
 					buildTelegramPlcAddress(plcAddresses, plcTelegrams, addressesToResourceId, plcAddressesByHwAddress,
@@ -74,9 +74,9 @@ class PlcConfigurator {
 
 	private static void configureConnection(Plc plc, Resource connection) throws Exception {
 		String className = connection.getParameter(BAG_PARAMETERS, PARAM_CLASS_NAME, true).getValue();
-		logger.info("Configuring PLC Connection " + className + "...");
-		PlcConnection plcConnection = ClassHelper.instantiateClass(className,
-				new Class<?>[] { Plc.class, String.class }, new Object[] { plc, connection.getId() });
+		logger.info("Configuring PLC Connection {}...", className);
+		PlcConnection plcConnection = ClassHelper.instantiateClass(className, new Class<?>[]{Plc.class, String.class},
+				new Object[]{plc, connection.getId()});
 		plcConnection.initialize(connection.getParameterBag(BAG_PARAMETERS, true).toObjectMap());
 		plc.addConnection(plcConnection);
 	}
@@ -121,14 +121,18 @@ class PlcConfigurator {
 					telegramRes.getLocator() + " is referencing non-existing address " + address);
 
 		if (valueP.getValueType() != existingAddress.valueType) {
-			throw new IllegalStateException(
-					telegramRes.getLocator() + " has valueType " + valueP.getValueType() + " but address "
-							+ existingAddress.address + " has type " + existingAddress.valueType);
+			throw new IllegalStateException(telegramRes.getLocator()
+					+ " has valueType "
+					+ valueP.getValueType()
+					+ " but address "
+					+ existingAddress.address
+					+ " has type "
+					+ existingAddress.valueType);
 		}
 
 		PlcAddress telegramAddress = new PlcAddress(PlcAddressType.Telegram, resource, action, address,
 				valueP.getValueType(), valueP.getValue(), false, remote);
-		logger.info("Adding " + telegramAddress + "...");
+		logger.info("Adding {}...", telegramAddress);
 
 		PlcAddress replaced = plcTelegrams.addElement(resource, action, telegramAddress);
 		if (replaced != null)
@@ -139,9 +143,12 @@ class PlcConfigurator {
 
 		PlcAddress plcAddress = plcAddresses.getElement(existingAddress.resource, existingAddress.action);
 		if (plcAddress == null)
-			throw new IllegalStateException(
-					"PlcAddress for " + resource + "-" + action + " does not exist, so can not connect PlcTelegram "
-							+ telegramAddress);
+			throw new IllegalStateException("PlcAddress for "
+					+ resource
+					+ "-"
+					+ action
+					+ " does not exist, so can not connect PlcTelegram "
+					+ telegramAddress);
 		String addressId = addressesToResourceId.get(plcAddress);
 		if (addressId == null)
 			throw new IllegalStateException(

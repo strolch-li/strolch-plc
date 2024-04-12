@@ -1,5 +1,7 @@
 package li.strolch.plc.model;
 
+import static java.text.MessageFormat.format;
+
 public class PlcAddressValueResponse extends PlcAddressResponse {
 
 	private Object value;
@@ -40,7 +42,8 @@ public class PlcAddressValueResponse extends PlcAddressResponse {
 
 	@Override
 	public String toString() {
-		return "PlcAddressValueResponse{" + "plcId='" + plcId + '\'' + ", sequenceId=" + sequenceId + ", state=" + state
-				+ ", stateMsg='" + stateMsg + '\'' + ", value=" + value + '}';
+		return format(
+				"PlcAddressValueResponse'{'plcId=''{0}'', sequenceId={1}, state={2}, stateMsg=''{3}'', value={4}'}'",
+				plcId, sequenceId, state, stateMsg, value);
 	}
 }

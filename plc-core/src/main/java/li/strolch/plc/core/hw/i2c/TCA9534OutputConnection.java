@@ -1,12 +1,12 @@
 package li.strolch.plc.core.hw.i2c;
 
-import static li.strolch.utils.helper.ByteHelper.*;
-import static li.strolch.utils.helper.StringHelper.toHexString;
+import com.pi4j.io.i2c.I2CDevice;
+import li.strolch.plc.core.hw.Plc;
 
 import java.io.IOException;
 
-import com.pi4j.io.i2c.I2CDevice;
-import li.strolch.plc.core.hw.Plc;
+import static li.strolch.utils.helper.ByteHelper.*;
+import static li.strolch.utils.helper.StringHelper.toHexString;
 
 public class TCA9534OutputConnection extends Multi8BitI2cOutputConnection {
 
@@ -44,8 +44,8 @@ public class TCA9534OutputConnection extends Multi8BitI2cOutputConnection {
 					"Failed to read configuration from address 0x" + toHexString(TCA9534_REG_ADDR_CFG));
 
 		if (config != 0x00) {
-			logger.warn(getDescription(address) + " is not configured as OUTPUT, setting register 0x" + toHexString(
-					TCA9534_REG_ADDR_CFG) + " to 0x00");
+			logger.warn("{} is not configured as OUTPUT, setting register 0x{} to 0x00", getDescription(address),
+					toHexString(TCA9534_REG_ADDR_CFG));
 			i2cDev.write(TCA9534_REG_ADDR_OUT_PORT, (byte) 0x00);
 			i2cDev.write(TCA9534_REG_ADDR_CFG, (byte) 0x00);
 		}
@@ -56,11 +56,10 @@ public class TCA9534OutputConnection extends Multi8BitI2cOutputConnection {
 			this.states[index] = (byte) 0x00;
 			try {
 				i2cDev.write(TCA9534_REG_ADDR_OUT_PORT, this.states[index]);
-				logger.info("Set initial value to " + asBinary((byte) 0x00) + " for " + getDescription(address));
+				logger.info("Set initial value to {} for {}", asBinary((byte) 0x00), getDescription(address));
 			} catch (Exception e) {
 				ok = false;
-				logger.error(
-						"Failed to set initial value to " + asBinary((byte) 0x00) + " for " + getDescription(address),
+				logger.error("Failed to set initial value to {} for {}", asBinary((byte) 0x00), getDescription(address),
 						e);
 			}
 		} else {
@@ -70,7 +69,7 @@ public class TCA9534OutputConnection extends Multi8BitI2cOutputConnection {
 				currentState = reverse(currentState);
 
 			this.states[index] = currentState;
-			logger.info("Initial value is " + asBinary(this.states[index]) + " for " + getDescription(address));
+			logger.info("Initial value is {} for {}", asBinary(this.states[index]), getDescription(address));
 		}
 
 		return ok;
@@ -87,8 +86,8 @@ public class TCA9534OutputConnection extends Multi8BitI2cOutputConnection {
 		byte writeState = this.reversed ? reverse(newState) : newState;
 
 		if (this.verbose)
-			logger.info("Setting " + getDescription((byte) outputDevice.getAddress()) + " to new state " + asBinary(
-					writeState));
+			logger.info("Setting {} to new state {}", getDescription((byte) outputDevice.getAddress()),
+					asBinary(writeState));
 
 		outputDevice.write(TCA9534_REG_ADDR_OUT_PORT, writeState);
 		this.states[device] = newState;

@@ -1,7 +1,7 @@
 package li.strolch.plc.core.hw.connections;
 
-import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
-import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
+import li.strolch.plc.core.hw.Plc;
+import li.strolch.utils.helper.AsciiHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,8 +15,9 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import li.strolch.plc.core.hw.Plc;
-import li.strolch.utils.helper.AsciiHelper;
+import static java.text.MessageFormat.format;
+import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
+import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 
 public class DataLogicScannerConnection extends SimplePlcConnection {
 
@@ -64,13 +65,13 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 		this.addresses.add(this.addressTrigger);
 		this.addresses.add(this.addressBarcode);
 
-		logger.info("Configured DataLogic Scanner connection to " + this.address + ":" + this.port);
+		logger.info("Configured DataLogic Scanner connection to {}:{}", this.address, this.port);
 	}
 
 	@Override
 	public boolean connect() {
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			return super.connect();
 		}
 
@@ -80,7 +81,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 		try {
 			this.socket = new Socket(this.address, this.port);
 			this.socket.setSoTimeout((int) TimeUnit.SECONDS.toMillis(this.readTimeout));
-			logger.info("Connected DataLogic Scanner connection to " + this.address + ":" + this.port);
+			logger.info("Connected DataLogic Scanner connection to {}:{}", this.address, this.port);
 			this.read = true;
 			this.readTask = this.plc.getExecutorPool().getSingleThreadExecutor(this.id).submit(this::read);
 
@@ -98,7 +99,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	@Override
 	public void disconnect() {
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			super.disconnect();
 			return;
 		}
@@ -114,7 +115,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 		}
 
 		if (this.socket != null) {
-			logger.warn("Closing socket to " + this.address + ":" + this.port);
+			logger.warn("Closing socket to {}:{}", this.address, this.port);
 			try {
 				this.socket.shutdownInput();
 				this.socket.shutdownOutput();
@@ -150,7 +151,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 			throw new IllegalStateException("Illegal Address " + address);
 
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			return;
 		}
 
@@ -170,8 +171,8 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 		} catch (IOException e) {
 			handleBrokenConnection(
-					"Failed to handle address " + address + " for " + this.address + ":" + this.port + ": "
-							+ getExceptionMessageWithCauses(e), e);
+					format("Failed to handle address {0} for {1}:{2}: {3}", address, this.address, this.port,
+							getExceptionMessageWithCauses(e)), e);
 
 			throw new IllegalStateException(
 					"Failed to handle address " + address + " for " + this.address + ":" + this.port, e);
@@ -180,7 +181,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 	private void read() {
 
-		logger.info("Reading from DataLogic Scanner at " + this.address + ":" + this.port + "...");
+		logger.info("Reading from DataLogic Scanner at {}:{}...", this.address, this.port);
 		while (this.read) {
 			try {
 
@@ -215,7 +216,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 					}
 
 					String barcode = sb.toString();
-					logger.info("Received barcode " + barcode);
+					logger.info("Received barcode {}", barcode);
 					notify(this.addressBarcode, barcode);
 				}
 
@@ -226,27 +227,27 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 						try {
 							sendStopTrigger();
 						} catch (IOException ex) {
-							logger.error("Failed to send stop during timeout exception: " + ex.getMessage());
+							logger.error("Failed to send stop during timeout exception: {}", ex.getMessage());
 						}
 						internalDisconnect();
 						handleBrokenConnection(
-								"Timeout while reading from scanner at " + this.address + ":" + this.port + ": "
-										+ getExceptionMessageWithCauses(e), e);
+								format("Timeout while reading from scanner at {0}:{1}: {2}", this.address, this.port,
+										getExceptionMessageWithCauses(e)), e);
 					} else {
-						logger.warn("Timeout while reading from scanner at " + this.address + ":" + this.port
-								+ ". Disconnected.");
+						logger.warn("Timeout while reading from scanner at {}:{}. Disconnected.", this.address,
+								this.port);
 						notify(this.addressBarcode, NO_CONNECTION);
 						disconnect();
 					}
 				} else {
 					notify(this.addressBarcode, NO_CONNECTION);
 					internalDisconnect();
-					handleBrokenConnection("Failed to connect to " + this.address + ":" + this.port + ": "
-							+ getExceptionMessageWithCauses(e), e);
+					handleBrokenConnection(format("Failed to connect to {0}:{1}: {2}", this.address, this.port,
+							getExceptionMessageWithCauses(e)), e);
 				}
 			}
 		}
 
-		logger.info("Stopped reading from " + this.address + ":" + this.port);
+		logger.info("Stopped reading from {}:{}", this.address, this.port);
 	}
 }

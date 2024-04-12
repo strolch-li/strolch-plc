@@ -10,6 +10,8 @@ import li.strolch.policy.ReloadPrivilegeHandlerJob;
 import li.strolch.runtime.configuration.RuntimeConfiguration;
 import li.strolch.utils.helper.ExceptionHelper;
 
+import static java.text.MessageFormat.format;
+
 public class PlcPostInitializer extends SimplePostInitializer {
 
 	public PlcPostInitializer(ComponentContainer container, String componentName) {
@@ -49,8 +51,9 @@ public class PlcPostInitializer extends SimplePostInitializer {
 
 	protected void notifyStart() {
 
-		if (!(getConfiguration().getBoolean("notifyStart", Boolean.FALSE) && getContainer()
-				.hasComponent(MailHandler.class)))
+		if (!(
+				getConfiguration().getBoolean("notifyStart", Boolean.FALSE) && getContainer().hasComponent(
+						MailHandler.class)))
 			return;
 
 		String recipients = getConfiguration().getString("notifyStartRecipients", "");
@@ -61,20 +64,18 @@ public class PlcPostInitializer extends SimplePostInitializer {
 
 		StrolchAgent agent = getContainer().getAgent();
 		RuntimeConfiguration runtimeConfiguration = agent.getStrolchConfiguration().getRuntimeConfiguration();
-		String subject = runtimeConfiguration.getApplicationName() + ":" + runtimeConfiguration.getEnvironment()
-				+ " Startup Complete!";
+		String subject = format("{0}:{1} Startup Complete!", runtimeConfiguration.getApplicationName(),
+				runtimeConfiguration.getEnvironment());
 
-		String body = "Dear User\n\n" //
-				+ "The " + getConfiguration().getRuntimeConfiguration().getApplicationName()
-				+ " Server has just completed startup with version " //
-				+ agent.getVersion().getAppVersion().getArtifactVersion() //
-				+ "\n\n" //
-				+ "\tYour Server.";
+		String body = format(
+				"Dear User\n\nThe {0} Server has just completed startup with version {1}\n\n\tYour Server.",
+				getConfiguration().getRuntimeConfiguration().getApplicationName(),
+				agent.getVersion().getAppVersion().getArtifactVersion());
 
 		try {
 			getContainer().getComponent(MailHandler.class).sendMailAsync(subject, body, recipients);
 		} catch (Exception e) {
-			logger.error("Notifying of server startup failed: " + ExceptionHelper.getRootCause(e), e);
+			logger.error("Notifying of server startup failed: {}", ExceptionHelper.getRootCause(e), e);
 		}
 	}
 }

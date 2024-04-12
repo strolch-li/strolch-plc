@@ -36,10 +36,10 @@ public class SendPlcAddressActionService extends AbstractService<JsonServiceArgu
 			if (jsonObject.has(PARAM_VALUE)) {
 				String valueS = jsonObject.get(PARAM_VALUE).getAsString();
 				Object value = plcAddress.valueType.parseValue(valueS);
-				logger.info("PLC Send " + resource + "-" + action + " with " + valueS);
+				logger.info("PLC Send {}-{} with {}", resource, action, valueS);
 				plcHandler.send(resource, action, value);
 			} else {
-				logger.info("PLC Send " + resource + "-" + action + " with default value " + plcAddress.defaultValue);
+				logger.info("PLC Send {}-{} with default value {}", resource, action, plcAddress.defaultValue);
 				plcHandler.send(resource, action);
 			}
 		} else if (addressType == PlcAddressType.Notification) {
@@ -49,7 +49,7 @@ public class SendPlcAddressActionService extends AbstractService<JsonServiceArgu
 			String valueS = jsonObject.get(PARAM_VALUE).getAsString();
 			Object value = plcAddress.valueType.parseValue(valueS);
 
-			logger.info("PLC Notification " + resource + "-" + action + " with " + valueS);
+			logger.info("PLC Notification {}-{} with {}", resource, action, valueS);
 			plcHandler.notify(resource, action, value);
 
 		} else {

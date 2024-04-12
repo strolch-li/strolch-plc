@@ -40,17 +40,17 @@ public class PCF8574OutputConnection extends Multi8BitI2cOutputConnection {
 			this.states[index] = (byte) 0xff;
 			try {
 				i2cDev.write(this.states[index]);
-				logger.info(this.id + ": set initial value to " + asBinary((byte) 0xff) + " for " + getDescription(
-						address));
+				logger.info("{}: set initial value to {} for {}", this.id, asBinary((byte) 0xff),
+						getDescription(address));
 			} catch (Exception e) {
 				ok = false;
-				logger.error(this.id + ": Failed to set initial value to " + asBinary((byte) 0xff) + " for "
-						+ getDescription(address), e);
+				logger.error("{}: Failed to set initial value to {} for {}", this.id, asBinary((byte) 0xff),
+						getDescription(address), e);
 			}
 		} else {
 			this.states[index] = (byte) i2cDev.read();
-			logger.info(
-					this.id + ": Initial value is " + asBinary(this.states[index]) + " for " + getDescription(address));
+			logger.info("{}: Initial value is {} for {}", this.id, asBinary(this.states[index]),
+					getDescription(address));
 		}
 
 		return ok;
@@ -64,8 +64,7 @@ public class PCF8574OutputConnection extends Multi8BitI2cOutputConnection {
 		else
 			newState = setBit(this.states[device], pin);
 
-		logger.info("Setting " + this.id + "." + device + "." + pin + " = " + (high ? 0 : 1) + " (" + asBinary(newState)
-				+ ")");
+		logger.info("Setting {}.{}.{} = {} ({})", this.id, device, pin, high ? 0 : 1, asBinary(newState));
 
 		outputDevice.write(newState);
 		this.states[device] = newState;

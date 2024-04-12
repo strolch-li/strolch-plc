@@ -41,7 +41,8 @@ public abstract class Multi8BitI2cOutputConnection extends SimplePlcConnection {
 	public abstract String getName();
 
 	public String getDescription() {
-		return "I2C Output " + getName() + " @ " + byteStream(this.addresses).map(b -> "0x" + toHexString(b))
+		return "I2C Output " + getName() + " @ " + byteStream(this.addresses)
+				.map(b -> "0x" + toHexString(b))
 				.collect(joining(", "));
 	}
 
@@ -65,12 +66,11 @@ public abstract class Multi8BitI2cOutputConnection extends SimplePlcConnection {
 		this.inverted = parameters.containsKey("inverted") && (boolean) parameters.get("inverted");
 		this.reversed = parameters.containsKey("reversed") && (boolean) parameters.get("reversed");
 
-		logger.info("inverted: " + this.inverted);
-		logger.info("reversed: " + this.reversed);
-		logger.info("nrOfBits: " + this.nrOfBits);
+		logger.info("inverted: {}", this.inverted);
+		logger.info("reversed: {}", this.reversed);
+		logger.info("nrOfBits: {}", this.nrOfBits);
 
-		@SuppressWarnings("unchecked")
-		List<Integer> addressList = (List<Integer>) parameters.get("addresses");
+		@SuppressWarnings("unchecked") List<Integer> addressList = (List<Integer>) parameters.get("addresses");
 		this.addresses = new byte[addressList.size()];
 		for (int i = 0; i < addressList.size(); i++) {
 			this.addresses[i] = addressList.get(i).byteValue();
@@ -79,26 +79,26 @@ public abstract class Multi8BitI2cOutputConnection extends SimplePlcConnection {
 		Map<String, int[]> positionsByAddress = new HashMap<>();
 		for (int i = 0; i < this.addresses.length; i++) {
 			for (int j = 0; j < this.nrOfBits; j++)
-				positionsByAddress.put(this.id + "." + i + "." + j, new int[] { i, j });
+				positionsByAddress.put(this.id + "." + i + "." + j, new int[]{i, j});
 		}
 		this.positionsByAddress = Collections.unmodifiableMap(positionsByAddress);
 
-		logger.info("Configured " + getDescription());
+		logger.info("Configured {}", getDescription());
 	}
 
 	@Override
 	public boolean connect() {
 		if (this.simulated) {
-			logger.warn(getName() + ": " + this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: {}: Running SIMULATED, NOT CONNECTING!", getName(), this.id);
 			return super.connect();
 		}
 
 		if (isConnected()) {
-			logger.warn(getName() + ": " + this.id + ": Already connected");
+			logger.warn("{}: {}: Already connected", getName(), this.id);
 			return true;
 		}
 
-		logger.info(getName() + ": " + this.id + ": Connecting...");
+		logger.info("{}: {}: Connecting...", getName(), this.id);
 
 		// initialize
 		try {
@@ -114,7 +114,7 @@ public abstract class Multi8BitI2cOutputConnection extends SimplePlcConnection {
 			}
 
 			if (setup()) {
-				logger.info("Successfully connected " + this.outputDevices.length + " devices as " + getDescription());
+				logger.info("Successfully connected {} devices as {}", this.outputDevices.length, getDescription());
 				return super.connect();
 			}
 
@@ -136,7 +136,7 @@ public abstract class Multi8BitI2cOutputConnection extends SimplePlcConnection {
 			byte address = this.addresses[index];
 			I2CDevice outputDevice = devices[index];
 			ok &= setup(address, index, outputDevice);
-			logger.info("Connected " + getDescription(address));
+			logger.info("Connected {}", getDescription(address));
 		}
 
 		if (ok)
@@ -150,7 +150,7 @@ public abstract class Multi8BitI2cOutputConnection extends SimplePlcConnection {
 	@Override
 	public void disconnect() {
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			super.disconnect();
 			return;
 		}
@@ -169,7 +169,7 @@ public abstract class Multi8BitI2cOutputConnection extends SimplePlcConnection {
 	@Override
 	public void send(String address, Object value) {
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			return;
 		}
 

@@ -5,14 +5,13 @@ import com.google.gson.JsonPrimitive;
 public class ModelHelper {
 
 	public static JsonPrimitive valueToJson(Object value) {
-		if (value instanceof Boolean)
-			return new JsonPrimitive((Boolean) value);
-		else if (value instanceof Number)
-			return new JsonPrimitive((Number) value);
-		else if (value instanceof String)
-			return new JsonPrimitive((String) value);
-		throw new IllegalArgumentException(
-				"Unhandled value type " + (value == null ? "(null)" : value.getClass().getName()));
+		return switch (value) {
+			case Boolean b -> new JsonPrimitive(b);
+			case Number number -> new JsonPrimitive(number);
+			case String s -> new JsonPrimitive(s);
+			case null, default -> throw new IllegalArgumentException(
+					"Unhandled value type " + (value == null ? "(null)" : value.getClass().getName()));
+		};
 	}
 
 	public static Object jsonToValue(JsonPrimitive valueJ) {
