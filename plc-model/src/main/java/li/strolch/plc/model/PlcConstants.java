@@ -54,6 +54,8 @@ public class PlcConstants {
 	public static final String PARAM_REALM = "realm";
 	public static final String PARAM_SIMULATED = "simulated";
 
+	public static final String PARAM_PLC_SUPPORTS_READ_STATE = "plcSupportsReadState";
+
 	public static final String INTERPRETATION_NOTIFICATION = "Notification";
 	public static final String INTERPRETATION_TELEGRAM = "Telegram";
 
