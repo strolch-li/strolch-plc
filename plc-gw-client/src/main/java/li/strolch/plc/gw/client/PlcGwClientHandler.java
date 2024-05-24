@@ -592,12 +592,12 @@ public class PlcGwClientHandler extends StrolchComponent implements GlobalPlcLis
 		if (this.versions == null) {
 			this.versions = new JsonObject();
 			VersionQueryResult versionQueryResult = getContainer().getAgent().getVersion();
-			this.versions.add(AGENT_VERSION, versionQueryResult.getAgentVersion().toJson(true));
-			this.versions.add(APP_VERSION, versionQueryResult.getAppVersion().toJson(true));
+			this.versions.add(AGENT_VERSION, versionQueryResult.getAgentVersion().toJson(true, true));
+			this.versions.add(APP_VERSION, versionQueryResult.getAppVersion().toJson(true, true));
 			this.versions.add(COMPONENT_VERSIONS, versionQueryResult
 					.getComponentVersions()
 					.stream()
-					.map(v -> v.toJson(true))
+					.map(v -> v.toJson(true, true))
 					.collect(JsonArray::new, JsonArray::add, JsonArray::addAll));
 		}
 
