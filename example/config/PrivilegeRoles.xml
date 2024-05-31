@@ -128,6 +128,9 @@
         <Privilege name="PrivilegeGetUserPrivileges" policy="UserAccessPrivilege">
             <AllAllowed>true</AllAllowed>
         </Privilege>
+        <Privilege name="PrivilegeGetGroupPrivileges" policy="UserAccessPrivilege">
+            <AllAllowed>true</AllAllowed>
+        </Privilege>
         <Privilege name="PrivilegeModifyRole" policy="RoleAccessPrivilege">
             <AllAllowed>true</AllAllowed>
         </Privilege>
@@ -192,6 +195,9 @@
             <AllAllowed>true</AllAllowed>
         </Privilege>
         <Privilege name="PrivilegeGetUserPrivileges" policy="UserAccessPrivilege">
+            <AllAllowed>true</AllAllowed>
+        </Privilege>
+        <Privilege name="PrivilegeGetGroupPrivileges" policy="UserAccessPrivilege">
             <AllAllowed>true</AllAllowed>
         </Privilege>
         <Privilege name="li.strolch.service.api.Service" policy="DefaultPrivilege">
