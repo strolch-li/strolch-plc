@@ -49,7 +49,7 @@ public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 	@Override
 	public boolean connect() {
 		if (this.simulated) {
-			logger.warn(this.id + ": Running SIMULATED, NOT CONNECTING!");
+			logger.warn("{}: Running SIMULATED, NOT CONNECTING!", this.id);
 			return super.connect();
 		}
 
