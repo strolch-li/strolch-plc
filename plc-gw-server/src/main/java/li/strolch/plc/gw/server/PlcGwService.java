@@ -1,13 +1,5 @@
 package li.strolch.plc.gw.server;
 
-import static li.strolch.plc.model.ModelHelper.valueToJson;
-import static li.strolch.plc.model.PlcConstants.TYPE_PLC;
-import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
-import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
-
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.execution.ExecutionHandler;
 import li.strolch.handler.operationslog.OperationsLog;
@@ -26,6 +18,14 @@ import li.strolch.utils.CheckedBiFunction;
 import li.strolch.utils.dbc.DBC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+import static li.strolch.plc.model.ModelHelper.valueToJson;
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC;
+import static li.strolch.runtime.StrolchConstants.SYSTEM_USER_AGENT;
+import static li.strolch.utils.helper.ExceptionHelper.getCallerMethod;
 
 public abstract class PlcGwService implements PlcNotificationListener, PlcAddressResponseListener {
 
