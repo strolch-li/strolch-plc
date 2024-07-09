@@ -3,6 +3,7 @@ package li.strolch.plc.core;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
+import li.strolch.model.Tags;
 import li.strolch.model.log.LogMessage;
 import li.strolch.model.log.LogMessageState;
 import li.strolch.model.log.LogSeverity;
@@ -242,8 +243,8 @@ public abstract class PlcService implements PlcListener {
 	protected LogMessage logMessageFor(PlcAddressKey addressKey, ResourceBundle bundle, LogSeverity severity,
 			LogMessageState state) {
 		return new LogMessage(DEFAULT_REALM, this.plcHandler.getPlcId(),
-				Locator.valueOf("Plc", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action), severity,
-				state, bundle, addressKey.toKey());
+				Locator.valueOf(Tags.AGENT, "PLC", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action),
+				severity, state, bundle, addressKey.toKey());
 	}
 
 	/**
@@ -272,8 +273,8 @@ public abstract class PlcService implements PlcListener {
 	protected LogMessage logMessageFor(String i18nKey, ResourceBundle bundle, LogSeverity severity,
 			LogMessageState state) {
 		return new LogMessage(DEFAULT_REALM, this.plcHandler.getPlcId(),
-				Locator.valueOf("Plc", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey), severity,
-				state, bundle, i18nKey);
+				Locator.valueOf(Tags.AGENT, "PLC", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey),
+				severity, state, bundle, i18nKey);
 	}
 
 	/**
