@@ -6,7 +6,7 @@
     <parent>
         <groupId>li.strolch</groupId>
         <artifactId>strolch-plc</artifactId>
-        <version>2.3.0-SNAPSHOT</version>
+        <version>2.4.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -21,32 +21,32 @@
             <!-- PLC -->
             <dependency>
                 <groupId>li.strolch</groupId>
-                <artifactId>plc-model</artifactId>
+                <artifactId>strolch-plc-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>li.strolch</groupId>
-                <artifactId>plc-core</artifactId>
+                <artifactId>strolch-plc-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>li.strolch</groupId>
-                <artifactId>plc-rest</artifactId>
+                <artifactId>strolch-plc-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>li.strolch</groupId>
-                <artifactId>plc-gw-client</artifactId>
+                <artifactId>strolch-plc-gw-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>li.strolch</groupId>
-                <artifactId>plc-gw-server</artifactId>
+                <artifactId>strolch-plc-gw-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>li.strolch</groupId>
-                <artifactId>plc-util</artifactId>
+                <artifactId>strolch-plc-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

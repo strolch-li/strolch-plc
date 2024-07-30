@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>li.strolch</groupId>
         <artifactId>strolch-plc</artifactId>
-        <version>2.3.0-SNAPSHOT</version>
+        <groupId>li.strolch</groupId>
+        <version>2.4.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>plc-rest</artifactId>
-    <name>plc-rest</name>
+    <artifactId>strolch-plc-gw-server</artifactId>
+    <name>plc-gw-server</name>
     <packaging>jar</packaging>
     <url>https://github.com/strolch-li/strolch-plc</url>
 
@@ -42,27 +42,27 @@
         <!-- Strolch -->
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>utils</artifactId>
+            <artifactId>strolch-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>model</artifactId>
+            <artifactId>strolch-model</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>agent</artifactId>
+            <artifactId>strolch-agent</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>service</artifactId>
+            <artifactId>strolch-service</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>web-rest</artifactId>
+            <artifactId>strolch-web-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>websocket</artifactId>
+            <artifactId>strolch-websocket</artifactId>
         </dependency>
 
         <!-- utils -->
@@ -74,7 +74,11 @@
         <!-- PLC -->
         <dependency>
             <groupId>li.strolch</groupId>
-            <artifactId>plc-core</artifactId>
+            <artifactId>strolch-plc-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>li.strolch</groupId>
+            <artifactId>strolch-plc-core</artifactId>
         </dependency>
 
         <!-- REST using Apache Jersey -->
@@ -109,6 +113,8 @@
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
+
+        <!-- Tyrus REST Client -->
         </dependency>
 
         <!-- test -->
