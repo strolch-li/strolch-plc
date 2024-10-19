@@ -1,11 +1,11 @@
 package li.strolch.plc.core.hw;
 
-import java.util.Set;
-import java.util.stream.Stream;
-
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.utils.ExecutorPool;
+
+import java.util.Set;
+import java.util.stream.Stream;
 
 public interface Plc {
 

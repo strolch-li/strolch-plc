@@ -1,17 +1,17 @@
 package li.strolch.plc.core.hw.gpio;
 
-import static java.util.stream.Collectors.joining;
-import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
-import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
+import com.pi4j.io.gpio.*;
+import li.strolch.plc.core.hw.Plc;
+import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.pi4j.io.gpio.*;
-import li.strolch.plc.core.hw.Plc;
-import li.strolch.plc.core.hw.connections.SimplePlcConnection;
+import static java.util.stream.Collectors.joining;
+import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
+import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
 
 public class RaspiBcmGpioOutputConnection extends SimplePlcConnection {
 

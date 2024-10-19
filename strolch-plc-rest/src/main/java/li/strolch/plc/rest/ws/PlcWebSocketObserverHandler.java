@@ -1,16 +1,16 @@
 package li.strolch.plc.rest.ws;
 
-import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
-import static li.strolch.plc.rest.PlcModelVisitor.plcAddressToJson;
-
-import java.util.Set;
-
 import com.google.gson.JsonObject;
 import li.strolch.agent.api.ObserverHandler;
 import li.strolch.agent.api.StrolchAgent;
 import li.strolch.model.StrolchRootElement;
 import li.strolch.websocket.WebSocketClient;
 import li.strolch.websocket.WebSocketObserverHandler;
+
+import java.util.Set;
+
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
+import static li.strolch.plc.rest.PlcModelVisitor.plcAddressToJson;
 
 public class PlcWebSocketObserverHandler extends WebSocketObserverHandler {
 

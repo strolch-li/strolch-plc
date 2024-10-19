@@ -1,16 +1,5 @@
 package li.strolch.plc.gw.server;
 
-import static li.strolch.model.Resource.locatorFor;
-import static li.strolch.model.Tags.Json.*;
-import static li.strolch.model.builder.BuilderHelper.buildParamName;
-import static li.strolch.plc.model.PlcConstants.*;
-import static li.strolch.utils.helper.StringHelper.DASH;
-import static li.strolch.utils.helper.StringHelper.isEmpty;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import li.strolch.agent.api.ComponentContainer;
@@ -33,6 +22,17 @@ import li.strolch.runtime.privilege.PrivilegedRunnable;
 import li.strolch.utils.DataUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static li.strolch.model.Resource.locatorFor;
+import static li.strolch.model.Tags.Json.*;
+import static li.strolch.model.builder.BuilderHelper.buildParamName;
+import static li.strolch.plc.model.PlcConstants.*;
+import static li.strolch.utils.helper.StringHelper.DASH;
+import static li.strolch.utils.helper.StringHelper.isEmpty;
 
 public class PlcStateHandler {
 

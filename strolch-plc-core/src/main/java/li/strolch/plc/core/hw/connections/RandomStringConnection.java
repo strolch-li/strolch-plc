@@ -1,10 +1,10 @@
 package li.strolch.plc.core.hw.connections;
 
-import java.security.SecureRandom;
-
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.PlcConnection;
 import li.strolch.utils.helper.StringHelper;
+
+import java.security.SecureRandom;
 
 public class RandomStringConnection extends SimplePlcConnection {
 

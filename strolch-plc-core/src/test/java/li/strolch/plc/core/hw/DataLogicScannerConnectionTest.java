@@ -1,14 +1,14 @@
 package li.strolch.plc.core.hw;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import li.strolch.model.StrolchValueType;
 import li.strolch.plc.core.hw.connections.DataLogicScannerConnection;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DataLogicScannerConnectionTest {
 

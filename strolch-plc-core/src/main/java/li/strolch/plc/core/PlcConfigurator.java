@@ -1,16 +1,10 @@
 package li.strolch.plc.core;
 
-import static li.strolch.plc.model.PlcConstants.*;
-import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import li.strolch.model.parameter.Parameter;
-import li.strolch.plc.core.hw.*;
 import li.strolch.model.Resource;
+import li.strolch.model.parameter.Parameter;
 import li.strolch.persistence.api.StrolchTransaction;
+import li.strolch.plc.core.hw.Plc;
+import li.strolch.plc.core.hw.PlcConnection;
 import li.strolch.plc.model.PlcAddress;
 import li.strolch.plc.model.PlcAddressType;
 import li.strolch.search.ResourceSearch;
@@ -18,6 +12,13 @@ import li.strolch.utils.collections.MapOfMaps;
 import li.strolch.utils.helper.ClassHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
+import static li.strolch.plc.model.PlcConstants.*;
 
 class PlcConfigurator {
 

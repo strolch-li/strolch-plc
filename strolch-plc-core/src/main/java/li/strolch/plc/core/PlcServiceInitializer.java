@@ -1,12 +1,12 @@
 package li.strolch.plc.core;
 
-import java.util.List;
-
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.agent.api.StrolchComponent;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.model.PlcServiceState;
 import li.strolch.plc.model.PlcState;
+
+import java.util.List;
 
 public abstract class PlcServiceInitializer extends StrolchComponent {
 

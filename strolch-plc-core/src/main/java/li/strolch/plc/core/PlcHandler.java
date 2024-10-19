@@ -1,8 +1,8 @@
 package li.strolch.plc.core;
 
 import li.strolch.agent.api.ComponentContainer;
-import li.strolch.model.log.LogMessage;
 import li.strolch.model.Locator;
+import li.strolch.model.log.LogMessage;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.PlcListener;

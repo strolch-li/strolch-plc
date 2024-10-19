@@ -1,11 +1,11 @@
 package li.strolch.plc.core.hw.i2c;
 
-import static li.strolch.utils.helper.ByteHelper.*;
+import com.pi4j.io.i2c.I2CDevice;
+import li.strolch.plc.core.hw.Plc;
 
 import java.io.IOException;
 
-import com.pi4j.io.i2c.I2CDevice;
-import li.strolch.plc.core.hw.Plc;
+import static li.strolch.utils.helper.ByteHelper.*;
 
 public class PCF8574OutputConnection extends Multi8BitI2cOutputConnection {
 

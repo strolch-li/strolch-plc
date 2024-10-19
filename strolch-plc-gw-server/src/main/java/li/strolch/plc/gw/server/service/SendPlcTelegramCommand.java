@@ -1,7 +1,5 @@
 package li.strolch.plc.gw.server.service;
 
-import static li.strolch.plc.model.PlcConstants.*;
-
 import li.strolch.model.StrolchValueType;
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.gw.server.PlcGwServerHandler;
@@ -9,6 +7,8 @@ import li.strolch.plc.model.PlcAddressKey;
 import li.strolch.plc.model.PlcAddressResponse;
 import li.strolch.service.api.Command;
 import li.strolch.utils.dbc.DBC;
+
+import static li.strolch.plc.model.PlcConstants.*;
 
 public class SendPlcTelegramCommand extends Command {
 

@@ -1,9 +1,9 @@
 package li.strolch.plc.core;
 
+import li.strolch.agent.api.ComponentContainer;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import li.strolch.agent.api.ComponentContainer;
 
 public class NoPlcServiceInitializer extends PlcServiceInitializer {
 

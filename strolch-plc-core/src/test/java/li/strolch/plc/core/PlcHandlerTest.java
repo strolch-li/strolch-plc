@@ -1,12 +1,5 @@
 package li.strolch.plc.core;
 
-import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
-import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
-import static org.junit.Assert.*;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
 import li.strolch.model.log.LogMessage;
@@ -23,6 +16,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
+import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
+import static org.junit.Assert.*;
 
 public class PlcHandlerTest {
 

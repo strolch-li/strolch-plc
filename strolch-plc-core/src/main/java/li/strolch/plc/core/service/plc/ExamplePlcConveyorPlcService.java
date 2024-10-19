@@ -1,11 +1,11 @@
 package li.strolch.plc.core.service.plc;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import li.strolch.persistence.api.StrolchTransaction;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.PlcService;
 import li.strolch.plc.model.PlcAddress;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ExamplePlcConveyorPlcService extends PlcService {
 

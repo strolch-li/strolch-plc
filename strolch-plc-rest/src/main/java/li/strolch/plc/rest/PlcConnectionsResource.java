@@ -1,7 +1,5 @@
 package li.strolch.plc.rest;
 
-import static li.strolch.plc.rest.PlcModelVisitor.plcConnectionToJson;
-
 import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
@@ -20,6 +18,8 @@ import li.strolch.service.StringMapArgument;
 import li.strolch.service.api.ServiceHandler;
 import li.strolch.service.api.ServiceResult;
 import li.strolch.utils.collections.Paging;
+
+import static li.strolch.plc.rest.PlcModelVisitor.plcConnectionToJson;
 
 @Path("plc/connections")
 public class PlcConnectionsResource {

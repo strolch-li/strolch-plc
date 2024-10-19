@@ -1,13 +1,13 @@
 package li.strolch.plc.core.hw.connections;
 
+import li.strolch.plc.core.hw.Plc;
+import li.strolch.plc.core.hw.PlcConnection;
+import li.strolch.plc.model.ConnectionState;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import li.strolch.plc.core.hw.Plc;
-import li.strolch.plc.core.hw.PlcConnection;
-import li.strolch.plc.model.ConnectionState;
 
 public abstract class SimplePlcConnection extends PlcConnection {
 

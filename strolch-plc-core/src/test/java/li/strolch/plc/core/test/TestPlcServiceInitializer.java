@@ -1,12 +1,12 @@
 package li.strolch.plc.core.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.PlcService;
 import li.strolch.plc.core.PlcServiceInitializer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestPlcServiceInitializer extends PlcServiceInitializer {
 

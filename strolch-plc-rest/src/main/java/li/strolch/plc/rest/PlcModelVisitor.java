@@ -1,9 +1,5 @@
 package li.strolch.plc.rest;
 
-import static java.util.Comparator.comparing;
-import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
-import static li.strolch.plc.model.PlcConstants.*;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import li.strolch.model.Tags;
@@ -11,6 +7,10 @@ import li.strolch.model.json.StrolchRootElementToJsonVisitor;
 import li.strolch.model.parameter.Parameter;
 import li.strolch.model.visitor.ResourceVisitor;
 import li.strolch.plc.model.PlcAddress;
+
+import static java.util.Comparator.comparing;
+import static li.strolch.model.StrolchModelConstants.BAG_PARAMETERS;
+import static li.strolch.plc.model.PlcConstants.*;
 
 public class PlcModelVisitor {
 

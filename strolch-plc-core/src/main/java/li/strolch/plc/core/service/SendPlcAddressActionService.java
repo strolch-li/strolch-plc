@@ -1,7 +1,5 @@
 package li.strolch.plc.core.service;
 
-import static li.strolch.plc.model.PlcConstants.*;
-
 import com.google.gson.JsonObject;
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.model.PlcAddress;
@@ -9,6 +7,8 @@ import li.strolch.plc.model.PlcAddressType;
 import li.strolch.service.JsonServiceArgument;
 import li.strolch.service.api.AbstractService;
 import li.strolch.service.api.ServiceResult;
+
+import static li.strolch.plc.model.PlcConstants.*;
 
 public class SendPlcAddressActionService extends AbstractService<JsonServiceArgument, ServiceResult> {
 	@Override

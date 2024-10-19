@@ -1,14 +1,5 @@
 package li.strolch.plc.core.hw.i2c;
 
-import static java.util.stream.Collectors.joining;
-import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
-import static li.strolch.utils.collections.CollectionsHelper.byteStream;
-import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
-import static li.strolch.utils.helper.StringHelper.toHexString;
-
-import java.io.IOException;
-import java.util.*;
-
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
@@ -16,6 +7,15 @@ import li.strolch.plc.core.hw.Plc;
 import li.strolch.plc.core.hw.connections.SimplePlcConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
+
+import static java.util.stream.Collectors.joining;
+import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
+import static li.strolch.utils.collections.CollectionsHelper.byteStream;
+import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
+import static li.strolch.utils.helper.StringHelper.toHexString;
 
 public abstract class Multi8BitI2cOutputConnection extends SimplePlcConnection {
 

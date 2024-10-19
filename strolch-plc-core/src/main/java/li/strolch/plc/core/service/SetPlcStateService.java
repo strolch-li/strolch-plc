@@ -1,13 +1,13 @@
 package li.strolch.plc.core.service;
 
-import static li.strolch.plc.model.PlcConstants.PARAM_STATE;
-
 import li.strolch.plc.core.PlcHandler;
 import li.strolch.plc.core.PlcServiceInitializer;
 import li.strolch.plc.model.PlcState;
 import li.strolch.service.StringMapArgument;
 import li.strolch.service.api.AbstractService;
 import li.strolch.service.api.ServiceResult;
+
+import static li.strolch.plc.model.PlcConstants.PARAM_STATE;
 
 public class SetPlcStateService extends AbstractService<StringMapArgument, ServiceResult> {
 

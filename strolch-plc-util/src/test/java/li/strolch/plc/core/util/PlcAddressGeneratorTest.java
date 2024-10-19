@@ -1,8 +1,8 @@
 package li.strolch.plc.core.util;
 
-import java.io.IOException;
-
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class PlcAddressGeneratorTest {
 
