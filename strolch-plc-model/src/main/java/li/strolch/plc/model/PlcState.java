@@ -5,5 +5,5 @@ public enum PlcState {
 	Configured,
 	Started,
 	Stopped,
-	Failed;
+	Failed
 }
