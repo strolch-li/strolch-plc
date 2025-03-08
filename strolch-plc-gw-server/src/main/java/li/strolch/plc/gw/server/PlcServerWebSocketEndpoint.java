@@ -19,10 +19,11 @@ package li.strolch.plc.gw.server;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
 import li.strolch.rest.RestfulStrolchComponent;
+import li.strolch.websocket.WebSocketConfigurator;
 
 import java.io.IOException;
 
-@ServerEndpoint("/websocket/strolch/plc")
+@ServerEndpoint(value = "/websocket/strolch/plc", configurator = WebSocketConfigurator.class)
 public class PlcServerWebSocketEndpoint {
 
 	private final PlcGwServerHandler serverHandler;

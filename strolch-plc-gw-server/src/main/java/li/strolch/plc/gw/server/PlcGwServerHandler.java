@@ -56,7 +56,6 @@ import static li.strolch.plc.model.ModelHelper.valueToJson;
 import static li.strolch.plc.model.PlcConstants.*;
 import static li.strolch.utils.collections.SynchronizedCollections.synchronizedMapOfLists;
 import static li.strolch.utils.helper.ExceptionHelper.getExceptionMessageWithCauses;
-import static li.strolch.websocket.WebSocketRemoteIp.get;
 
 public class PlcGwServerHandler extends StrolchComponent {
 
@@ -505,7 +504,8 @@ public class PlcGwServerHandler extends StrolchComponent {
 		Certificate certificate;
 		try {
 			char[] passwordChars = password.toCharArray();
-			certificate = sessionHandler.authenticate(username, passwordChars, get(), Usage.ANY, false);
+			certificate = sessionHandler.authenticate(username, passwordChars,
+					session.getUserProperties().getOrDefault("remoteIp", "notset").toString(), Usage.ANY, false);
 		} catch (PrivilegeException e) {
 			session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR,
 					"Authentication failed for given credentials!"));

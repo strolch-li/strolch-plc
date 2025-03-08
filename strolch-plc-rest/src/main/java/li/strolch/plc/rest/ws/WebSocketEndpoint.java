@@ -20,10 +20,11 @@ import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
 import li.strolch.agent.api.StrolchAgent;
 import li.strolch.rest.RestfulStrolchComponent;
+import li.strolch.websocket.WebSocketConfigurator;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-@ServerEndpoint("/websocket/plc/observer")
+@ServerEndpoint(value = "/websocket/plc/observer", configurator = WebSocketConfigurator.class)
 public class WebSocketEndpoint {
 
 	private final ConcurrentHashMap<Session, PlcWebSocketClient> clientMap = new ConcurrentHashMap<>();
