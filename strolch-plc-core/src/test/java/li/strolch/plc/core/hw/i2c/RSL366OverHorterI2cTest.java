@@ -312,18 +312,18 @@ public class RSL366OverHorterI2cTest {
 
 	public static String asBinary(byte b) {
 
-		StringBuilder sb = new StringBuilder();
+		String sb = String.valueOf((b >>> 7) & 1)
+				+ ((b >>> 6) & 1)
+				+ ((b >>> 5) & 1)
+				+ ((b >>> 4) & 1)
+				+ (
+				(b >>> 3)
+						& 1)
+				+ ((b >>> 2) & 1)
+				+ ((b >>> 1) & 1)
+				+ ((b >>> 0) & 1);
 
-		sb.append(((b >>> 7) & 1));
-		sb.append(((b >>> 6) & 1));
-		sb.append(((b >>> 5) & 1));
-		sb.append(((b >>> 4) & 1));
-		sb.append(((b >>> 3) & 1));
-		sb.append(((b >>> 2) & 1));
-		sb.append(((b >>> 1) & 1));
-		sb.append(((b >>> 0) & 1));
-
-		return sb.toString();
+		return sb;
 	}
 
 	public static boolean isBitSet(byte data, int position) {
