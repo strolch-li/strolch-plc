@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) 2025 Robert von Burg <eitch@eitchnet.ch>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <Users>
   <!-- password: admin -->
   <User password="$PBKDF2WithHmacSHA512,10000,256$83c5d3697a69497ed4d999cde98a6a2c586114435cab5a80327734b3a032766b$c9185893044f5421f28c2a6def129e072186c7d73b78ec4ec60c1044c97546fe" userId="U10" username="admin">
