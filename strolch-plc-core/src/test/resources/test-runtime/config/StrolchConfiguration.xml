@@ -67,17 +67,6 @@
         </Component>
 
         <Component>
-            <name>SessionHandler</name>
-            <api>li.strolch.runtime.sessions.StrolchSessionHandler</api>
-            <impl>li.strolch.runtime.sessions.DefaultStrolchSessionHandler</impl>
-            <depends>PrivilegeHandler</depends>
-            <Properties>
-                <session.ttl.minutes>1440</session.ttl.minutes>
-                <session.maxKeepAlive.minutes>10080</session.maxKeepAlive.minutes>
-            </Properties>
-        </Component>
-
-        <Component>
             <name>PlcHandler</name>
             <api>li.strolch.plc.core.PlcHandler</api>
             <impl>li.strolch.plc.core.DefaultPlcHandler</impl>

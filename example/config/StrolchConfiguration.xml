@@ -110,6 +110,7 @@
             <name>SessionHandler</name>
             <api>li.strolch.runtime.sessions.StrolchSessionHandler</api>
             <impl>li.strolch.runtime.sessions.DefaultStrolchSessionHandler</impl>
+            <depends>RealmHandler</depends>
             <depends>PrivilegeHandler</depends>
             <Properties>
                 <session.ttl.minutes>1440</session.ttl.minutes>
