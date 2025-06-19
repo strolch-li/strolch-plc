@@ -687,7 +687,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
-                            <!--                            <autoPublish>true</autoPublish>-->
+                            <autoPublish>true</autoPublish>
                             <!--                            <waitUntil>published</waitUntil>-->
                         </configuration>
                     </plugin>
