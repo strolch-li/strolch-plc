@@ -24,7 +24,6 @@ import li.strolch.job.StrolchJobsHandler;
 import li.strolch.policy.ReloadPoliciesJob;
 import li.strolch.policy.ReloadPrivilegeHandlerJob;
 import li.strolch.runtime.configuration.RuntimeConfiguration;
-import li.strolch.utils.helper.ExceptionHelper;
 
 import static java.text.MessageFormat.format;
 
@@ -48,7 +47,7 @@ public class PlcPostInitializer extends SimplePostInitializer {
 		super.stop();
 	}
 
-	protected void registerJobs() throws Exception {
+	protected void registerJobs() {
 		if (!getContainer().hasComponent(StrolchJobsHandler.class))
 			return;
 
@@ -91,11 +90,7 @@ public class PlcPostInitializer extends SimplePostInitializer {
 				The {0} Server has just completed startup with version {1}
 				
 					Your Server.""", applicationName, version);
-
-		try {
-			getComponent(MailHandler.class).sendUnencryptedMailAsync(recipients, subject, body);
-		} catch (Exception e) {
-			logger.error("Notifying of server startup failed: {}", ExceptionHelper.getRootCause(e), e);
-		}
+		getComponent(MailHandler.class).sendUnencryptedMailWithBodyAsSignedAttachmentIfAvailableAsync(recipients,
+				subject, body);
 	}
 }
