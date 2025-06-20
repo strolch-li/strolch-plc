@@ -83,10 +83,14 @@ public class PlcPostInitializer extends SimplePostInitializer {
 		String subject = format("{0}:{1} Startup Complete!", runtimeConfiguration.getApplicationName(),
 				runtimeConfiguration.getEnvironment());
 
-		String body = format(
-				"Dear User\n\nThe {0} Server has just completed startup with version {1}\n\n\tYour Server.",
-				getConfiguration().getRuntimeConfiguration().getApplicationName(),
-				agent.getVersion().getAppVersion().getArtifactVersion());
+		String applicationName = getConfiguration().getRuntimeConfiguration().getApplicationName();
+		String version = agent.getVersion().getAppVersion().getArtifactVersion();
+		String body = format("""
+				Dear User
+				
+				The {0} Server has just completed startup with version {1}
+				
+					Your Server.""", applicationName, version);
 
 		try {
 			getComponent(MailHandler.class).sendUnencryptedMailAsync(recipients, subject, body);
