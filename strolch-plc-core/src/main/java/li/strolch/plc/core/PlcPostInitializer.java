@@ -89,7 +89,7 @@ public class PlcPostInitializer extends SimplePostInitializer {
 				agent.getVersion().getAppVersion().getArtifactVersion());
 
 		try {
-			getContainer().getComponent(MailHandler.class).sendMailAsync(recipients, subject, body);
+			getComponent(MailHandler.class).sendUnencryptedMailAsync(recipients, subject, body);
 		} catch (Exception e) {
 			logger.error("Notifying of server startup failed: {}", ExceptionHelper.getRootCause(e), e);
 		}
