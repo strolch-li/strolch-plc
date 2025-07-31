@@ -24,7 +24,6 @@ import li.strolch.job.StrolchJobsHandler;
 import li.strolch.policy.ReloadPoliciesJob;
 import li.strolch.policy.ReloadPrivilegeHandlerJob;
 import li.strolch.runtime.configuration.RuntimeConfiguration;
-import li.strolch.utils.helper.ExceptionHelper;
 
 import static java.text.MessageFormat.format;
 
@@ -48,7 +47,7 @@ public class PlcPostInitializer extends SimplePostInitializer {
 		super.stop();
 	}
 
-	protected void registerJobs() throws Exception {
+	protected void registerJobs() {
 		if (!getContainer().hasComponent(StrolchJobsHandler.class))
 			return;
 
@@ -83,15 +82,15 @@ public class PlcPostInitializer extends SimplePostInitializer {
 		String subject = format("{0}:{1} Startup Complete!", runtimeConfiguration.getApplicationName(),
 				runtimeConfiguration.getEnvironment());
 
-		String body = format(
-				"Dear User\n\nThe {0} Server has just completed startup with version {1}\n\n\tYour Server.",
-				getConfiguration().getRuntimeConfiguration().getApplicationName(),
-				agent.getVersion().getAppVersion().getArtifactVersion());
-
-		try {
-			getContainer().getComponent(MailHandler.class).sendMailAsync(recipients, subject, body);
-		} catch (Exception e) {
-			logger.error("Notifying of server startup failed: {}", ExceptionHelper.getRootCause(e), e);
-		}
+		String applicationName = getConfiguration().getRuntimeConfiguration().getApplicationName();
+		String version = agent.getVersion().getAppVersion().getArtifactVersion();
+		String body = format("""
+				Dear User
+				
+				The {0} Server has just completed startup with version {1}
+				
+					Your Server.""", applicationName, version);
+		getComponent(MailHandler.class).sendUnencryptedMailWithBodyAsSignedAttachmentIfAvailableAsync(recipients,
+				subject, body);
 	}
 }
