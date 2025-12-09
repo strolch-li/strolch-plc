@@ -98,7 +98,7 @@
         <pi4j.version>1.4</pi4j.version>
         <jserialcomm.version>2.11.0</jserialcomm.version>
 
-        <strolch.version>2.5.0-SNAPSHOT</strolch.version>
+        <strolch.version>2.6.0-SNAPSHOT</strolch.version>
 
         <!-- test time dependencies -->
         <junit.version>4.13.2</junit.version>
