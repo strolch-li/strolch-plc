@@ -42,6 +42,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.*;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static li.strolch.model.Tags.*;
 import static li.strolch.plc.model.PlcConstants.PARAM_VALUE;
 import static li.strolch.plc.model.PlcConstants.TYPE_PLC_ADDRESS;
 import static li.strolch.runtime.StrolchConstants.DEFAULT_REALM;
@@ -198,7 +199,7 @@ public abstract class PlcService implements PlcListener {
 	 * @param addressKey the address for which the message was enabled
 	 */
 	protected void disableMsg(PlcAddressKey addressKey) {
-		disableMsg(Locator.valueOf("Plc", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action));
+		disableMsg(Locator.valueOf(AGENT, "PLC", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action));
 	}
 
 	/**
@@ -219,7 +220,7 @@ public abstract class PlcService implements PlcListener {
 	 * @param bundle  the resource bundle containing the message
 	 */
 	protected void disableMsg(String i18nKey, ResourceBundle bundle) {
-		disableMsg(Locator.valueOf("Plc", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey));
+		disableMsg(Locator.valueOf(AGENT, "PLC", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey));
 	}
 
 	/**
@@ -259,7 +260,7 @@ public abstract class PlcService implements PlcListener {
 	protected LogMessage logMessageFor(PlcAddressKey addressKey, ResourceBundle bundle, LogSeverity severity,
 			LogMessageState state) {
 		return new LogMessage(DEFAULT_REALM, this.plcHandler.getPlcId(),
-				Locator.valueOf(Tags.AGENT, "PLC", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action),
+				Locator.valueOf(AGENT, "PLC", this.plcHandler.getPlcId(), addressKey.resource, addressKey.action),
 				severity, state, bundle, addressKey.toKey());
 	}
 
@@ -289,7 +290,7 @@ public abstract class PlcService implements PlcListener {
 	protected LogMessage logMessageFor(String i18nKey, ResourceBundle bundle, LogSeverity severity,
 			LogMessageState state) {
 		return new LogMessage(DEFAULT_REALM, this.plcHandler.getPlcId(),
-				Locator.valueOf(Tags.AGENT, "PLC", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey),
+				Locator.valueOf(AGENT, "PLC", this.plcHandler.getPlcId(), bundle.getBaseBundleName(), i18nKey),
 				severity, state, bundle, i18nKey);
 	}
 
