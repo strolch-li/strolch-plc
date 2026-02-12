@@ -93,7 +93,7 @@
         <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
         <jakarta.websocket.version>2.2.0</jakarta.websocket.version>
         <jersey.version>3.1.11</jersey.version>
-        <tyrus-container-grizzly-client.version>2.2.0</tyrus-container-grizzly-client.version>
+        <tyrus-container-grizzly-client.version>2.2.2</tyrus-container-grizzly-client.version>
 
         <pi4j.version>1.4</pi4j.version>
         <jserialcomm.version>2.11.0</jserialcomm.version>
