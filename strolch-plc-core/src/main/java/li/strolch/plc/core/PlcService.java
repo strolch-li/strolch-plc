@@ -19,7 +19,6 @@ package li.strolch.plc.core;
 import li.strolch.agent.api.ComponentContainer;
 import li.strolch.model.Locator;
 import li.strolch.model.Resource;
-import li.strolch.model.Tags;
 import li.strolch.model.log.LogMessage;
 import li.strolch.model.log.LogMessageState;
 import li.strolch.model.log.LogSeverity;
@@ -423,9 +422,11 @@ public abstract class PlcService implements PlcListener {
 	 * Submits the given runnable for asynchronous execution
 	 *
 	 * @param runnable the runnable to execute asynchronously
+	 *
+	 * @return the future to cancel if necessary
 	 */
-	protected void async(Runnable runnable) {
-		getExecutor().submit(() -> {
+	protected Future<?> async(Runnable runnable) {
+		return getExecutor().submit(() -> {
 			try {
 				runnable.run();
 			} catch (Exception e) {
