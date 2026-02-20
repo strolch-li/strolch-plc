@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.text.MessageFormat.format;
 import static li.strolch.plc.model.PlcConstants.PARAM_SIMULATED;
@@ -49,7 +50,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 	private Socket socket;
 	private boolean triggered;
-	private boolean read;
+	private volatile AtomicBoolean read;
 	private Future<?> readTask;
 	private HashSet<String> addresses;
 
@@ -60,6 +61,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 		super(plc, id);
 		this.addressTrigger = id + ADDR_TRIGGER;
 		this.addressBarcode = id + ADDR_BARCODE;
+		this.read = new AtomicBoolean(false);
 	}
 
 	@Override
@@ -98,7 +100,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 			this.socket = new Socket(this.address, this.port);
 			this.socket.setSoTimeout((int) TimeUnit.SECONDS.toMillis(this.readTimeout));
 			logger.info("Connected DataLogic Scanner connection to {}:{}", this.address, this.port);
-			this.read = true;
+			this.read.set(true);
 			this.readTask = this.plc.getExecutorPool().getSingleThreadExecutor(this.id).submit(this::read);
 
 			return super.connect();
@@ -125,7 +127,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	}
 
 	private void internalDisconnect() {
-		this.read = false;
+		this.read.set( false);
 		if (this.readTask != null) {
 			this.readTask.cancel(true);
 		}
@@ -157,6 +159,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 
 	private void sendStopTrigger() throws IOException {
 		this.triggered = false;
+		this.read.set( false);
 		this.socket.getOutputStream().write('S');
 		logger.info("Stopped DataLogicScanner");
 	}
@@ -198,7 +201,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 	private void read() {
 
 		logger.info("Reading from DataLogic Scanner at {}:{}...", this.address, this.port);
-		while (this.read) {
+		while (this.read.get()) {
 			try {
 
 				InputStream inputStream = this.socket.getInputStream();
@@ -206,7 +209,7 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 				int read;
 				while ((read = inputStream.read()) != AsciiHelper.STX) {
 					if (read == -1) {
-						if (this.read) {
+						if (this.read.get()) {
 							throw new IllegalStateException("No data read from socket!");
 						} else {
 							logger.warn("Disconnect requested while waiting for data.");
@@ -215,12 +218,12 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 					}
 				}
 
-				if (this.read) {
+				if (this.read.get()) {
 					StringBuilder sb = new StringBuilder();
 
 					while ((read = inputStream.read()) != AsciiHelper.ETX) {
 						if (read == -1) {
-							if (this.read) {
+							if (this.read.get()) {
 								throw new IllegalStateException("No data read from socket!");
 							} else {
 								logger.warn("Disconnected requested while waiting for data.");
@@ -231,9 +234,11 @@ public class DataLogicScannerConnection extends SimplePlcConnection {
 						sb.append((char) read);
 					}
 
-					String barcode = sb.toString();
-					logger.info("Received barcode {}", barcode);
-					notify(this.addressBarcode, barcode);
+					if (this.read.get()) {
+						String barcode = sb.toString();
+						logger.info("Received barcode {}", barcode);
+						notify(this.addressBarcode, barcode);
+					}
 				}
 
 			} catch (Exception e) {
