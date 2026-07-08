@@ -44,6 +44,9 @@ public class PlcConstants {
 	public static final String PARAM_INTERRUPT_PIN_NAME = "interruptPinName";
 	public static final String PARAM_INVERTED = "inverted";
 	public static final String PARAM_REMOTE = "remote";
+	/**
+	 * Config parameter: The identifier for the PLC.
+	 */
 	public static final String PARAM_PLC_ID = "plcId";
 	public static final String PARAM_IP_ADDRESS = "ipAddress";
 	public static final String PARAM_IP_ADDRESSES = "ipAddresses";
