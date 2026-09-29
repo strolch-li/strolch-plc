@@ -21,8 +21,6 @@
 
         <Parameters>
             <!-- parameters for the container itself -->
-            <Parameter name="secretKey" value="changeMe"/>
-            <Parameter name="secretSalt" value="changeMe"/>
             <Parameter name="persistSessions" value="true"/>
             <Parameter name="autoPersistOnUserChangesData" value="false"/>
         </Parameters>
